@@ -82,7 +82,7 @@ export async function getAllProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('projects')
     .select(PROJECT_SELECT)
-    .order('position', { ascending: true })
+    .order('position', { ascending: false })
   if (error) throw error
   return (data as unknown as ProjectRow[]).map(mapProjectRow)
 }
@@ -343,7 +343,7 @@ export async function getAllArticles(): Promise<Article[]> {
   const { data, error } = await supabase
     .from('articles')
     .select('*')
-    .order('position', { ascending: true })
+    .order('position', { ascending: false })
   if (error) throw error
   return data as Article[]
 }
