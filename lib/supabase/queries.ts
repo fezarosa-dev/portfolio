@@ -132,7 +132,7 @@ export async function getVisibleProjects(): Promise<Project[]> {
     .from('projects')
     .select(PROJECT_SELECT)
     .eq('visible', true)
-    .order('position', { ascending: true })
+    .order('position', { ascending: false })
 
   if (error) throw error
   return (data as unknown as ProjectRow[]).map(mapProjectRow)
@@ -206,7 +206,7 @@ export async function getVisibleArticles(): Promise<Article[]> {
     .from('articles')
     .select('*')
     .eq('visible', true)
-    .order('position', { ascending: true })
+    .order('position', { ascending: false })
 
   if (error) throw error
   return data as Article[]
