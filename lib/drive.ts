@@ -33,6 +33,25 @@ export async function listDriveImages(folderId: string): Promise<DriveImage[]> {
   return data.files ?? []
 }
 
+/** Como DriveImage, mas inclui vídeos (mimeType) — usado onde o markdown pode referenciar vídeo/gif. */
+export type DriveMedia = DriveImage & { mimeType: string }
+
+export async function listDriveMedia(folderId: string): Promise<DriveMedia[]> {
+  const apiKey = requireApiKey()
+  const q = encodeURIComponent(
+    `'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/') and trashed = false`
+  )
+  const fields = encodeURIComponent('files(id,name,thumbnailLink,mimeType)')
+  const url = `${DRIVE_API_BASE}/files?q=${q}&fields=${fields}&key=${apiKey}`
+
+  const res = await fetch(url, { next: { revalidate: 300 } })
+  if (!res.ok) {
+    throw new Error(`Falha ao listar arquivos do Drive: ${res.status}`)
+  }
+  const data = (await res.json()) as { files?: DriveMedia[] }
+  return data.files ?? []
+}
+
 export async function fetchDriveImage(fileId: string): Promise<Response> {
   const apiKey = requireApiKey()
   const url = `${DRIVE_API_BASE}/files/${fileId}?alt=media&key=${apiKey}`

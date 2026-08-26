@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getProjectById, getSiteContent } from '@/lib/supabase/queries'
-import { listDriveImages, parseDriveFolderId } from '@/lib/drive'
+import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { iconUrl } from '@/lib/icons'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
@@ -43,7 +43,7 @@ export default async function ProjetoDetailPage({
 
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
-  const driveImages = folderId ? await listDriveImages(folderId) : []
+  const driveImages = folderId ? await listDriveMedia(folderId) : []
   const title = resolveText(project.title, project.title_en, locale)
   const contentMd = resolveText(project.content_md, project.content_md_en, locale)
 
