@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getArticleById, getSiteContent } from '@/lib/supabase/queries'
-import { listDriveImages, parseDriveFolderId } from '@/lib/drive'
+import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
@@ -57,7 +57,7 @@ export default async function ArtigoDetailPage({
   if (!article || content.artigos_ativo === 'false') notFound()
 
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
-  const driveImages = folderId ? await listDriveImages(folderId) : []
+  const driveImages = folderId ? await listDriveMedia(folderId) : []
   const title = resolveText(article.title, article.title_en, locale)
   const contentMd = resolveText(article.content_md, article.content_md_en, locale)
 

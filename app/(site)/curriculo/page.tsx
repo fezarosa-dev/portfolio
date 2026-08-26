@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/queries'
-import { listDriveImages, parseDriveFolderId } from '@/lib/drive'
+import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { PAGE_SEO, localizedAlternates } from '@/lib/seo'
@@ -22,7 +22,7 @@ export default async function CurriculoPage() {
     getDictionary(),
   ])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
-  const driveImages = folderId ? await listDriveImages(folderId) : []
+  const driveImages = folderId ? await listDriveMedia(folderId) : []
   const resumeMd = resolveText(resume.content_md, resume.content_md_en, locale)
 
   return (
