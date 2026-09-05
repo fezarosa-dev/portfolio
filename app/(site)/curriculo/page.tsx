@@ -3,7 +3,7 @@ import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/querie
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { PAGE_SEO, localizedAlternates } from '@/lib/seo'
+import { PAGE_SEO, pageMetadata } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -11,7 +11,7 @@ import { FadeIn } from '@/components/fade-in'
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
   const seo = PAGE_SEO.curriculo[locale]
-  return { title: seo.title, description: seo.description, alternates: localizedAlternates(locale, '/curriculo') }
+  return pageMetadata(locale, '/curriculo', seo.title, seo.description)
 }
 
 export default async function CurriculoPage() {
@@ -29,6 +29,7 @@ export default async function CurriculoPage() {
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.curriculo.eyebrow}</Eyebrow>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.curriculo.title}</h1>
       </FadeIn>
       {links.length > 0 && (
         <FadeIn delay={0.1}>

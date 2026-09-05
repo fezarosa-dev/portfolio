@@ -6,7 +6,7 @@ import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { iconUrl } from '@/lib/icons'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { localizedAlternates } from '@/lib/seo'
+import { pageMetadata, breadcrumbJsonLd } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { AuthorNames } from '@/components/author-names'
 import { Eyebrow } from '@/components/eyebrow'
@@ -24,11 +24,8 @@ export async function generateMetadata({
   const title = resolveText(project.title, project.title_en, locale)
   const summary = resolveText(project.summary, project.summary_en, locale)
 
-  return {
-    title,
-    description: summary || `Projeto ${title}, por Felipe Zanoni da Rosa.`,
-    alternates: localizedAlternates(locale, `/projetos/${project.id}`),
-  }
+  const description = summary || `Projeto ${title}, por Felipe Zanoni da Rosa.`
+  return pageMetadata(locale, `/projetos/${project.id}`, title, description)
 }
 
 export default async function ProjetoDetailPage({
@@ -45,10 +42,36 @@ export default async function ProjetoDetailPage({
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const driveImages = folderId ? await listDriveMedia(folderId) : []
   const title = resolveText(project.title, project.title_en, locale)
+  const summary = resolveText(project.summary, project.summary_en, locale)
   const contentMd = resolveText(project.content_md, project.content_md_en, locale)
+
+  const softwareJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: title,
+    description: summary || undefined,
+    author: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },
+    ...(project.repo_url ? { codeRepository: project.repo_url } : {}),
+    ...(project.site_url ? { url: project.site_url } : {}),
+  }
+  const breadcrumbJson = breadcrumbJsonLd(locale, [
+    { name: dict.nav.links[0].label, path: '' },
+    { name: dict.projetos.title, path: '/projetos' },
+    { name: title, path: `/projetos/${project.id}` },
+  ])
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJson) }}
+      />
       <FadeIn>
         <Link href={`/${locale}/projetos`} className="font-mono text-xs text-steel hover:text-signal">
           {dict.projetos.back}

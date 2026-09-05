@@ -2,10 +2,10 @@
 
 > Portfólio pessoal de Felipe Zanoni da Rosa, desenvolvedor de software.
 
-- [Início](https://www.zanoni.dev.br/): apresentação e projetos em destaque
-- [Sobre mim](https://www.zanoni.dev.br/sobre): biografia
-- [Serviços](https://www.zanoni.dev.br/servicos): serviços oferecidos
-- [Projetos](https://www.zanoni.dev.br/projetos): lista de projetos desenvolvidos
-- [Artigos](https://www.zanoni.dev.br/artigos): artigos escritos
-- [Currículo](https://www.zanoni.dev.br/curriculo): experiência e formação
-- [Contato](https://www.zanoni.dev.br/contato): formas de contato
+- [Início](https://www.zanoni.dev.br/pt): apresentação e projetos em destaque
+- [Sobre mim](https://www.zanoni.dev.br/pt/sobre): biografia
+- [Serviços](https://www.zanoni.dev.br/pt/servicos): serviços oferecidos
+- [Projetos](https://www.zanoni.dev.br/pt/projetos): lista de projetos desenvolvidos
+- [Artigos](https://www.zanoni.dev.br/pt/artigos): artigos escritos
+- [Currículo](https://www.zanoni.dev.br/pt/curriculo): experiência e formação
+- [Contato](https://www.zanoni.dev.br/pt/contato): formas de contato

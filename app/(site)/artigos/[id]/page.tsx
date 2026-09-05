@@ -5,7 +5,7 @@ import { getArticleById, getSiteContent } from '@/lib/supabase/queries'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { localizedAlternates } from '@/lib/seo'
+import { pageMetadata, breadcrumbJsonLd } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -28,19 +28,7 @@ export async function generateMetadata({
 
   const description = summary || `Artigo de Felipe Zanoni da Rosa: ${title}.`
 
-  return {
-    title,
-    description,
-    alternates: localizedAlternates(locale, `/artigos/${article.id}`),
-    openGraph: {
-      type: 'article',
-      locale: locale === 'en' ? 'en_US' : 'pt_BR',
-      url: `https://www.zanoni.dev.br/${locale}/artigos/${article.id}`,
-      siteName: 'Felipe Zanoni da Rosa',
-      title,
-      description,
-    },
-  }
+  return pageMetadata(locale, `/artigos/${article.id}`, title, description, 'article')
 }
 
 export default async function ArtigoDetailPage({
@@ -61,13 +49,25 @@ export default async function ArtigoDetailPage({
   const title = resolveText(article.title, article.title_en, locale)
   const contentMd = resolveText(article.content_md, article.content_md_en, locale)
 
+  const SITE_URL = 'https://www.zanoni.dev.br'
+  const pageUrl = `${SITE_URL}/${locale}/artigos/${article.id}`
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: title,
     description: resolveText(article.summary, article.summary_en, locale) || undefined,
+    image: `${pageUrl}/opengraph-image`,
+    datePublished: article.created_at,
+    dateModified: article.created_at,
     author: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },
+    publisher: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
   }
+  const breadcrumbJson = breadcrumbJsonLd(locale, [
+    { name: dict.nav.links[0].label, path: '' },
+    { name: dict.artigos.title, path: '/artigos' },
+    { name: title, path: `/artigos/${article.id}` },
+  ])
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
@@ -75,6 +75,11 @@ export default async function ArtigoDetailPage({
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJson) }}
       />
       <FadeIn>
         <Link href={`/${locale}/artigos`} className="font-mono text-xs text-steel hover:text-signal">

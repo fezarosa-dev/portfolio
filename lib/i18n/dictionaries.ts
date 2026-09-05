@@ -49,7 +49,7 @@ export type Dictionary = {
     sent: string
     error: string
   }
-  curriculo: { eyebrow: string }
+  curriculo: { eyebrow: string; title: string }
   artigos: {
     eyebrow: string
     title: string
@@ -112,7 +112,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       sent: '✓ mensagem enviada — obrigado pelo contato, retorno em breve.',
       error: '✗ erro ao enviar, tente de novo.',
     },
-    curriculo: { eyebrow: 'currículo' },
+    curriculo: { eyebrow: 'currículo', title: 'Currículo' },
     artigos: {
       eyebrow: 'artigos',
       title: 'Artigos',
@@ -173,7 +173,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       sent: "✓ message sent — thanks for reaching out, I'll get back to you soon.",
       error: '✗ failed to send, please try again.',
     },
-    curriculo: { eyebrow: 'resume' },
+    curriculo: { eyebrow: 'resume', title: 'Resume' },
     artigos: {
       eyebrow: 'articles',
       title: 'Articles',
