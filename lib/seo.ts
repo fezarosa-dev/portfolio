@@ -7,7 +7,7 @@ const SITE_NAME = 'Felipe Zanoni da Rosa'
 export function localizedAlternates(locale: Locale, path: string) {
   return {
     canonical: `/${locale}${path}`,
-    languages: { pt: `/pt${path}`, en: `/en${path}` },
+    languages: { pt: `/pt${path}`, en: `/en${path}`, 'x-default': `/pt${path}` },
   }
 }
 

@@ -9,7 +9,10 @@ function entriesFor(
   changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'],
   priority: number
 ): MetadataRoute.Sitemap {
-  const languages = Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}/${l}${path}`]))
+  const languages: Record<string, string> = Object.fromEntries(
+    LOCALES.map((l) => [l, `${SITE_URL}/${l}${path}`])
+  )
+  languages['x-default'] = `${SITE_URL}/pt${path}`
   return LOCALES.map((locale) => ({
     url: `${SITE_URL}/${locale}${path}`,
     changeFrequency,
