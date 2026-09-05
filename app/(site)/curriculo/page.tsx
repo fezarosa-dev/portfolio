@@ -29,6 +29,7 @@ export default async function CurriculoPage() {
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.curriculo.eyebrow}</Eyebrow>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.curriculo.title}</h1>
       </FadeIn>
       {links.length > 0 && (
         <FadeIn delay={0.1}>
