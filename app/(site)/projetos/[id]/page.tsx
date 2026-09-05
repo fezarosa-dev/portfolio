@@ -42,10 +42,26 @@ export default async function ProjetoDetailPage({
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const driveImages = folderId ? await listDriveMedia(folderId) : []
   const title = resolveText(project.title, project.title_en, locale)
+  const summary = resolveText(project.summary, project.summary_en, locale)
   const contentMd = resolveText(project.content_md, project.content_md_en, locale)
+
+  const softwareJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: title,
+    description: summary || undefined,
+    author: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },
+    ...(project.repo_url ? { codeRepository: project.repo_url } : {}),
+    ...(project.site_url ? { url: project.site_url } : {}),
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
       <FadeIn>
         <Link href={`/${locale}/projetos`} className="font-mono text-xs text-steel hover:text-signal">
           {dict.projetos.back}
