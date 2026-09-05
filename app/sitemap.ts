@@ -7,7 +7,8 @@ const LOCALES = ['pt', 'en'] as const
 function entriesFor(
   path: string,
   changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'],
-  priority: number
+  priority: number,
+  lastModified?: Date
 ): MetadataRoute.Sitemap {
   const languages: Record<string, string> = Object.fromEntries(
     LOCALES.map((l) => [l, `${SITE_URL}/${l}${path}`])
@@ -15,6 +16,7 @@ function entriesFor(
   languages['x-default'] = `${SITE_URL}/pt${path}`
   return LOCALES.map((locale) => ({
     url: `${SITE_URL}/${locale}${path}`,
+    lastModified,
     changeFrequency,
     priority,
     alternates: { languages },
@@ -43,11 +45,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const projectRoutes: MetadataRoute.Sitemap = projects
     .filter((p) => p.click_mode === 'detail')
-    .flatMap((p) => entriesFor(`/projetos/${p.id}`, 'monthly', 0.7))
+    .flatMap((p) => entriesFor(`/projetos/${p.id}`, 'monthly', 0.7, new Date(p.created_at)))
 
   const articleRoutes: MetadataRoute.Sitemap =
     content.artigos_ativo !== 'false'
-      ? articles.flatMap((a) => entriesFor(`/artigos/${a.id}`, 'monthly', 0.7))
+      ? articles.flatMap((a) => entriesFor(`/artigos/${a.id}`, 'monthly', 0.7, new Date(a.created_at)))
       : []
 
   return [...staticRoutes, ...projectRoutes, ...articleRoutes]
