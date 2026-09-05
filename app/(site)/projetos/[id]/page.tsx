@@ -6,7 +6,7 @@ import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { iconUrl } from '@/lib/icons'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { pageMetadata } from '@/lib/seo'
+import { pageMetadata, breadcrumbJsonLd } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { AuthorNames } from '@/components/author-names'
 import { Eyebrow } from '@/components/eyebrow'
@@ -54,6 +54,11 @@ export default async function ProjetoDetailPage({
     ...(project.repo_url ? { codeRepository: project.repo_url } : {}),
     ...(project.site_url ? { url: project.site_url } : {}),
   }
+  const breadcrumbJson = breadcrumbJsonLd(locale, [
+    { name: dict.nav.links[0].label, path: '' },
+    { name: dict.projetos.title, path: '/projetos' },
+    { name: title, path: `/projetos/${project.id}` },
+  ])
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
@@ -61,6 +66,11 @@ export default async function ProjetoDetailPage({
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJson) }}
       />
       <FadeIn>
         <Link href={`/${locale}/projetos`} className="font-mono text-xs text-steel hover:text-signal">

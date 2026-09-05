@@ -40,6 +40,19 @@ export function pageMetadata(
   }
 }
 
+export function breadcrumbJsonLd(locale: Locale, items: { name: string; path: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: item.name,
+      item: `${SITE_URL}/${locale}${item.path}`,
+    })),
+  }
+}
+
 type PageSeo = { title: string; description: string }
 
 export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
