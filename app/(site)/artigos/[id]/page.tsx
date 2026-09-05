@@ -49,12 +49,19 @@ export default async function ArtigoDetailPage({
   const title = resolveText(article.title, article.title_en, locale)
   const contentMd = resolveText(article.content_md, article.content_md_en, locale)
 
+  const SITE_URL = 'https://www.zanoni.dev.br'
+  const pageUrl = `${SITE_URL}/${locale}/artigos/${article.id}`
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: title,
     description: resolveText(article.summary, article.summary_en, locale) || undefined,
+    image: `${pageUrl}/opengraph-image`,
+    datePublished: article.created_at,
+    dateModified: article.created_at,
     author: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },
+    publisher: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
   }
 
   return (
