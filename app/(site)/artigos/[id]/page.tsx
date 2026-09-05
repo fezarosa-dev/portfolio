@@ -5,7 +5,7 @@ import { getArticleById, getSiteContent } from '@/lib/supabase/queries'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { localizedAlternates } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -28,19 +28,7 @@ export async function generateMetadata({
 
   const description = summary || `Artigo de Felipe Zanoni da Rosa: ${title}.`
 
-  return {
-    title,
-    description,
-    alternates: localizedAlternates(locale, `/artigos/${article.id}`),
-    openGraph: {
-      type: 'article',
-      locale: locale === 'en' ? 'en_US' : 'pt_BR',
-      url: `https://www.zanoni.dev.br/${locale}/artigos/${article.id}`,
-      siteName: 'Felipe Zanoni da Rosa',
-      title,
-      description,
-    },
-  }
+  return pageMetadata(locale, `/artigos/${article.id}`, title, description, 'article')
 }
 
 export default async function ArtigoDetailPage({

@@ -6,7 +6,7 @@ import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { iconUrl } from '@/lib/icons'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { localizedAlternates } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { AuthorNames } from '@/components/author-names'
 import { Eyebrow } from '@/components/eyebrow'
@@ -24,11 +24,8 @@ export async function generateMetadata({
   const title = resolveText(project.title, project.title_en, locale)
   const summary = resolveText(project.summary, project.summary_en, locale)
 
-  return {
-    title,
-    description: summary || `Projeto ${title}, por Felipe Zanoni da Rosa.`,
-    alternates: localizedAlternates(locale, `/projetos/${project.id}`),
-  }
+  const description = summary || `Projeto ${title}, por Felipe Zanoni da Rosa.`
+  return pageMetadata(locale, `/projetos/${project.id}`, title, description)
 }
 
 export default async function ProjetoDetailPage({

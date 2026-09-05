@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { getVisibleArticles, getSiteContent } from '@/lib/supabase/queries'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ArticleCard } from '@/components/article-card'
-import { PAGE_SEO, localizedAlternates } from '@/lib/seo'
+import { PAGE_SEO, pageMetadata } from '@/lib/seo'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 
@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const [content, locale] = await Promise.all([getSiteContent(), getLocale()])
   if (content.artigos_ativo === 'false') return {}
   const seo = PAGE_SEO.artigos[locale]
-  return { title: seo.title, description: seo.description, alternates: localizedAlternates(locale, '/artigos') }
+  return pageMetadata(locale, '/artigos', seo.title, seo.description)
 }
 
 export default async function ArtigosPage() {

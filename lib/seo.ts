@@ -1,9 +1,42 @@
+import type { Metadata } from 'next'
 import type { Locale } from '@/lib/i18n'
+
+const SITE_URL = 'https://www.zanoni.dev.br'
+const SITE_NAME = 'Felipe Zanoni da Rosa'
 
 export function localizedAlternates(locale: Locale, path: string) {
   return {
     canonical: `/${locale}${path}`,
     languages: { pt: `/pt${path}`, en: `/en${path}` },
+  }
+}
+
+export function pageMetadata(
+  locale: Locale,
+  path: string,
+  title: string,
+  description: string,
+  type: 'website' | 'article' = 'website'
+): Metadata {
+  const url = `${SITE_URL}/${locale}${path}`
+  const fullTitle = `${title} — Zanoni`
+  return {
+    title,
+    description,
+    alternates: localizedAlternates(locale, path),
+    openGraph: {
+      type,
+      locale: locale === 'en' ? 'en_US' : 'pt_BR',
+      url,
+      siteName: SITE_NAME,
+      title: fullTitle,
+      description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: fullTitle,
+      description,
+    },
   }
 }
 

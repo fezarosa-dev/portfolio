@@ -3,7 +3,7 @@ import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/querie
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { PAGE_SEO, localizedAlternates } from '@/lib/seo'
+import { PAGE_SEO, pageMetadata } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -11,7 +11,7 @@ import { FadeIn } from '@/components/fade-in'
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
   const seo = PAGE_SEO.curriculo[locale]
-  return { title: seo.title, description: seo.description, alternates: localizedAlternates(locale, '/curriculo') }
+  return pageMetadata(locale, '/curriculo', seo.title, seo.description)
 }
 
 export default async function CurriculoPage() {
