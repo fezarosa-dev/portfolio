@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type Language = {
   id: string
@@ -92,8 +93,8 @@ export function mapProjectRow(row: ProjectRow): Project {
   }
 }
 
-export async function getLanguages(): Promise<Language[]> {
-  const supabase = await createClient()
+export async function getLanguages(client?: SupabaseClient): Promise<Language[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('languages')
     .select('*')
@@ -104,8 +105,8 @@ export async function getLanguages(): Promise<Language[]> {
   return data as Language[]
 }
 
-export async function getAuthors(): Promise<Author[]> {
-  const supabase = await createClient()
+export async function getAuthors(client?: SupabaseClient): Promise<Author[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('authors')
     .select('*')
@@ -115,8 +116,8 @@ export async function getAuthors(): Promise<Author[]> {
   return data as Author[]
 }
 
-export async function getCompanies(): Promise<Company[]> {
-  const supabase = await createClient()
+export async function getCompanies(client?: SupabaseClient): Promise<Company[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('companies')
     .select('*')
@@ -126,8 +127,8 @@ export async function getCompanies(): Promise<Company[]> {
   return data as Company[]
 }
 
-export async function getVisibleProjects(): Promise<Project[]> {
-  const supabase = await createClient()
+export async function getVisibleProjects(client?: SupabaseClient): Promise<Project[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('projects')
     .select(PROJECT_SELECT)
@@ -140,10 +141,10 @@ export async function getVisibleProjects(): Promise<Project[]> {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export async function getProjectById(id: string): Promise<Project | null> {
+export async function getProjectById(id: string, client?: SupabaseClient): Promise<Project | null> {
   if (!UUID_RE.test(id)) return null
 
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('projects')
     .select(PROJECT_SELECT)
@@ -155,18 +156,18 @@ export async function getProjectById(id: string): Promise<Project | null> {
   return data ? mapProjectRow(data as unknown as ProjectRow) : null
 }
 
-export async function getSiteContent(): Promise<Record<string, string>> {
-  const supabase = await createClient()
+export async function getSiteContent(client?: SupabaseClient): Promise<Record<string, string>> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase.from('site_content').select('key, value')
   if (error) throw error
   return Object.fromEntries(data.map((row) => [row.key, row.value]))
 }
 
-export async function getResume(): Promise<{
+export async function getResume(client?: SupabaseClient): Promise<{
   content_md: string | null
   content_md_en: string | null
 }> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('resume')
     .select('content_md, content_md_en')
@@ -176,8 +177,8 @@ export async function getResume(): Promise<{
   return { content_md: data?.content_md ?? null, content_md_en: data?.content_md_en ?? null }
 }
 
-export async function getResumeLinks(): Promise<ResumeLink[]> {
-  const supabase = await createClient()
+export async function getResumeLinks(client?: SupabaseClient): Promise<ResumeLink[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('resume_links')
     .select('*')
@@ -188,8 +189,8 @@ export async function getResumeLinks(): Promise<ResumeLink[]> {
   return data as ResumeLink[]
 }
 
-export async function getContactLinks(): Promise<ContactLink[]> {
-  const supabase = await createClient()
+export async function getContactLinks(client?: SupabaseClient): Promise<ContactLink[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('contact_links')
     .select('*')
@@ -200,8 +201,8 @@ export async function getContactLinks(): Promise<ContactLink[]> {
   return data as ContactLink[]
 }
 
-export async function getVisibleArticles(): Promise<Article[]> {
-  const supabase = await createClient()
+export async function getVisibleArticles(client?: SupabaseClient): Promise<Article[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('articles')
     .select('*')
@@ -212,10 +213,10 @@ export async function getVisibleArticles(): Promise<Article[]> {
   return data as Article[]
 }
 
-export async function getArticleById(id: string): Promise<Article | null> {
+export async function getArticleById(id: string, client?: SupabaseClient): Promise<Article | null> {
   if (!UUID_RE.test(id)) return null
 
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('articles')
     .select('*')
