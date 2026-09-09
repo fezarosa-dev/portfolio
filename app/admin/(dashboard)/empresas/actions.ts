@@ -11,7 +11,6 @@ export async function saveCompany(formData: FormData) {
 
   await addCompany(name, nameEn, url)
   revalidatePath('/admin/empresas')
-  revalidatePath('/projetos')
 }
 
 export async function editCompany(id: string, formData: FormData) {
@@ -22,11 +21,9 @@ export async function editCompany(id: string, formData: FormData) {
 
   await updateCompany(id, name, nameEn, url)
   revalidatePath('/admin/empresas')
-  revalidatePath('/projetos')
 }
 
 export async function removeCompany(id: string) {
   await deleteCompany(id)
   revalidatePath('/admin/empresas')
-  revalidatePath('/projetos')
 }

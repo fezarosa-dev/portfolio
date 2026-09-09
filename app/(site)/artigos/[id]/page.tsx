@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getArticleById, getSiteContent } from '@/lib/supabase/queries'
+import { getArticleById, getSiteContent } from '@/lib/supabase/queries-cached'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'

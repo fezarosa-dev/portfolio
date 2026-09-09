@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { ReduceMotionProvider } from "@/components/reduce-motion-provider";
-import { getSiteContent } from "@/lib/supabase/queries";
+import { getSiteContent } from "@/lib/supabase/queries-cached";
 import "./globals.css";
 
 const display = Space_Grotesk({

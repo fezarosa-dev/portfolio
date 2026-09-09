@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSiteContent } from '@/lib/supabase/queries'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 
 export async function GET() {
   const content = await getSiteContent()

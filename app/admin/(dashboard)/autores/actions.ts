@@ -10,7 +10,6 @@ export async function saveAuthor(formData: FormData) {
 
   await addAuthor(name, url)
   revalidatePath('/admin/autores')
-  revalidatePath('/projetos')
 }
 
 export async function editAuthor(id: string, formData: FormData) {
@@ -20,11 +19,9 @@ export async function editAuthor(id: string, formData: FormData) {
 
   await updateAuthor(id, name, url)
   revalidatePath('/admin/autores')
-  revalidatePath('/projetos')
 }
 
 export async function removeAuthor(id: string) {
   await deleteAuthor(id)
   revalidatePath('/admin/autores')
-  revalidatePath('/projetos')
 }

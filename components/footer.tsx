@@ -1,4 +1,4 @@
-import { getSiteContent } from '@/lib/supabase/queries'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
 
 export async function Footer() {

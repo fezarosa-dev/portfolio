@@ -25,7 +25,6 @@ async function saveSide(key: string, value: string | null) {
 export async function toggleMascoteAtivo(ativo: boolean) {
   await upsertSiteContent('mascote_ativo', ativo ? 'true' : 'false')
   revalidatePath('/admin/personalizacao')
-  revalidatePath('/', 'layout')
 }
 
 export async function saveSiteContent(formData: FormData) {
@@ -37,5 +36,4 @@ export async function saveSiteContent(formData: FormData) {
     ]),
   ])
   revalidatePath('/admin/personalizacao')
-  revalidatePath('/', 'layout')
 }

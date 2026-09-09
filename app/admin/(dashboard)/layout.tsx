@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Toaster } from 'sonner'
 import { signOut } from '../actions'
+import { RepublishButton } from '@/components/admin/republish-button'
 import { Button } from '@/components/ui/button'
 
 const TABS = [
@@ -14,6 +15,7 @@ const TABS = [
   { href: '/admin/personalizacao', label: 'Personalização', icon: '✎' },
   { href: '/admin/curriculo', label: 'Currículo', icon: '▤' },
   { href: '/admin/imagens', label: 'Imagens', icon: '▨' },
+  { href: '/admin/preview', label: 'Preview', icon: '◉' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -39,7 +41,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
           ))}
         </nav>
-        <div className="border-t border-hairline p-3">
+        <div className="flex flex-col gap-2 border-t border-hairline p-3">
+          <RepublishButton />
           <form action={signOut}>
             <Button type="submit" variant="outline" size="sm" className="w-full">
               Sair

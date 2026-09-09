@@ -23,23 +23,19 @@ export async function saveArticle(formData: FormData) {
     visible: formData.get('visible') === 'true',
   })
   revalidatePath('/admin/artigos')
-  revalidatePath('/artigos')
 }
 
 export async function removeArticle(id: string) {
   await deleteArticle(id)
   revalidatePath('/admin/artigos')
-  revalidatePath('/artigos')
 }
 
 export async function toggleArticleVisibility(id: string, visible: boolean) {
   await setArticleVisibility(id, visible)
   revalidatePath('/admin/artigos')
-  revalidatePath('/artigos')
 }
 
 export async function toggleArtigosAtivo(ativo: boolean) {
   await upsertSiteContent('artigos_ativo', ativo ? 'true' : 'false')
   revalidatePath('/admin/artigos')
-  revalidatePath('/', 'layout')
 }

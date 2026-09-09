@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import { getSiteContent } from '@/lib/supabase/queries'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { MobileNav } from '@/components/mobile-nav'
