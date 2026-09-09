@@ -32,19 +32,14 @@ export async function saveProject(formData: FormData) {
   await setProjectLanguages(project.id, formData.getAll('language_ids').map(String))
   await setProjectAuthors(project.id, formData.getAll('author_ids').map(String))
   revalidatePath('/admin/projetos')
-  revalidatePath('/projetos')
-  revalidatePath('/')
 }
 
 export async function removeProject(id: string) {
   await deleteProject(id)
   revalidatePath('/admin/projetos')
-  revalidatePath('/projetos')
 }
 
 export async function toggleVisibility(id: string, visible: boolean) {
   await setProjectVisibility(id, visible)
   revalidatePath('/admin/projetos')
-  revalidatePath('/projetos')
-  revalidatePath('/')
 }

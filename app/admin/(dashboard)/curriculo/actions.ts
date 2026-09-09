@@ -13,7 +13,6 @@ import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
 export async function saveResume(formData: FormData) {
   await upsertResume(parseBilingualPt(formData, 'content_md'), parseBilingualEn(formData, 'content_md'))
   revalidatePath('/admin/curriculo')
-  revalidatePath('/curriculo')
 }
 
 export async function saveResumeLink(formData: FormData) {
@@ -23,7 +22,6 @@ export async function saveResumeLink(formData: FormData) {
 
   await addResumeLink(label, parseBilingualEn(formData, 'label'), url)
   revalidatePath('/admin/curriculo')
-  revalidatePath('/curriculo')
 }
 
 export async function editResumeLink(id: string, formData: FormData) {
@@ -32,17 +30,14 @@ export async function editResumeLink(id: string, formData: FormData) {
 
   await updateResumeLink(id, parseBilingualPt(formData, 'label'), parseBilingualEn(formData, 'label'), url)
   revalidatePath('/admin/curriculo')
-  revalidatePath('/curriculo')
 }
 
 export async function removeResumeLink(id: string) {
   await deleteResumeLink(id)
   revalidatePath('/admin/curriculo')
-  revalidatePath('/curriculo')
 }
 
 export async function saveResumeLinksOrder(orderedIds: string[]) {
   await setResumeLinksOrder(orderedIds)
   revalidatePath('/admin/curriculo')
-  revalidatePath('/curriculo')
 }

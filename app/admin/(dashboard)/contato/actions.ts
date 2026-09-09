@@ -16,7 +16,6 @@ export async function saveContactLink(formData: FormData) {
 
   await addContactLink(label, parseBilingualEn(formData, 'label'), url)
   revalidatePath('/admin/contato')
-  revalidatePath('/contato')
 }
 
 export async function editContactLink(id: string, formData: FormData) {
@@ -25,17 +24,14 @@ export async function editContactLink(id: string, formData: FormData) {
 
   await updateContactLink(id, parseBilingualPt(formData, 'label'), parseBilingualEn(formData, 'label'), url)
   revalidatePath('/admin/contato')
-  revalidatePath('/contato')
 }
 
 export async function removeContactLink(id: string) {
   await deleteContactLink(id)
   revalidatePath('/admin/contato')
-  revalidatePath('/contato')
 }
 
 export async function saveContactLinksOrder(orderedIds: string[]) {
   await setContactLinksOrder(orderedIds)
   revalidatePath('/admin/contato')
-  revalidatePath('/contato')
 }
