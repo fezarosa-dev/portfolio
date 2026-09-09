@@ -1,7 +1,12 @@
 'use server'
 
+import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+
+export async function republishSite() {
+  updateTag('site')
+}
 
 export async function signOut() {
   const supabase = await createClient()
