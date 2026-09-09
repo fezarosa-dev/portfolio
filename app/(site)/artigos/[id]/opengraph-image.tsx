@@ -1,4 +1,4 @@
-import { getArticleById, getSiteContent } from '@/lib/supabase/queries'
+import { getArticleById, getSiteContent } from '@/lib/supabase/queries-cached'
 import { parseDriveFolderId } from '@/lib/drive'
 import { getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'

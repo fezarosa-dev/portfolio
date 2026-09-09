@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getSiteContent, getVisibleProjects, getLanguages } from '@/lib/supabase/queries'
+import { getSiteContent, getVisibleProjects, getLanguages } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'

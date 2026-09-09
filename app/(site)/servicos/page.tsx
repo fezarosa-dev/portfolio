@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { getSiteContent } from '@/lib/supabase/queries'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { PAGE_SEO, pageMetadata } from '@/lib/seo'

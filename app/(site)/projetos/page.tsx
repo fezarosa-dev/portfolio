@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { getVisibleProjects } from '@/lib/supabase/queries'
+import { getVisibleProjects } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ProjectsExplorer } from '@/components/projects-explorer'
 import { PAGE_SEO, pageMetadata } from '@/lib/seo'

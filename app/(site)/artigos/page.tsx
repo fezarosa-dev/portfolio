@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getVisibleArticles, getSiteContent } from '@/lib/supabase/queries'
+import { getVisibleArticles, getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ArticleCard } from '@/components/article-card'
 import { PAGE_SEO, pageMetadata } from '@/lib/seo'

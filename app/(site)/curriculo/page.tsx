@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/queries'
+import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/queries-cached'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
