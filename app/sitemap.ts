@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { getVisibleProjects, getVisibleArticles, getSiteContent } from '@/lib/supabase/queries-cached'
 
+export const dynamic = 'force-dynamic'
+
 const SITE_URL = 'https://www.zanoni.dev.br'
 const LOCALES = ['pt', 'en'] as const
 

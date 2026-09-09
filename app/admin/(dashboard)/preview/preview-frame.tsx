@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 type Device = 'desktop' | 'tablet' | 'mobile'
 
@@ -14,7 +14,6 @@ export function PreviewFrame() {
   const [locale, setLocale] = useState<'pt' | 'en'>('pt')
   const [device, setDevice] = useState<Device>('desktop')
   const [nonce, setNonce] = useState(0)
-  const frameRef = useRef<HTMLIFrameElement>(null)
 
   const src = `/${locale}`
 
@@ -27,6 +26,7 @@ export function PreviewFrame() {
               key={l}
               type="button"
               onClick={() => setLocale(l)}
+              aria-pressed={locale === l}
               className={`px-3 py-1 uppercase ${locale === l ? 'bg-signal text-white' : 'text-steel hover:text-signal'}`}
             >
               {l}
@@ -39,6 +39,7 @@ export function PreviewFrame() {
               key={d}
               type="button"
               onClick={() => setDevice(d)}
+              aria-pressed={device === d}
               className={`px-3 py-1 capitalize ${device === d ? 'bg-signal text-white' : 'text-steel hover:text-signal'}`}
             >
               {d}
@@ -64,7 +65,6 @@ export function PreviewFrame() {
 
       <div className="flex justify-center overflow-auto rounded-lg border border-hairline bg-card p-4">
         <iframe
-          ref={frameRef}
           key={`${locale}-${nonce}`}
           src={src}
           title="Preview do site"

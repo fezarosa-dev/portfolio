@@ -4,8 +4,6 @@ import { createPublicClient } from './public-client'
 import * as raw from './queries'
 import { pickSource } from './pick-source'
 
-export { pickSource }
-
 export async function isPreview(): Promise<boolean> {
   return (await draftMode()).isEnabled
 }
@@ -92,22 +90,4 @@ const cachedContactLinks = unstable_cache(
 )
 export async function getContactLinks() {
   return pickSource(await isPreview(), () => raw.getContactLinks(createPublicClient()), cachedContactLinks)()
-}
-
-const cachedAuthors = unstable_cache(
-  () => raw.getAuthors(createPublicClient()),
-  ['authors'],
-  opts
-)
-export async function getAuthors() {
-  return pickSource(await isPreview(), () => raw.getAuthors(createPublicClient()), cachedAuthors)()
-}
-
-const cachedCompanies = unstable_cache(
-  () => raw.getCompanies(createPublicClient()),
-  ['companies'],
-  opts
-)
-export async function getCompanies() {
-  return pickSource(await isPreview(), () => raw.getCompanies(createPublicClient()), cachedCompanies)()
 }
