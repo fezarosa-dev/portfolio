@@ -6,7 +6,7 @@ import {
   getResume,
   getResumeLinks,
   getContactLinks,
-} from '@/lib/supabase/queries'
+} from '@/lib/supabase/queries-cached'
 import { resolveText } from '@/lib/bilingual'
 import { detectLocaleFromAcceptLanguage } from '@/lib/i18n/detect-locale'
 import type { Locale } from '@/lib/i18n/dictionaries'

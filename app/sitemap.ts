@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getVisibleProjects, getVisibleArticles, getSiteContent } from '@/lib/supabase/queries'
+import { getVisibleProjects, getVisibleArticles, getSiteContent } from '@/lib/supabase/queries-cached'
 
 const SITE_URL = 'https://www.zanoni.dev.br'
 const LOCALES = ['pt', 'en'] as const
