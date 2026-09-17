@@ -4,6 +4,7 @@ import { Footer } from '@/components/footer'
 import { Mascote } from '@/components/mascote'
 import { SudoEasterEgg } from '@/components/sudo-easter-egg'
 import { SpinEasterEgg } from '@/components/spin-easter-egg'
+import { CookieConsent } from '@/components/cookie-consent'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { findDriveFile, parseDriveFolderId } from '@/lib/drive'
 import { getLocale } from '@/lib/i18n'
@@ -84,6 +85,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Mascote ativo={content.mascote_ativo === 'true'} rickrollVideoId={rickrollVideo?.id ?? null} />
       <SudoEasterEgg locale={locale} />
       <SpinEasterEgg />
+      <CookieConsent />
     </>
   )
 }

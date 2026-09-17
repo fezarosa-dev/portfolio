@@ -39,6 +39,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entriesFor('/projetos', 'weekly', 0.9),
     ...entriesFor('/contato', 'yearly', 0.5),
     ...entriesFor('/curriculo', 'monthly', 0.6),
+    ...entriesFor('/privacidade', 'yearly', 0.3),
+    ...entriesFor('/termos', 'yearly', 0.3),
+    ...entriesFor('/cookies', 'yearly', 0.3),
   ]
 
   if (content.artigos_ativo !== 'false') {
