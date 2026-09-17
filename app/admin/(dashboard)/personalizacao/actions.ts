@@ -15,7 +15,16 @@ const KEYS = [
   'link_linkedin',
 ] as const
 
-const BILINGUAL_KEYS = ['hero_title', 'hero_subtitle', 'sobre_texto', 'servicos_texto', 'status_text'] as const
+const BILINGUAL_KEYS = [
+  'hero_title',
+  'hero_subtitle',
+  'sobre_texto',
+  'servicos_texto',
+  'status_text',
+  'privacidade_texto',
+  'termos_texto',
+  'cookies_texto',
+] as const
 
 async function saveSide(key: string, value: string | null) {
   if (value === null) await deleteSiteContentKey(key)
