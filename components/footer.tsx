@@ -8,6 +8,11 @@ export async function Footer() {
     content.link_github && { href: content.link_github, label: dict.footer.github },
     content.link_linkedin && { href: content.link_linkedin, label: dict.footer.linkedin },
   ].filter(Boolean) as { href: string; label: string }[]
+  const legalLinks = [
+    { href: `/${locale}/privacidade`, label: dict.footer.privacidade },
+    { href: `/${locale}/termos`, label: dict.footer.termos },
+    { href: `/${locale}/cookies`, label: dict.footer.cookies },
+  ]
 
   return (
     <footer className="mt-auto border-t border-hairline px-6 py-8">
@@ -37,6 +42,13 @@ export async function Footer() {
             </a>
           ))}
         </div>
+      </div>
+      <div className="mx-auto mt-4 flex max-w-4xl justify-center gap-4 font-mono text-[11px] text-steel/70 sm:justify-start">
+        {legalLinks.map((link) => (
+          <a key={link.href} href={link.href} className="transition-colors hover:text-signal">
+            {link.label}
+          </a>
+        ))}
       </div>
       {content.mascote_ativo === 'true' && (
         <p className="mt-4 text-center font-mono text-[11px] text-steel/70">{"// don't wake the dog."}</p>

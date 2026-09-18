@@ -12,6 +12,9 @@ export type Dictionary = {
     github: string
     linkedin: string
     exportAi: string
+    privacidade: string
+    termos: string
+    cookies: string
   }
   home: {
     whoami: string
@@ -57,6 +60,15 @@ export type Dictionary = {
     back: string
     notFound: string
   }
+  privacidade: { eyebrow: string; title: string }
+  termos: { eyebrow: string; title: string }
+  cookiesPage: { eyebrow: string; title: string }
+  consent: {
+    message: string
+    accept: string
+    decline: string
+    policyLink: string
+  }
 }
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -75,7 +87,15 @@ export const dictionaries: Record<Locale, Dictionary> = {
       menuClose: 'Fechar menu',
       settings: 'Configurações',
     },
-    footer: { email: 'e-mail', github: 'github', linkedin: 'linkedin', exportAi: 'exportar p/ IA' },
+    footer: {
+      email: 'e-mail',
+      github: 'github',
+      linkedin: 'linkedin',
+      exportAi: 'exportar p/ IA',
+      privacidade: 'privacidade',
+      termos: 'termos de uso',
+      cookies: 'cookies',
+    },
     home: {
       whoami: '$ whoami',
       aboutEyebrow: 'sobre',
@@ -120,6 +140,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
       back: '← artigos',
       notFound: 'Nenhum artigo encontrado.',
     },
+    privacidade: { eyebrow: 'privacidade', title: 'Política de Privacidade' },
+    termos: { eyebrow: 'termos', title: 'Termos de Uso' },
+    cookiesPage: { eyebrow: 'cookies', title: 'Política de Cookies' },
+    consent: {
+      message:
+        'Este site usa cookies essenciais (tema, preferências) e, com sua permissão, cookies de análise (Google Analytics) para entender como o site é usado.',
+      accept: 'Aceitar',
+      decline: 'Recusar',
+      policyLink: 'saiba mais',
+    },
   },
   en: {
     nav: {
@@ -136,7 +166,15 @@ export const dictionaries: Record<Locale, Dictionary> = {
       menuClose: 'Close menu',
       settings: 'Settings',
     },
-    footer: { email: 'email', github: 'github', linkedin: 'linkedin', exportAi: 'export for AI' },
+    footer: {
+      email: 'email',
+      github: 'github',
+      linkedin: 'linkedin',
+      exportAi: 'export for AI',
+      privacidade: 'privacy',
+      termos: 'terms of use',
+      cookies: 'cookies',
+    },
     home: {
       whoami: '$ whoami',
       aboutEyebrow: 'about',
@@ -180,6 +218,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
       detailEyebrow: 'article',
       back: '← articles',
       notFound: 'No articles found.',
+    },
+    privacidade: { eyebrow: 'privacy', title: 'Privacy Policy' },
+    termos: { eyebrow: 'terms', title: 'Terms of Use' },
+    cookiesPage: { eyebrow: 'cookies', title: 'Cookie Policy' },
+    consent: {
+      message:
+        'This site uses essential cookies (theme, preferences) and, with your permission, analytics cookies (Google Analytics) to understand how the site is used.',
+      accept: 'Accept',
+      decline: 'Decline',
+      policyLink: 'learn more',
     },
   },
 }

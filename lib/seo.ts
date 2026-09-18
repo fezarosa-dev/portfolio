@@ -128,4 +128,34 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
         "Felipe Zanoni da Rosa's resume: professional experience, academic background, technical skills and certifications.",
     },
   },
+  privacidade: {
+    pt: {
+      title: 'Política de Privacidade',
+      description: 'Como Felipe Zanoni da Rosa coleta, usa e protege dados pessoais neste site.',
+    },
+    en: {
+      title: 'Privacy Policy',
+      description: "How Felipe Zanoni da Rosa's site collects, uses and protects personal data.",
+    },
+  },
+  termos: {
+    pt: {
+      title: 'Termos de Uso',
+      description: 'Condições de uso do site de Felipe Zanoni da Rosa.',
+    },
+    en: {
+      title: 'Terms of Use',
+      description: "Terms of use for Felipe Zanoni da Rosa's site.",
+    },
+  },
+  cookies: {
+    pt: {
+      title: 'Política de Cookies',
+      description: 'Quais cookies o site de Felipe Zanoni da Rosa usa e como gerenciá-los.',
+    },
+    en: {
+      title: 'Cookie Policy',
+      description: "Which cookies Felipe Zanoni da Rosa's site uses and how to manage them.",
+    },
+  },
 }

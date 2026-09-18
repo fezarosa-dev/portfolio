@@ -153,6 +153,36 @@ export function SiteContentForm({
         </div>
       </Section>
 
+      <Section title="páginas legais">
+        <BilingualField
+          name="privacidade_texto"
+          label="Política de Privacidade (markdown)"
+          language={language}
+          defaultValuePt={lookup('privacidade_texto')}
+          defaultValueEn={lookup('privacidade_texto_en')}
+          multiline
+          rows={12}
+        />
+        <BilingualField
+          name="termos_texto"
+          label="Termos de Uso (markdown)"
+          language={language}
+          defaultValuePt={lookup('termos_texto')}
+          defaultValueEn={lookup('termos_texto_en')}
+          multiline
+          rows={12}
+        />
+        <BilingualField
+          name="cookies_texto"
+          label="Política de Cookies (markdown)"
+          language={language}
+          defaultValuePt={lookup('cookies_texto')}
+          defaultValueEn={lookup('cookies_texto_en')}
+          multiline
+          rows={12}
+        />
+      </Section>
+
       <Section title="avançado">
         <div>
           <Label htmlFor="drive_folder_url">Drive URL (pasta de imagens do site)</Label>

@@ -70,6 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = headerList.get("x-locale") === "en" ? "en" : "pt-BR";
   const dark = cookieStore.get("theme")?.value === "dark";
   const reduceMotionCookie = cookieStore.get("reduce-motion")?.value;
+  const analyticsConsent = cookieStore.get("cookie-consent")?.value === "accepted";
 
   return (
     <html
@@ -108,7 +109,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           {children}
         </ReduceMotionProvider>
-        <GoogleAnalytics />
+        {analyticsConsent && <GoogleAnalytics />}
       </body>
     </html>
   );
