@@ -43,16 +43,16 @@ export async function Footer() {
           ))}
         </div>
       </div>
-      <div className="mx-auto mt-4 flex max-w-4xl justify-center gap-4 font-mono text-[11px] text-steel/70 sm:justify-start">
-        {legalLinks.map((link) => (
-          <a key={link.href} href={link.href} className="transition-colors hover:text-signal">
-            {link.label}
-          </a>
-        ))}
+      <div className="mx-auto mt-4 flex max-w-4xl flex-col items-center justify-between gap-2 font-mono text-[11px] text-steel/70 sm:flex-row">
+        <div className="flex gap-4">
+          {legalLinks.map((link) => (
+            <a key={link.href} href={link.href} className="transition-colors hover:text-signal">
+              {link.label}
+            </a>
+          ))}
+        </div>
+        {content.mascote_ativo === 'true' && <p>{"// don't wake the dog."}</p>}
       </div>
-      {content.mascote_ativo === 'true' && (
-        <p className="mt-4 text-center font-mono text-[11px] text-steel/70">{"// don't wake the dog."}</p>
-      )}
     </footer>
   )
 }
