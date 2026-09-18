@@ -15,15 +15,36 @@ whose value derives, entirely or substantially, from the functionality of the
 Software. Any license notice or attribution required by the License must also
 include this Commons Clause License Condition notice.
 
-To sell a product or service whose value derives, entirely or substantially,
-from the functionality of the Software, contact the Licensor to obtain a
-separate commercial license.
-
 Software: portfolio (this repository)
 
 License: MIT
 
 Licensor: Felipe Zanoni da Rosa
+
+---
+
+Commercial License
+
+To Sell a product or service whose value derives, entirely or substantially,
+from the functionality of the Software (as "Sell" is defined above), you must
+first obtain a separate, written commercial license from the Licensor.
+
+Contact fezarosa@gmail.com or https://www.zanoni.dev.br/contato to request
+one. There is no fixed price list: fees and terms are set by the Licensor at
+their sole discretion, case by case, and may differ between requests
+depending on the intended use. Using the Software to Sell without first
+obtaining this written commercial license is a violation of this License.
+
+---
+
+Governing Law
+
+This License and any dispute arising from the Software are governed by the
+laws of the Federative Republic of Brazil, in particular Law No. 9.610/1998
+(Copyright Law) and Law No. 9.609/1998 (Software Law), without regard to
+conflict-of-law rules. Any dispute shall be submitted to the courts of the
+Licensor's domicile in Brazil, unless the Licensor and the other party agree
+in writing to a different forum.
 
 ---
 
