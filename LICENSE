@@ -1,3 +1,69 @@
+"Commons Clause" License Condition v1.0
+
+The Software is provided to you by the Licensor under the License, as defined
+below, subject to the following condition.
+
+Without limiting other conditions in the License, the grant of rights under
+the License will not include, and the License does not grant to you, the
+right to Sell the Software.
+
+For purposes of the foregoing, "Sell" means practicing any or all of the
+rights granted to you under the License to provide to third parties, for a
+fee or other consideration (including without limitation fees for hosting or
+consulting/ support services related to the Software), a product or service
+whose value derives, entirely or substantially, from the functionality of the
+Software. Any license notice or attribution required by the License must also
+include this Commons Clause License Condition notice.
+
+For the avoidance of doubt, the word "sell" as used anywhere below (including
+in the MIT License's grant of rights) is limited by, and does not expand or
+override, the restriction on "Sell" set out above.
+
+Software: portfolio (this repository)
+
+License: MIT
+
+Licensor: Felipe Zanoni da Rosa
+
+---
+
+Commercial License
+
+To Sell a product or service whose value derives, entirely or substantially,
+from the functionality of the Software (as "Sell" is defined above), you must
+first obtain a separate, written commercial license from the Licensor.
+
+Contact fezarosa@gmail.com or https://www.zanoni.dev.br/contato to request
+one. There is no fixed price list: fees and terms are set by the Licensor at
+their sole discretion, case by case, and may differ between requests
+depending on the intended use. Using the Software to Sell without first
+obtaining this written commercial license is a violation of this License.
+
+The Licensor reserves the right to offer the Software under different or
+additional license terms to any party, at any time, at the Licensor's
+discretion, including free-of-charge or paid licenses. Doing so does not
+affect the rights already granted under this License to existing copies of
+the Software.
+
+---
+
+Governing Law
+
+This License and any dispute arising from the Software are governed by the
+laws of the Federative Republic of Brazil, in particular Law No. 9.610/1998
+(Copyright Law) and Law No. 9.609/1998 (Software Law), without regard to
+conflict-of-law rules. Any dispute shall be submitted to the courts of the
+Licensor's domicile in Brazil, unless the Licensor and the other party agree
+in writing to a different forum.
+
+If any provision of this License (including the Commons Clause License
+Condition, the Commercial License section, or this Governing Law section) is
+held unenforceable or invalid, that provision shall be limited or eliminated
+to the minimum extent necessary, and the remaining provisions shall remain in
+full force and effect.
+
+---
+
 MIT License
 
 Copyright (c) 2026 Felipe Zanoni da Rosa
@@ -9,8 +75,10 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice (including, in full,
+the Commons Clause License Condition, Commercial License, and Governing Law
+sections above) shall be included in all copies or substantial portions of
+the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
