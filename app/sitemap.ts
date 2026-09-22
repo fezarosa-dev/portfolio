@@ -40,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entriesFor('/contato', 'yearly', 0.5),
     ...entriesFor('/curriculo', 'monthly', 0.6),
     ...entriesFor('/status', 'weekly', 0.4),
+    ...entriesFor('/busca', 'weekly', 0.4),
     ...entriesFor('/privacidade', 'yearly', 0.3),
     ...entriesFor('/termos', 'yearly', 0.3),
     ...entriesFor('/cookies', 'yearly', 0.3),

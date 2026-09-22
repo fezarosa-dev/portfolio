@@ -35,6 +35,13 @@ export async function Footer() {
           >
             {dict.footer.status}
           </a>
+          <a
+            href={`/${locale}/busca`}
+            title="Busca em linguagem natural pelo conteúdo do site"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-colors hover:border-signal hover:text-signal"
+          >
+            {dict.footer.busca}
+          </a>
         </p>
         <div className="flex gap-5">
           {links.map((link) => (
