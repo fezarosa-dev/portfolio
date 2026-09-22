@@ -248,3 +248,19 @@ export async function countRecentMessagesFromIp(ip: string, windowMinutes: numbe
   if (error) throw error
   return data as number
 }
+
+export async function countRecentSearchesFromIp(ip: string, windowMinutes: number): Promise<number> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('count_recent_searches_by_ip', {
+    check_ip: ip,
+    window_minutes: windowMinutes,
+  })
+  if (error) throw error
+  return data as number
+}
+
+export async function logSearchRequest(ip: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('search_requests').insert({ ip })
+  if (error) throw error
+}
