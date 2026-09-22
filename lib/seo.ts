@@ -128,6 +128,16 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
         "Felipe Zanoni da Rosa's resume: professional experience, academic background, technical skills and certifications.",
     },
   },
+  busca: {
+    pt: {
+      title: 'Busca',
+      description: 'Busque em linguagem natural pelos projetos, artigos e tecnologias de Felipe Zanoni da Rosa.',
+    },
+    en: {
+      title: 'Search',
+      description: "Search in natural language across Felipe Zanoni da Rosa's projects, articles and technologies.",
+    },
+  },
   status: {
     pt: {
       title: 'Bastidores técnicos',

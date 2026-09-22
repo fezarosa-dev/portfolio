@@ -13,6 +13,7 @@ export type Dictionary = {
     linkedin: string
     exportAi: string
     status: string
+    busca: string
     privacidade: string
     termos: string
     cookies: string
@@ -26,6 +27,13 @@ export type Dictionary = {
   }
   sobre: { eyebrow: string; title: string }
   servicos: { eyebrow: string; title: string }
+  busca: {
+    eyebrow: string
+    title: string
+    subtitle: string
+    placeholder: string
+    noResults: string
+  }
   projetos: {
     eyebrow: string
     title: string
@@ -109,6 +117,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       linkedin: 'linkedin',
       exportAi: 'exportar p/ IA',
       status: 'status',
+      busca: 'busca (⌘K)',
       privacidade: 'privacidade',
       termos: 'termos de uso',
       cookies: 'cookies',
@@ -122,6 +131,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
     servicos: { eyebrow: 'serviços', title: 'Serviços' },
+    busca: {
+      eyebrow: 'busca',
+      title: 'Busca',
+      subtitle: 'Pergunte com suas próprias palavras — a busca entende o significado, não só o texto exato.',
+      placeholder: 'Buscar projetos, artigos, tecnologias…',
+      noResults: 'Nada encontrado. Tenta reformular a busca.',
+    },
     projetos: {
       eyebrow: 'projetos',
       title: 'Projetos',
@@ -204,6 +220,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       linkedin: 'linkedin',
       exportAi: 'export for AI',
       status: 'status',
+      busca: 'search (⌘K)',
       privacidade: 'privacy',
       termos: 'terms of use',
       cookies: 'cookies',
@@ -217,6 +234,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     sobre: { eyebrow: 'about-me', title: 'About me' },
     servicos: { eyebrow: 'services', title: 'Services' },
+    busca: {
+      eyebrow: 'search',
+      title: 'Search',
+      subtitle: 'Ask in your own words — search understands meaning, not just exact text.',
+      placeholder: 'Search projects, articles, technologies…',
+      noResults: 'Nothing found. Try rephrasing your search.',
+    },
     projetos: {
       eyebrow: 'projects',
       title: 'Projects',
