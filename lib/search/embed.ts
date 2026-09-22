@@ -1,4 +1,7 @@
-import { pipeline, type FeatureExtractionPipeline } from '@huggingface/transformers'
+import { pipeline, env, type FeatureExtractionPipeline } from '@huggingface/transformers'
+
+// serverless (Vercel/Lambda) só permite escrita em /tmp — node_modules é read-only em runtime
+env.cacheDir = '/tmp/transformers-cache'
 
 const MODEL_ID = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2'
 

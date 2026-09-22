@@ -9,6 +9,7 @@ import {
   reindexLanguage,
   reindexSobreTexto,
   reindexResume,
+  removeSearchEntry,
 } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
 
@@ -69,9 +70,13 @@ export async function reindexAllSearchContent(): Promise<{
     getResume(),
   ])
 
+  const artigosAtivo = content.artigos_ativo !== 'false'
+
   await Promise.all([
     ...projects.filter((project) => project.visible).map((project) => reindexProject(project)),
-    ...articles.filter((article) => article.visible).map((article) => reindexArticle(article)),
+    ...(artigosAtivo
+      ? articles.filter((article) => article.visible).map((article) => reindexArticle(article))
+      : articles.map((article) => removeSearchEntry('articles', article.id))),
     ...languages.map((language) => reindexLanguage(language)),
   ])
   await reindexSobreTexto(content.sobre_texto ?? null, content.sobre_texto_en ?? null)

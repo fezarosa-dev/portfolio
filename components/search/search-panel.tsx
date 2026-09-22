@@ -37,6 +37,7 @@ export function SearchPanel({
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [techStats, setTechStats] = useState<TechStat[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
   const requestIdRef = useRef(0)
@@ -66,6 +67,7 @@ export function SearchPanel({
     const trimmed = value.trim()
     if (!trimmed) {
       setResults([])
+      setError(null)
       setLoading(false)
       return
     }
@@ -78,14 +80,21 @@ export function SearchPanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: trimmed }),
       })
-        .then((res) => res.json())
-        .then((data) => {
+        .then(async (res) => ({ ok: res.ok, data: await res.json() }))
+        .then(({ ok, data }) => {
           if (requestId !== requestIdRef.current) return
+          if (!ok) {
+            setResults([])
+            setError(typeof data.error === 'string' ? data.error : null)
+            return
+          }
+          setError(null)
           setResults(Array.isArray(data.results) ? data.results : [])
         })
         .catch(() => {
           if (requestId !== requestIdRef.current) return
           setResults([])
+          setError(null)
         })
         .finally(() => {
           if (requestId !== requestIdRef.current) return
@@ -108,7 +117,8 @@ export function SearchPanel({
       />
       <div className="mt-3">
         {trimmedQuery && loading && <p className="font-mono text-xs text-steel">…</p>}
-        {trimmedQuery && !loading && results.length === 0 && (
+        {trimmedQuery && !loading && error && <p className="font-mono text-xs text-steel">{error}</p>}
+        {trimmedQuery && !loading && !error && results.length === 0 && (
           <p className="font-mono text-xs text-steel">{noResultsLabel}</p>
         )}
         {!trimmedQuery && techStats.length > 0 && (
