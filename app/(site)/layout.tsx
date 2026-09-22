@@ -50,25 +50,32 @@ const SEO_BY_LOCALE = {
 } as const
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale()
+  const [locale, content] = await Promise.all([getLocale(), getSiteContent()])
   const seo = SEO_BY_LOCALE[locale]
+  const suffix = locale === 'en' ? '_en' : ''
+  const title = content[`seo_home_title${suffix}`]?.trim() || seo.title.default
+  const description = content[`seo_home_description${suffix}`]?.trim() || seo.description
+  const keywordsOverride = content[`seo_home_keywords${suffix}`]?.trim()
+  const keywords = keywordsOverride
+    ? keywordsOverride.split(',').map((k) => k.trim()).filter(Boolean)
+    : [...seo.keywords]
 
   return {
-    title: seo.title,
-    description: seo.description,
-    keywords: [...seo.keywords],
+    title: { default: title, template: seo.title.template },
+    description,
+    keywords,
     openGraph: {
       type: 'website',
       locale: seo.ogLocale,
       url: `${SITE_URL}/${locale}`,
       siteName: SITE_NAME,
       title: seo.ogTitle,
-      description: seo.description,
+      description,
     },
     twitter: {
       card: 'summary_large_image',
       title: seo.ogTitle,
-      description: seo.description,
+      description,
     },
   }
 }

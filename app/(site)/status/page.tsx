@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { version as nextVersion } from 'next/package.json'
 import { getDictionary, getLocale } from '@/lib/i18n'
-import { PAGE_SEO, pageMetadata } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
+import { getPageSeo } from '@/lib/seo-runtime'
 import { getVisibleProjects, getVisibleArticles, getLanguages } from '@/lib/supabase/queries-cached'
 import { getLanguages as getLanguagesLive } from '@/lib/supabase/queries'
 import { createPublicClient } from '@/lib/supabase/public-client'
@@ -12,7 +13,7 @@ const REPO_URL = 'https://github.com/fezarosa-dev/portfolio'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const seo = PAGE_SEO.status[locale]
+  const seo = await getPageSeo('status', locale)
   return pageMetadata(locale, '/status', seo.title, seo.description)
 }
 

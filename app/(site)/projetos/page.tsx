@@ -3,13 +3,14 @@ import type { Metadata } from 'next'
 import { getVisibleProjects } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ProjectsExplorer } from '@/components/projects-explorer'
-import { PAGE_SEO, pageMetadata } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
+import { getPageSeo } from '@/lib/seo-runtime'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const seo = PAGE_SEO.projetos[locale]
+  const seo = await getPageSeo('projetos', locale)
   return pageMetadata(locale, '/projetos', seo.title, seo.description)
 }
 

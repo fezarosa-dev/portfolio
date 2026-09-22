@@ -12,6 +12,9 @@ import {
   removeSearchEntry,
 } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
+import { SEO_PAGE_KEYS } from '@/lib/seo'
+
+const SEO_PAGES = ['home', ...SEO_PAGE_KEYS]
 
 const KEYS = [
   'site_icon',
@@ -22,6 +25,11 @@ const KEYS = [
   'status_color',
   'link_github',
   'link_linkedin',
+  'search_rate_limit_max',
+  'search_rate_limit_window_minutes',
+  'search_max_query_length',
+  'search_semantic_timeout_ms',
+  'search_results_limit',
 ] as const
 
 const BILINGUAL_KEYS = [
@@ -34,7 +42,9 @@ const BILINGUAL_KEYS = [
   'privacidade_texto',
   'termos_texto',
   'cookies_texto',
-] as const
+  ...SEO_PAGES.flatMap((page) => [`seo_${page}_title`, `seo_${page}_description`]),
+  'seo_home_keywords',
+]
 
 async function saveSide(key: string, value: string | null) {
   if (value === null) await deleteSiteContentKey(key)
@@ -49,6 +59,7 @@ export async function toggleMascoteAtivo(ativo: boolean) {
 export async function saveSiteContent(formData: FormData) {
   await Promise.all([
     ...KEYS.map((key) => upsertSiteContent(key, String(formData.get(key) ?? ''))),
+    upsertSiteContent('nav_hidden_links', formData.getAll('nav_hidden_links').join(',')),
     ...BILINGUAL_KEYS.flatMap((key) => [
       saveSide(key, parseBilingualPt(formData, key)),
       saveSide(`${key}_en`, parseBilingualEn(formData, key)),

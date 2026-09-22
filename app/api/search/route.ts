@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server'
 import { countRecentSearchesFromIp, logSearchRequest } from '@/lib/supabase/queries'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { searchFullText, searchSemantic } from '@/lib/supabase/search-queries'
 import { reciprocalRankFusion } from '@/lib/search/rank'
 
-const RATE_LIMIT_MAX = 20
-const RATE_LIMIT_WINDOW_MINUTES = 1
-const MAX_QUERY_LENGTH = 200
-const SEMANTIC_TIMEOUT_MS = 4000
-const RESULTS_LIMIT = 8
+const DEFAULTS = {
+  rateLimitMax: 20,
+  rateLimitWindowMinutes: 1,
+  maxQueryLength: 200,
+  semanticTimeoutMs: 4000,
+  resultsLimit: 8,
+}
+
+function numberFromContent(content: Record<string, string>, key: string, fallback: number): number {
+  const parsed = Number(content[key])
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
   return Promise.race([
@@ -17,8 +25,21 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) ?? {}
-  const query = String(body.query ?? '').trim()
+  const [body, content] = await Promise.all([
+    request.json().catch(() => ({})),
+    getSiteContent(),
+  ])
+  const query = String((body ?? {}).query ?? '').trim()
+
+  const RATE_LIMIT_MAX = numberFromContent(content, 'search_rate_limit_max', DEFAULTS.rateLimitMax)
+  const RATE_LIMIT_WINDOW_MINUTES = numberFromContent(
+    content,
+    'search_rate_limit_window_minutes',
+    DEFAULTS.rateLimitWindowMinutes
+  )
+  const MAX_QUERY_LENGTH = numberFromContent(content, 'search_max_query_length', DEFAULTS.maxQueryLength)
+  const SEMANTIC_TIMEOUT_MS = numberFromContent(content, 'search_semantic_timeout_ms', DEFAULTS.semanticTimeoutMs)
+  const RESULTS_LIMIT = numberFromContent(content, 'search_results_limit', DEFAULTS.resultsLimit)
 
   if (!query) return NextResponse.json({ results: [] })
   if (query.length > MAX_QUERY_LENGTH) {

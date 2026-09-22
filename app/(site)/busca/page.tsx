@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import { getDictionary, getLocale } from '@/lib/i18n'
-import { PAGE_SEO, pageMetadata } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
+import { getPageSeo } from '@/lib/seo-runtime'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 import { SearchPanel } from '@/components/search/search-panel'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const seo = PAGE_SEO.busca[locale]
+  const seo = await getPageSeo('busca', locale)
   return pageMetadata(locale, '/busca', seo.title, seo.description)
 }
 
