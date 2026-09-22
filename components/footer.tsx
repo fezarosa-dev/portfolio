@@ -9,6 +9,7 @@ export async function Footer() {
     content.link_linkedin && { href: content.link_linkedin, label: dict.footer.linkedin },
   ].filter(Boolean) as { href: string; label: string }[]
   const legalLinks = [
+    { href: `/${locale}/como-usar`, label: dict.footer.comoUsar },
     { href: `/${locale}/privacidade`, label: dict.footer.privacidade },
     { href: `/${locale}/termos`, label: dict.footer.termos },
     { href: `/${locale}/cookies`, label: dict.footer.cookies },
@@ -27,6 +28,20 @@ export async function Footer() {
             className="rounded-full border border-hairline px-2 py-0.5 transition-colors hover:border-signal hover:text-signal"
           >
             {dict.footer.exportAi}
+          </a>
+          <a
+            href={`/${locale}/status`}
+            title="Métricas técnicas reais deste site, ao vivo"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-colors hover:border-signal hover:text-signal"
+          >
+            {dict.footer.status}
+          </a>
+          <a
+            href={`/${locale}/busca`}
+            title="Busca em linguagem natural pelo conteúdo do site"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-colors hover:border-signal hover:text-signal"
+          >
+            {dict.footer.busca}
           </a>
         </p>
         <div className="flex gap-5">

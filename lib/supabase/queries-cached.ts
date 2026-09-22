@@ -52,6 +52,24 @@ const cachedVisibleArticles = unstable_cache(
   ['visible-articles'],
   opts
 )
+export async function getLanguageUsageStats() {
+  const [projects, languages] = await Promise.all([getVisibleProjects(), getLanguages()])
+  const total = projects.length
+  const counts = new Map<string, number>()
+  for (const project of projects) {
+    for (const language of project.languages) {
+      counts.set(language.id, (counts.get(language.id) ?? 0) + 1)
+    }
+  }
+  return languages
+    .map((language) => ({
+      ...language,
+      percentage: total > 0 ? Math.round(((counts.get(language.id) ?? 0) / total) * 100) : 0,
+    }))
+    .filter((stat) => stat.percentage > 0)
+    .sort((a, b) => b.percentage - a.percentage)
+}
+
 export async function getVisibleArticles() {
   return pickSource(await isPreview(), () => raw.getVisibleArticles(createPublicClient()), cachedVisibleArticles)()
 }

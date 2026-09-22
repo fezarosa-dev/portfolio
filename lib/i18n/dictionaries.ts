@@ -12,6 +12,9 @@ export type Dictionary = {
     github: string
     linkedin: string
     exportAi: string
+    status: string
+    busca: string
+    comoUsar: string
     privacidade: string
     termos: string
     cookies: string
@@ -25,6 +28,13 @@ export type Dictionary = {
   }
   sobre: { eyebrow: string; title: string }
   servicos: { eyebrow: string; title: string }
+  busca: {
+    eyebrow: string
+    title: string
+    subtitle: string
+    placeholder: string
+    noResults: string
+  }
   projetos: {
     eyebrow: string
     title: string
@@ -60,6 +70,22 @@ export type Dictionary = {
     back: string
     notFound: string
   }
+  status: {
+    eyebrow: string
+    title: string
+    subtitle: string
+    deployLabel: string
+    deployLocal: string
+    branchLabel: string
+    branchLocal: string
+    latencyLabel: string
+    runtimeLabel: string
+    contentLabel: string
+    projects: string
+    articles: string
+    technologies: string
+  }
+  comoUsar: { eyebrow: string; title: string }
   privacidade: { eyebrow: string; title: string }
   termos: { eyebrow: string; title: string }
   cookiesPage: { eyebrow: string; title: string }
@@ -92,6 +118,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       github: 'github',
       linkedin: 'linkedin',
       exportAi: 'exportar p/ IA',
+      status: 'status',
+      busca: 'busca (⌘K)',
+      comoUsar: 'como usar',
       privacidade: 'privacidade',
       termos: 'termos de uso',
       cookies: 'cookies',
@@ -105,6 +134,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
     servicos: { eyebrow: 'serviços', title: 'Serviços' },
+    busca: {
+      eyebrow: 'busca',
+      title: 'Busca',
+      subtitle: 'Pergunte com suas próprias palavras — a busca entende o significado, não só o texto exato.',
+      placeholder: 'Buscar projetos, artigos, tecnologias…',
+      noResults: 'Nada encontrado. Tenta reformular a busca.',
+    },
     projetos: {
       eyebrow: 'projetos',
       title: 'Projetos',
@@ -140,6 +176,22 @@ export const dictionaries: Record<Locale, Dictionary> = {
       back: '← artigos',
       notFound: 'Nenhum artigo encontrado.',
     },
+    status: {
+      eyebrow: 'internals',
+      title: 'Bastidores técnicos',
+      subtitle: 'Métricas reais deste site, lidas agora — nada aqui é simulado.',
+      deployLabel: 'deploy atual',
+      deployLocal: 'ambiente local',
+      branchLabel: 'branch / região',
+      branchLocal: 'sem info (local)',
+      latencyLabel: 'latência real (Supabase)',
+      runtimeLabel: 'runtime',
+      contentLabel: 'conteúdo no banco',
+      projects: 'projetos',
+      articles: 'artigos',
+      technologies: 'tecnologias',
+    },
+    comoUsar: { eyebrow: 'guia', title: 'Como usar este site' },
     privacidade: { eyebrow: 'privacidade', title: 'Política de Privacidade' },
     termos: { eyebrow: 'termos', title: 'Termos de Uso' },
     cookiesPage: { eyebrow: 'cookies', title: 'Política de Cookies' },
@@ -171,6 +223,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       github: 'github',
       linkedin: 'linkedin',
       exportAi: 'export for AI',
+      status: 'status',
+      busca: 'search (⌘K)',
+      comoUsar: 'how to use',
       privacidade: 'privacy',
       termos: 'terms of use',
       cookies: 'cookies',
@@ -184,6 +239,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     sobre: { eyebrow: 'about-me', title: 'About me' },
     servicos: { eyebrow: 'services', title: 'Services' },
+    busca: {
+      eyebrow: 'search',
+      title: 'Search',
+      subtitle: 'Ask in your own words — search understands meaning, not just exact text.',
+      placeholder: 'Search projects, articles, technologies…',
+      noResults: 'Nothing found. Try rephrasing your search.',
+    },
     projetos: {
       eyebrow: 'projects',
       title: 'Projects',
@@ -219,6 +281,22 @@ export const dictionaries: Record<Locale, Dictionary> = {
       back: '← articles',
       notFound: 'No articles found.',
     },
+    status: {
+      eyebrow: 'internals',
+      title: 'Technical internals',
+      subtitle: 'Real metrics from this site, read right now — nothing here is simulated.',
+      deployLabel: 'current deploy',
+      deployLocal: 'local environment',
+      branchLabel: 'branch / region',
+      branchLocal: 'no info (local)',
+      latencyLabel: 'live latency (Supabase)',
+      runtimeLabel: 'runtime',
+      contentLabel: 'content in the database',
+      projects: 'projects',
+      articles: 'articles',
+      technologies: 'technologies',
+    },
+    comoUsar: { eyebrow: 'guide', title: 'How to use this site' },
     privacidade: { eyebrow: 'privacy', title: 'Privacy Policy' },
     termos: { eyebrow: 'terms', title: 'Terms of Use' },
     cookiesPage: { eyebrow: 'cookies', title: 'Cookie Policy' },

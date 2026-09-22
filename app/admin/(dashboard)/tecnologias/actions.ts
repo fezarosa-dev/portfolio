@@ -8,13 +8,15 @@ import {
   setLanguagesOrder,
   setLanguageShowOnHome,
 } from '@/lib/supabase/admin-queries'
+import { reindexLanguage, removeSearchEntry } from '@/lib/supabase/search-index'
 
 export async function saveLanguage(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
   if (!name) return
   const iconUrl = String(formData.get('iconUrl') ?? '').trim()
 
-  await addLanguage(name, iconUrl || undefined)
+  const language = await addLanguage(name, iconUrl || undefined)
+  await reindexLanguage(language)
   revalidatePath('/admin/tecnologias')
 }
 
@@ -23,12 +25,14 @@ export async function editLanguage(id: string, formData: FormData) {
   if (!name) return
   const iconUrl = String(formData.get('iconUrl') ?? '').trim()
 
-  await updateLanguage(id, name, iconUrl || undefined)
+  const language = await updateLanguage(id, name, iconUrl || undefined)
+  await reindexLanguage(language)
   revalidatePath('/admin/tecnologias')
 }
 
 export async function removeLanguage(id: string) {
   await deleteLanguage(id)
+  await removeSearchEntry('languages', id)
   revalidatePath('/admin/tecnologias')
 }
 

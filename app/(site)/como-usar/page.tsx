@@ -11,23 +11,23 @@ import { FadeIn } from '@/components/fade-in'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const seo = await getPageSeo('cookies', locale)
-  return pageMetadata(locale, '/cookies', seo.title, seo.description)
+  const seo = await getPageSeo('comoUsar', locale)
+  return pageMetadata(locale, '/como-usar', seo.title, seo.description)
 }
 
-export default async function CookiesPage() {
+export default async function ComoUsarPage() {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
-        <Eyebrow>{dict.cookiesPage.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.cookiesPage.title}</h1>
+        <Eyebrow>{dict.comoUsar.eyebrow}</Eyebrow>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.comoUsar.title}</h1>
       </FadeIn>
       <FadeIn delay={0.1}>
         <div className="prose dark:prose-invert mt-8 max-w-none text-foreground/90 prose-a:text-signal prose-a:no-underline hover:prose-a:underline">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {resolveText(content.cookies_texto ?? '', content.cookies_texto_en, locale)}
+            {resolveText(content.como_usar_texto ?? '', content.como_usar_texto_en, locale)}
           </ReactMarkdown>
         </div>
       </FadeIn>

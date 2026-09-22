@@ -6,6 +6,7 @@ import { localizedAlternates } from '@/lib/seo'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
+import { SearchTeaser } from '@/components/home/search-teaser'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: localizedAlternates(await getLocale(), '') }
@@ -55,6 +56,12 @@ export default async function HomePage() {
         withLabel={dict.projetos.with}
         atLabel={dict.projetos.at}
         locale={locale}
+      />
+      <SearchTeaser
+        locale={locale}
+        eyebrow={dict.busca.eyebrow}
+        placeholder={dict.busca.placeholder}
+        noResultsLabel={dict.busca.noResults}
       />
     </>
   )

@@ -4,6 +4,19 @@ import type { Locale } from '@/lib/i18n'
 const SITE_URL = 'https://www.zanoni.dev.br'
 const SITE_NAME = 'Felipe Zanoni da Rosa'
 
+/** Aplica override de título/descrição vindo do painel admin (site_content), se houver. */
+export function resolveSeoOverride(
+  content: Record<string, string>,
+  pageKey: string,
+  locale: Locale,
+  fallback: { title: string; description: string }
+): { title: string; description: string } {
+  const suffix = locale === 'en' ? '_en' : ''
+  const title = content[`seo_${pageKey}_title${suffix}`]?.trim()
+  const description = content[`seo_${pageKey}_description${suffix}`]?.trim()
+  return { title: title || fallback.title, description: description || fallback.description }
+}
+
 export function localizedAlternates(locale: Locale, path: string) {
   return {
     canonical: `/${locale}${path}`,
@@ -128,6 +141,38 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
         "Felipe Zanoni da Rosa's resume: professional experience, academic background, technical skills and certifications.",
     },
   },
+  busca: {
+    pt: {
+      title: 'Busca',
+      description: 'Busque em linguagem natural pelos projetos, artigos e tecnologias de Felipe Zanoni da Rosa.',
+    },
+    en: {
+      title: 'Search',
+      description: "Search in natural language across Felipe Zanoni da Rosa's projects, articles and technologies.",
+    },
+  },
+  status: {
+    pt: {
+      title: 'Bastidores técnicos',
+      description:
+        'Métricas reais e ao vivo deste site — deploy atual, latência do banco e volume de conteúdo, sem dado simulado.',
+    },
+    en: {
+      title: 'Technical internals',
+      description:
+        'Real, live metrics from this site — current deploy, database latency and content volume, nothing simulated.',
+    },
+  },
+  comoUsar: {
+    pt: {
+      title: 'Como usar este site',
+      description: 'Um guia completo pelo site de Felipe Zanoni da Rosa — páginas, recursos e até os easter eggs escondidos.',
+    },
+    en: {
+      title: 'How to use this site',
+      description: "A complete guide to Felipe Zanoni da Rosa's site — pages, features and even the hidden easter eggs.",
+    },
+  },
   privacidade: {
     pt: {
       title: 'Política de Privacidade',
@@ -159,3 +204,6 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
     },
   },
 }
+
+/** Lista de páginas com SEO editável pelo painel admin (chave usada nos campos seo_<key>_*). */
+export const SEO_PAGE_KEYS = Object.keys(PAGE_SEO) as (keyof typeof PAGE_SEO)[]

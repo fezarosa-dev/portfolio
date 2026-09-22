@@ -6,13 +6,14 @@ import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { listDriveImages, parseDriveFolderId, resolveDriveImageUrl } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
-import { PAGE_SEO, pageMetadata } from '@/lib/seo'
+import { pageMetadata } from '@/lib/seo'
+import { getPageSeo } from '@/lib/seo-runtime'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const seo = PAGE_SEO.sobre[locale]
+  const seo = await getPageSeo('sobre', locale)
   return pageMetadata(locale, '/sobre', seo.title, seo.description)
 }
 
