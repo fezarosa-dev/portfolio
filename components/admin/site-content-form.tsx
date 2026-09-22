@@ -153,6 +153,18 @@ export function SiteContentForm({
         </div>
       </Section>
 
+      <Section title="guia do site">
+        <BilingualField
+          name="como_usar_texto"
+          label="Como usar este site (markdown)"
+          language={language}
+          defaultValuePt={lookup('como_usar_texto')}
+          defaultValueEn={lookup('como_usar_texto_en')}
+          multiline
+          rows={16}
+        />
+      </Section>
+
       <Section title="páginas legais">
         <BilingualField
           name="privacidade_texto"

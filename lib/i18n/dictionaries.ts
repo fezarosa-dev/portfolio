@@ -14,6 +14,7 @@ export type Dictionary = {
     exportAi: string
     status: string
     busca: string
+    comoUsar: string
     privacidade: string
     termos: string
     cookies: string
@@ -84,6 +85,7 @@ export type Dictionary = {
     articles: string
     technologies: string
   }
+  comoUsar: { eyebrow: string; title: string }
   privacidade: { eyebrow: string; title: string }
   termos: { eyebrow: string; title: string }
   cookiesPage: { eyebrow: string; title: string }
@@ -118,6 +120,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       exportAi: 'exportar p/ IA',
       status: 'status',
       busca: 'busca (⌘K)',
+      comoUsar: 'como usar',
       privacidade: 'privacidade',
       termos: 'termos de uso',
       cookies: 'cookies',
@@ -188,6 +191,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       articles: 'artigos',
       technologies: 'tecnologias',
     },
+    comoUsar: { eyebrow: 'guia', title: 'Como usar este site' },
     privacidade: { eyebrow: 'privacidade', title: 'Política de Privacidade' },
     termos: { eyebrow: 'termos', title: 'Termos de Uso' },
     cookiesPage: { eyebrow: 'cookies', title: 'Política de Cookies' },
@@ -221,6 +225,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       exportAi: 'export for AI',
       status: 'status',
       busca: 'search (⌘K)',
+      comoUsar: 'how to use',
       privacidade: 'privacy',
       termos: 'terms of use',
       cookies: 'cookies',
@@ -291,6 +296,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       articles: 'articles',
       technologies: 'technologies',
     },
+    comoUsar: { eyebrow: 'guide', title: 'How to use this site' },
     privacidade: { eyebrow: 'privacy', title: 'Privacy Policy' },
     termos: { eyebrow: 'terms', title: 'Terms of Use' },
     cookiesPage: { eyebrow: 'cookies', title: 'Cookie Policy' },

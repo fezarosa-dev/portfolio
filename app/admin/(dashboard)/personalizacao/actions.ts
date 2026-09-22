@@ -30,6 +30,7 @@ const BILINGUAL_KEYS = [
   'sobre_texto',
   'servicos_texto',
   'status_text',
+  'como_usar_texto',
   'privacidade_texto',
   'termos_texto',
   'cookies_texto',

@@ -9,6 +9,7 @@ export async function Footer() {
     content.link_linkedin && { href: content.link_linkedin, label: dict.footer.linkedin },
   ].filter(Boolean) as { href: string; label: string }[]
   const legalLinks = [
+    { href: `/${locale}/como-usar`, label: dict.footer.comoUsar },
     { href: `/${locale}/privacidade`, label: dict.footer.privacidade },
     { href: `/${locale}/termos`, label: dict.footer.termos },
     { href: `/${locale}/cookies`, label: dict.footer.cookies },

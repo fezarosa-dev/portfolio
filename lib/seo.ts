@@ -150,6 +150,16 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
         'Real, live metrics from this site — current deploy, database latency and content volume, nothing simulated.',
     },
   },
+  comoUsar: {
+    pt: {
+      title: 'Como usar este site',
+      description: 'Um guia completo pelo site de Felipe Zanoni da Rosa — páginas, recursos e até os easter eggs escondidos.',
+    },
+    en: {
+      title: 'How to use this site',
+      description: "A complete guide to Felipe Zanoni da Rosa's site — pages, features and even the hidden easter eggs.",
+    },
+  },
   privacidade: {
     pt: {
       title: 'Política de Privacidade',
