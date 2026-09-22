@@ -8,10 +8,14 @@ import {
   deleteResumeLink,
   setResumeLinksOrder,
 } from '@/lib/supabase/admin-queries'
+import { reindexResume } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
 
 export async function saveResume(formData: FormData) {
-  await upsertResume(parseBilingualPt(formData, 'content_md'), parseBilingualEn(formData, 'content_md'))
+  const contentPt = parseBilingualPt(formData, 'content_md')
+  const contentEn = parseBilingualEn(formData, 'content_md')
+  await upsertResume(contentPt, contentEn)
+  await reindexResume(contentPt, contentEn)
   revalidatePath('/admin/curriculo')
 }
 
