@@ -28,6 +28,13 @@ export async function Footer() {
           >
             {dict.footer.exportAi}
           </a>
+          <a
+            href={`/${locale}/status`}
+            title="Métricas técnicas reais deste site, ao vivo"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-colors hover:border-signal hover:text-signal"
+          >
+            {dict.footer.status}
+          </a>
         </p>
         <div className="flex gap-5">
           {links.map((link) => (

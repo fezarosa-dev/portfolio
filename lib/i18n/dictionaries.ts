@@ -12,6 +12,7 @@ export type Dictionary = {
     github: string
     linkedin: string
     exportAi: string
+    status: string
     privacidade: string
     termos: string
     cookies: string
@@ -60,6 +61,21 @@ export type Dictionary = {
     back: string
     notFound: string
   }
+  status: {
+    eyebrow: string
+    title: string
+    subtitle: string
+    deployLabel: string
+    deployLocal: string
+    branchLabel: string
+    branchLocal: string
+    latencyLabel: string
+    runtimeLabel: string
+    contentLabel: string
+    projects: string
+    articles: string
+    technologies: string
+  }
   privacidade: { eyebrow: string; title: string }
   termos: { eyebrow: string; title: string }
   cookiesPage: { eyebrow: string; title: string }
@@ -92,6 +108,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       github: 'github',
       linkedin: 'linkedin',
       exportAi: 'exportar p/ IA',
+      status: 'status',
       privacidade: 'privacidade',
       termos: 'termos de uso',
       cookies: 'cookies',
@@ -140,6 +157,21 @@ export const dictionaries: Record<Locale, Dictionary> = {
       back: '← artigos',
       notFound: 'Nenhum artigo encontrado.',
     },
+    status: {
+      eyebrow: 'internals',
+      title: 'Bastidores técnicos',
+      subtitle: 'Métricas reais deste site, lidas agora — nada aqui é simulado.',
+      deployLabel: 'deploy atual',
+      deployLocal: 'ambiente local',
+      branchLabel: 'branch / região',
+      branchLocal: 'sem info (local)',
+      latencyLabel: 'latência real (Supabase)',
+      runtimeLabel: 'runtime',
+      contentLabel: 'conteúdo no banco',
+      projects: 'projetos',
+      articles: 'artigos',
+      technologies: 'tecnologias',
+    },
     privacidade: { eyebrow: 'privacidade', title: 'Política de Privacidade' },
     termos: { eyebrow: 'termos', title: 'Termos de Uso' },
     cookiesPage: { eyebrow: 'cookies', title: 'Política de Cookies' },
@@ -171,6 +203,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       github: 'github',
       linkedin: 'linkedin',
       exportAi: 'export for AI',
+      status: 'status',
       privacidade: 'privacy',
       termos: 'terms of use',
       cookies: 'cookies',
@@ -218,6 +251,21 @@ export const dictionaries: Record<Locale, Dictionary> = {
       detailEyebrow: 'article',
       back: '← articles',
       notFound: 'No articles found.',
+    },
+    status: {
+      eyebrow: 'internals',
+      title: 'Technical internals',
+      subtitle: 'Real metrics from this site, read right now — nothing here is simulated.',
+      deployLabel: 'current deploy',
+      deployLocal: 'local environment',
+      branchLabel: 'branch / region',
+      branchLocal: 'no info (local)',
+      latencyLabel: 'live latency (Supabase)',
+      runtimeLabel: 'runtime',
+      contentLabel: 'content in the database',
+      projects: 'projects',
+      articles: 'articles',
+      technologies: 'technologies',
     },
     privacidade: { eyebrow: 'privacy', title: 'Privacy Policy' },
     termos: { eyebrow: 'terms', title: 'Terms of Use' },
