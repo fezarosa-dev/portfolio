@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { Locale } from '@/lib/i18n'
 import { iconUrl } from '@/lib/icons'
+import { resolveText } from '@/lib/bilingual'
 
 type SearchResult = {
   id: string
@@ -19,6 +20,7 @@ type TechStat = {
   devicon_variant: string | null
   icon_source: string | null
   percentage: number
+  projects: { id: string; title: string | null; title_en: string | null }[]
 }
 
 export function SearchPanel({
@@ -138,25 +140,41 @@ export function SearchPanel({
         {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
         {showTechStats && (
           <ul className="flex flex-col gap-2">
-            {techStats.map((stat) => (
-              <li key={stat.id} className="flex items-center gap-2">
-                {stat.devicon_slug && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={iconUrl(stat.devicon_slug, stat.devicon_variant ?? 'plain', stat.icon_source)}
-                    alt=""
-                    className="h-3.5 w-3.5 shrink-0"
-                  />
-                )}
-                <span className="w-20 shrink-0 truncate font-mono text-xs text-foreground">{stat.name}</span>
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-hairline">
-                  <div className="h-full rounded-full bg-signal" style={{ width: `${stat.percentage}%` }} />
-                </div>
-                <span className="w-8 shrink-0 text-right font-mono text-[10px] text-steel">
-                  {stat.percentage}%
-                </span>
-              </li>
-            ))}
+            {techStats.map((stat) => {
+              const projectNames = stat.projects
+                .map((project) => resolveText(project.title, project.title_en, locale))
+                .filter(Boolean)
+                .join(', ')
+              return (
+                <li key={stat.id} className="flex items-center gap-2">
+                  <Link
+                    href={`/${locale}/projetos?tech=${stat.id}`}
+                    title={`Ver projetos com ${stat.name}`}
+                    onClick={onNavigate}
+                    className="flex w-24 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
+                  >
+                    {stat.devicon_slug && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={iconUrl(stat.devicon_slug, stat.devicon_variant ?? 'plain', stat.icon_source)}
+                        alt=""
+                        className="h-3.5 w-3.5 shrink-0"
+                      />
+                    )}
+                    <span className="truncate font-mono text-xs text-foreground">{stat.name}</span>
+                  </Link>
+                  <div
+                    className="h-1.5 flex-1 overflow-hidden rounded-full bg-hairline"
+                    title={projectNames}
+                  >
+                    <div className="h-full rounded-full bg-signal" style={{ width: `${stat.percentage}%` }} />
+                  </div>
+                  <span className="w-8 shrink-0 text-right font-mono text-[10px] text-steel">
+                    {stat.percentage}%
+                  </span>
+                </li>
+              )
+            })}
           </ul>
         )}
         <ul className="flex flex-col gap-1">
