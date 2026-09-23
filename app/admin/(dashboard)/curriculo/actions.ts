@@ -15,7 +15,7 @@ export async function saveResume(formData: FormData) {
   const contentPt = parseBilingualPt(formData, 'content_md')
   const contentEn = parseBilingualEn(formData, 'content_md')
   await upsertResume(contentPt, contentEn)
-  await reindexResume(contentPt, contentEn)
+  if (formData.get('reindex') === 'true') await reindexResume(contentPt, contentEn)
   revalidatePath('/admin/curriculo')
 }
 

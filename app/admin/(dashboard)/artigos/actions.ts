@@ -25,8 +25,11 @@ export async function saveArticle(formData: FormData) {
     position: Number(formData.get('position') ?? 0),
     visible: formData.get('visible') === 'true',
   })
-  if (article.visible) await reindexArticle(article)
-  else await removeSearchEntry('articles', article.id)
+  if (article.visible) {
+    if (formData.get('reindex') === 'true') await reindexArticle(article)
+  } else {
+    await removeSearchEntry('articles', article.id)
+  }
   revalidatePath('/admin/artigos')
 }
 

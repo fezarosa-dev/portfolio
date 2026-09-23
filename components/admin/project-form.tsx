@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { withReindexConfirm } from '@/components/admin/with-reindex-confirm'
 import { iconUrl } from '@/lib/icons'
 import type { Project, Language, Author, Company } from '@/lib/supabase/queries'
 
@@ -36,7 +37,7 @@ export function ProjectForm({
 
   async function handleSubmit(formData: FormData) {
     try {
-      await action(formData)
+      await action(withReindexConfirm(formData))
       toast.success('Projeto salvo')
       router.push('/admin/projetos')
     } catch {
