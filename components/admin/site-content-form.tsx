@@ -5,11 +5,13 @@ import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DriveImagePicker } from '@/components/drive-image-picker'
 import { IconUpload } from '@/components/admin/icon-upload'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { MascoteAtivoToggle } from '@/components/admin/mascote-ativo-toggle'
 
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/', label: 'Home' },
@@ -84,13 +86,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function SiteContentForm({
   content,
   action,
+  mascoteAtivo,
+  toggleMascoteAtivo,
 }: {
   content: Record<string, string>
   action: (formData: FormData) => Promise<void>
+  mascoteAtivo: boolean
+  toggleMascoteAtivo: (ativo: boolean) => Promise<void>
 }) {
   const [sobreFoto, setSobreFoto] = useState(content.sobre_foto ?? '')
   const [siteIcon, setSiteIcon] = useState(content.site_icon ?? '')
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
+  const [easterEggsAtivo, setEasterEggsAtivo] = useState(content.easter_eggs_ativo !== 'false')
   const lookup = (key: string): string | null => (key in content ? content[key] : null)
   const hiddenNavLinks = new Set(
     (content.nav_hidden_links ?? '')
@@ -376,6 +383,58 @@ export function SiteContentForm({
                 defaultValue={content.drive_folder_url}
               />
             </div>
+          </Section>
+
+          <Section title="mascote e easter eggs">
+            <div className="flex items-center gap-2">
+              <MascoteAtivoToggle ativo={mascoteAtivo} action={toggleMascoteAtivo} />
+            </div>
+            <p className="-mt-2 font-mono text-xs text-steel">
+              o cachorro dormindo fixo no canto do site — clicar nele acorda e mostra uma piada;
+              clicar 3x rápido (ou o número configurado abaixo) mostra um vídeo escondido
+            </p>
+
+            <div>
+              <Label htmlFor="rickroll_video_filename">Nome do arquivo de vídeo (no Drive)</Label>
+              <Input
+                id="rickroll_video_filename"
+                name="rickroll_video_filename"
+                placeholder="never_gonna_give-you_up.mp4"
+                defaultValue={content.rickroll_video_filename ?? ''}
+              />
+              <p className="mt-1 font-mono text-xs text-steel">
+                nome exato do arquivo na pasta do Drive configurada acima — padrão:
+                never_gonna_give-you_up.mp4
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="rickroll_clicks">Cliques no mascote pra mostrar o vídeo</Label>
+              <Input
+                id="rickroll_clicks"
+                name="rickroll_clicks"
+                type="number"
+                min={2}
+                placeholder="3"
+                defaultValue={content.rickroll_clicks ?? ''}
+              />
+            </div>
+
+            <div className="h-px bg-hairline" aria-hidden />
+
+            <div className="flex items-center gap-2">
+              <input type="hidden" name="easter_eggs_ativo" value={easterEggsAtivo ? 'true' : 'false'} />
+              <Switch
+                id="easter_eggs_ativo"
+                checked={easterEggsAtivo}
+                onCheckedChange={setEasterEggsAtivo}
+              />
+              <Label htmlFor="easter_eggs_ativo">Ativar os easter eggs de teclado</Label>
+            </div>
+            <p className="-mt-2 font-mono text-xs text-steel">
+              liga/desliga de uma vez os easter eggs digitados (&quot;sudo&quot;, &quot;spin&quot;/&quot;girar&quot; e o
+              código Konami no menu de configurações) — o mascote acima tem controle próprio
+            </p>
           </Section>
         </TabsContent>
       </Tabs>

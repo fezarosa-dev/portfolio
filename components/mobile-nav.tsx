@@ -16,6 +16,7 @@ export function MobileNav({
   searchLabel,
   initialDark,
   locale,
+  easterEggsAtivo = true,
 }: {
   links: { href: string; label: string }[]
   openLabel: string
@@ -24,6 +25,7 @@ export function MobileNav({
   searchLabel: string
   initialDark: boolean
   locale: Locale
+  easterEggsAtivo?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const { enabled: reduceMotion } = useReduceMotion()
@@ -45,7 +47,12 @@ export function MobileNav({
         <span onClick={() => setOpen(false)}>
           <SearchTrigger label={searchLabel} />
         </span>
-        <NavSettings initialDark={initialDark} locale={locale} label={settingsLabel} />
+        <NavSettings
+          initialDark={initialDark}
+          locale={locale}
+          label={settingsLabel}
+          easterEggsAtivo={easterEggsAtivo}
+        />
       </li>
     </>
   )

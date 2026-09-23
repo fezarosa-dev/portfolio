@@ -35,9 +35,9 @@ export async function Nav() {
       .filter(Boolean)
   )
   const navLinks = dict.nav.links
-    .filter((link) => link.href === '/artigos' ? content.artigos_ativo !== 'false' : true)
     .filter((link) => !hiddenLinks.has(link.href))
     .map((link) => ({ ...link, href: `/${locale}${link.href === '/' ? '' : link.href}` }))
+  const easterEggsAtivo = content.easter_eggs_ativo !== 'false'
 
   return (
     <div className="sticky top-0 z-40 border-b border-hairline bg-background/80 backdrop-blur">
@@ -51,7 +51,12 @@ export async function Nav() {
           <span className="truncate">{statusText}</span>
           <span className="ml-auto flex items-center gap-2">
             <SearchTrigger label={dict.busca.title} />
-            <NavSettings initialDark={isDark} locale={locale} label={dict.nav.settings} />
+            <NavSettings
+              initialDark={isDark}
+              locale={locale}
+              label={dict.nav.settings}
+              easterEggsAtivo={easterEggsAtivo}
+            />
           </span>
         </div>
       </CollapsibleOnScroll>
@@ -79,6 +84,7 @@ export async function Nav() {
           searchLabel={dict.busca.title}
           initialDark={isDark}
           locale={locale}
+          easterEggsAtivo={easterEggsAtivo}
         />
       </nav>
     </div>

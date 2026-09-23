@@ -1,14 +1,11 @@
 import Link from 'next/link'
 import { getAllArticles } from '@/lib/supabase/admin-queries'
-import { getSiteContent } from '@/lib/supabase/queries'
 import { Button } from '@/components/ui/button'
 import { ToastForm } from '@/components/admin/toast-form'
-import { ArtigosAtivoToggle } from '@/components/admin/artigos-ativo-toggle'
-import { removeArticle, toggleArticleVisibility, toggleArtigosAtivo } from './actions'
+import { removeArticle, toggleArticleVisibility } from './actions'
 
 export default async function AdminArtigosPage() {
-  const [articles, content] = await Promise.all([getAllArticles(), getSiteContent()])
-  const artigosAtivo = content.artigos_ativo !== 'false'
+  const articles = await getAllArticles()
 
   return (
     <div>
@@ -17,12 +14,13 @@ export default async function AdminArtigosPage() {
         <Button render={<Link href="/admin/artigos/novo" />}>Novo artigo</Button>
       </div>
 
-      <div className="mb-6 flex items-center gap-2 rounded-lg border border-hairline bg-card p-4">
-        <ArtigosAtivoToggle ativo={artigosAtivo} action={toggleArtigosAtivo} />
-        <p className="font-mono text-xs text-steel">
-          quando desligado, o item &quot;Artigos&quot; some do menu do site
-        </p>
-      </div>
+      <p className="mb-6 font-mono text-xs text-steel">
+        pra esconder &quot;Artigos&quot; do menu do site sem apagar nada, use a aba{' '}
+        <Link href="/admin/personalizacao" className="text-signal hover:underline">
+          Personalização → Navegação
+        </Link>
+        .
+      </p>
 
       {articles.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhum artigo ainda.</p>

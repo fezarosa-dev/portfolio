@@ -10,7 +10,8 @@ import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { findDriveFile, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 
-const RICKROLL_FILENAME = 'never_gonna_give-you_up.mp4'
+const RICKROLL_FILENAME_DEFAULT = 'never_gonna_give-you_up.mp4'
+const RICKROLL_CLICKS_DEFAULT = 3
 
 const SITE_NAME = 'Felipe Zanoni da Rosa'
 const SITE_URL = 'https://www.zanoni.dev.br'
@@ -83,16 +84,27 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
-  const rickrollVideo = folderId ? await findDriveFile(folderId, RICKROLL_FILENAME).catch(() => null) : null
+  const rickrollFilename = content.rickroll_video_filename?.trim() || RICKROLL_FILENAME_DEFAULT
+  const rickrollVideo = folderId ? await findDriveFile(folderId, rickrollFilename).catch(() => null) : null
+  const rickrollClicks = Number(content.rickroll_clicks) || RICKROLL_CLICKS_DEFAULT
+  const easterEggsAtivo = content.easter_eggs_ativo !== 'false'
 
   return (
     <>
       <Nav />
       {children}
       <Footer />
-      <Mascote ativo={content.mascote_ativo === 'true'} rickrollVideoId={rickrollVideo?.id ?? null} />
-      <SudoEasterEgg locale={locale} />
-      <SpinEasterEgg />
+      <Mascote
+        ativo={content.mascote_ativo === 'true'}
+        rickrollVideoId={rickrollVideo?.id ?? null}
+        rickrollClicks={rickrollClicks}
+      />
+      {easterEggsAtivo && (
+        <>
+          <SudoEasterEgg locale={locale} />
+          <SpinEasterEgg />
+        </>
+      )}
       <CookieConsent />
       <CommandPalette
         locale={locale}

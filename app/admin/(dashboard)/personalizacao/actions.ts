@@ -9,7 +9,6 @@ import {
   reindexLanguage,
   reindexSobreTexto,
   reindexResume,
-  removeSearchEntry,
 } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
 import { SEO_PAGE_KEYS } from '@/lib/seo'
@@ -30,6 +29,9 @@ const KEYS = [
   'search_max_query_length',
   'search_semantic_timeout_ms',
   'search_results_limit',
+  'easter_eggs_ativo',
+  'rickroll_video_filename',
+  'rickroll_clicks',
 ] as const
 
 const BILINGUAL_KEYS = [
@@ -82,13 +84,9 @@ export async function reindexAllSearchContent(): Promise<{
     getResume(),
   ])
 
-  const artigosAtivo = content.artigos_ativo !== 'false'
-
   await Promise.all([
     ...projects.filter((project) => project.visible).map((project) => reindexProject(project)),
-    ...(artigosAtivo
-      ? articles.filter((article) => article.visible).map((article) => reindexArticle(article))
-      : articles.map((article) => removeSearchEntry('articles', article.id))),
+    ...articles.filter((article) => article.visible).map((article) => reindexArticle(article)),
     ...languages.map((language) => reindexLanguage(language)),
   ])
   await reindexSobreTexto(content.sobre_texto ?? null, content.sobre_texto_en ?? null)

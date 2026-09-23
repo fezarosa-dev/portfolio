@@ -16,12 +16,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const [article, content, locale] = await Promise.all([
-    getArticleById(id),
-    getSiteContent(),
-    getLocale(),
-  ])
-  if (!article || content.artigos_ativo === 'false') return {}
+  const [article, locale] = await Promise.all([getArticleById(id), getLocale()])
+  if (!article) return {}
 
   const title = resolveText(article.title, article.title_en, locale)
   const summary = resolveText(article.summary, article.summary_en, locale)
@@ -42,7 +38,7 @@ export default async function ArtigoDetailPage({
     getSiteContent(),
     getDictionary(),
   ])
-  if (!article || content.artigos_ativo === 'false') notFound()
+  if (!article) notFound()
 
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const driveImages = folderId ? await listDriveMedia(folderId) : []
