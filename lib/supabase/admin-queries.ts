@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import type {
   Project,
@@ -12,9 +13,13 @@ import type {
 import { PROJECT_SELECT, mapProjectRow } from '@/lib/supabase/queries'
 import { resolveIcon } from '@/lib/icons'
 
-export async function addLanguage(name: string, customIconUrl?: string): Promise<Language> {
+// todas as funções aceitam um `client` opcional (ex.: o client de service role usado
+// pelo MCP, ver lib/mcp/) — sem ele, seguem usando o client autenticado por cookie
+// de sempre. Ver lib/supabase/service.ts.
+
+export async function addLanguage(name: string, customIconUrl?: string, client?: SupabaseClient): Promise<Language> {
   const icon = customIconUrl ? { slug: customIconUrl, variant: null, source: 'custom' as const } : resolveIcon(name)
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { count } = await supabase
     .from('languages')
@@ -35,8 +40,8 @@ export async function addLanguage(name: string, customIconUrl?: string): Promise
   return data as Language
 }
 
-export async function setLanguagesOrder(orderedIds: string[]): Promise<void> {
-  const supabase = await createClient()
+export async function setLanguagesOrder(orderedIds: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const results = await Promise.all(
     orderedIds.map((id, position) =>
       supabase.from('languages').update({ position }).eq('id', id)
@@ -47,21 +52,26 @@ export async function setLanguagesOrder(orderedIds: string[]): Promise<void> {
   }
 }
 
-export async function deleteLanguage(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteLanguage(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('languages').delete().eq('id', id)
   if (error) throw error
 }
 
-export async function setLanguageShowOnHome(id: string, showOnHome: boolean): Promise<void> {
-  const supabase = await createClient()
+export async function setLanguageShowOnHome(id: string, showOnHome: boolean, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('languages').update({ show_on_home: showOnHome }).eq('id', id)
   if (error) throw error
 }
 
-export async function updateLanguage(id: string, name: string, customIconUrl?: string): Promise<Language> {
+export async function updateLanguage(
+  id: string,
+  name: string,
+  customIconUrl?: string,
+  client?: SupabaseClient
+): Promise<Language> {
   const icon = customIconUrl ? { slug: customIconUrl, variant: null, source: 'custom' as const } : resolveIcon(name)
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('languages')
     .update({
@@ -77,8 +87,8 @@ export async function updateLanguage(id: string, name: string, customIconUrl?: s
   return data as Language
 }
 
-export async function getAllProjects(): Promise<Project[]> {
-  const supabase = await createClient()
+export async function getAllProjects(client?: SupabaseClient): Promise<Project[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('projects')
     .select(PROJECT_SELECT)
@@ -91,9 +101,10 @@ export async function upsertProject(
   input: Partial<Omit<Project, 'languages' | 'authors' | 'company'>> & {
     id?: string
     company_id?: string | null
-  }
+  },
+  client?: SupabaseClient
 ): Promise<Omit<Project, 'languages' | 'authors' | 'company'>> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('projects')
     .upsert(input)
@@ -103,8 +114,8 @@ export async function upsertProject(
   return data as Omit<Project, 'languages' | 'authors' | 'company'>
 }
 
-export async function setProjectLanguages(projectId: string, languageIds: string[]): Promise<void> {
-  const supabase = await createClient()
+export async function setProjectLanguages(projectId: string, languageIds: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const del = await supabase.from('project_languages').delete().eq('project_id', projectId)
   if (del.error) throw del.error
   if (languageIds.length === 0) return
@@ -114,8 +125,8 @@ export async function setProjectLanguages(projectId: string, languageIds: string
   if (error) throw error
 }
 
-export async function setProjectAuthors(projectId: string, authorIds: string[]): Promise<void> {
-  const supabase = await createClient()
+export async function setProjectAuthors(projectId: string, authorIds: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const del = await supabase.from('project_authors').delete().eq('project_id', projectId)
   if (del.error) throw del.error
   if (authorIds.length === 0) return
@@ -125,8 +136,8 @@ export async function setProjectAuthors(projectId: string, authorIds: string[]):
   if (error) throw error
 }
 
-export async function addAuthor(name: string, url: string | null): Promise<Author> {
-  const supabase = await createClient()
+export async function addAuthor(name: string, url: string | null, client?: SupabaseClient): Promise<Author> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('authors')
     .insert({ name: name.trim(), url: url?.trim() || null })
@@ -136,8 +147,8 @@ export async function addAuthor(name: string, url: string | null): Promise<Autho
   return data as Author
 }
 
-export async function updateAuthor(id: string, name: string, url: string | null): Promise<Author> {
-  const supabase = await createClient()
+export async function updateAuthor(id: string, name: string, url: string | null, client?: SupabaseClient): Promise<Author> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('authors')
     .update({ name: name.trim(), url: url?.trim() || null })
@@ -148,8 +159,8 @@ export async function updateAuthor(id: string, name: string, url: string | null)
   return data as Author
 }
 
-export async function deleteAuthor(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteAuthor(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('authors').delete().eq('id', id)
   if (error) throw error
 }
@@ -157,9 +168,10 @@ export async function deleteAuthor(id: string): Promise<void> {
 export async function addCompany(
   name: string | null,
   nameEn: string | null,
-  url: string | null
+  url: string | null,
+  client?: SupabaseClient
 ): Promise<Company> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('companies')
     .insert({ name: name?.trim() || null, name_en: nameEn?.trim() || null, url: url?.trim() || null })
@@ -173,9 +185,10 @@ export async function updateCompany(
   id: string,
   name: string | null,
   nameEn: string | null,
-  url: string | null
+  url: string | null,
+  client?: SupabaseClient
 ): Promise<Company> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('companies')
     .update({ name: name?.trim() || null, name_en: nameEn?.trim() || null, url: url?.trim() || null })
@@ -186,41 +199,42 @@ export async function updateCompany(
   return data as Company
 }
 
-export async function deleteCompany(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteCompany(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('companies').delete().eq('id', id)
   if (error) throw error
 }
 
-export async function deleteProject(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteProject(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('projects').delete().eq('id', id)
   if (error) throw error
 }
 
-export async function setProjectVisibility(id: string, visible: boolean): Promise<void> {
-  const supabase = await createClient()
+export async function setProjectVisibility(id: string, visible: boolean, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('projects').update({ visible }).eq('id', id)
   if (error) throw error
 }
 
-export async function upsertSiteContent(key: string, value: string): Promise<void> {
-  const supabase = await createClient()
+export async function upsertSiteContent(key: string, value: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('site_content').upsert({ key, value })
   if (error) throw error
 }
 
-export async function deleteSiteContentKey(key: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteSiteContentKey(key: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('site_content').delete().eq('key', key)
   if (error) throw error
 }
 
 export async function upsertResume(
   content_md: string | null,
-  content_md_en: string | null
+  content_md_en: string | null,
+  client?: SupabaseClient
 ): Promise<void> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { error } = await supabase
     .from('resume')
     .update({ content_md, content_md_en, updated_at: new Date().toISOString() })
@@ -231,9 +245,10 @@ export async function upsertResume(
 export async function addResumeLink(
   label: string | null,
   label_en: string | null,
-  url: string
+  url: string,
+  client?: SupabaseClient
 ): Promise<ResumeLink> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { count } = await supabase
     .from('resume_links')
@@ -252,9 +267,10 @@ export async function updateResumeLink(
   id: string,
   label: string | null,
   label_en: string | null,
-  url: string
+  url: string,
+  client?: SupabaseClient
 ): Promise<ResumeLink> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('resume_links')
     .update({ label: label?.trim() ?? null, label_en, url: url.trim() })
@@ -265,14 +281,14 @@ export async function updateResumeLink(
   return data as ResumeLink
 }
 
-export async function deleteResumeLink(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteResumeLink(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('resume_links').delete().eq('id', id)
   if (error) throw error
 }
 
-export async function setResumeLinksOrder(orderedIds: string[]): Promise<void> {
-  const supabase = await createClient()
+export async function setResumeLinksOrder(orderedIds: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const results = await Promise.all(
     orderedIds.map((id, position) =>
       supabase.from('resume_links').update({ position }).eq('id', id)
@@ -286,9 +302,10 @@ export async function setResumeLinksOrder(orderedIds: string[]): Promise<void> {
 export async function addContactLink(
   label: string | null,
   label_en: string | null,
-  url: string
+  url: string,
+  client?: SupabaseClient
 ): Promise<ContactLink> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { count } = await supabase
     .from('contact_links')
@@ -307,9 +324,10 @@ export async function updateContactLink(
   id: string,
   label: string | null,
   label_en: string | null,
-  url: string
+  url: string,
+  client?: SupabaseClient
 ): Promise<ContactLink> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('contact_links')
     .update({ label: label?.trim() ?? null, label_en, url: url.trim() })
@@ -320,14 +338,14 @@ export async function updateContactLink(
   return data as ContactLink
 }
 
-export async function deleteContactLink(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteContactLink(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('contact_links').delete().eq('id', id)
   if (error) throw error
 }
 
-export async function setContactLinksOrder(orderedIds: string[]): Promise<void> {
-  const supabase = await createClient()
+export async function setContactLinksOrder(orderedIds: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const results = await Promise.all(
     orderedIds.map((id, position) =>
       supabase.from('contact_links').update({ position }).eq('id', id)
@@ -338,8 +356,8 @@ export async function setContactLinksOrder(orderedIds: string[]): Promise<void> 
   }
 }
 
-export async function getAllArticles(): Promise<Article[]> {
-  const supabase = await createClient()
+export async function getAllArticles(client?: SupabaseClient): Promise<Article[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('articles')
     .select('*')
@@ -349,28 +367,29 @@ export async function getAllArticles(): Promise<Article[]> {
 }
 
 export async function upsertArticle(
-  input: Partial<Article> & { id?: string }
+  input: Partial<Article> & { id?: string },
+  client?: SupabaseClient
 ): Promise<Article> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase.from('articles').upsert(input).select().single()
   if (error) throw error
   return data as Article
 }
 
-export async function deleteArticle(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteArticle(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('articles').delete().eq('id', id)
   if (error) throw error
 }
 
-export async function setArticleVisibility(id: string, visible: boolean): Promise<void> {
-  const supabase = await createClient()
+export async function setArticleVisibility(id: string, visible: boolean, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('articles').update({ visible }).eq('id', id)
   if (error) throw error
 }
 
-export async function listMessages() {
-  const supabase = await createClient()
+export async function listMessages(client?: SupabaseClient) {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('messages')
     .select('*')
@@ -379,14 +398,14 @@ export async function listMessages() {
   return data
 }
 
-export async function markMessageRead(id: string, read: boolean): Promise<void> {
-  const supabase = await createClient()
+export async function markMessageRead(id: string, read: boolean, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('messages').update({ read }).eq('id', id)
   if (error) throw error
 }
 
-export async function deleteMessage(id: string): Promise<void> {
-  const supabase = await createClient()
+export async function deleteMessage(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('messages').delete().eq('id', id)
   if (error) throw error
 }

@@ -25,6 +25,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/admin/**': ONNXRUNTIME_NODE_FILES,
     '/api/search/**': ONNXRUNTIME_NODE_FILES,
+    // escritas via MCP reindexam o mesmo jeito que o admin (embedding incluso)
+    '/api/mcp/**': ONNXRUNTIME_NODE_FILES,
   },
 };
 

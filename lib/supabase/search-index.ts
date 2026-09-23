@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { embedTextSafe } from '@/lib/search/embed'
 import type { Project, Article, Language } from '@/lib/supabase/queries'
@@ -15,9 +16,9 @@ type SearchIndexInput = {
   url: string
 }
 
-export async function reindexSearchEntry(input: SearchIndexInput): Promise<void> {
+export async function reindexSearchEntry(input: SearchIndexInput, client?: SupabaseClient): Promise<void> {
   const embedding = await embedTextSafe(input.searchText)
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { error } = await supabase.from('search_index').upsert(
     {
       source_table: input.sourceTable,
@@ -34,8 +35,8 @@ export async function reindexSearchEntry(input: SearchIndexInput): Promise<void>
   if (error) throw error
 }
 
-export async function removeSearchEntry(sourceTable: string, sourceId: string): Promise<void> {
-  const supabase = await createClient()
+export async function removeSearchEntry(sourceTable: string, sourceId: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
   const { error } = await supabase
     .from('search_index')
     .delete()
@@ -44,7 +45,7 @@ export async function removeSearchEntry(sourceTable: string, sourceId: string): 
   if (error) throw error
 }
 
-export async function reindexProject(project: Project): Promise<void> {
+export async function reindexProject(project: Project, client?: SupabaseClient): Promise<void> {
   // simplificação: título/trecho exibidos sempre em português, mesmo buscando em /en —
   // o texto indexado inclui as duas variantes, então a busca funciona nos dois idiomas
   // mesmo que o rótulo mostrado não traduza. Evoluir se um dia fizer falta.
@@ -63,17 +64,20 @@ export async function reindexProject(project: Project): Promise<void> {
   )
   const url = project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.id}`
 
-  await reindexSearchEntry({
-    sourceTable: 'projects',
-    sourceId: project.id,
-    title,
-    excerpt,
-    searchText,
-    url,
-  })
+  await reindexSearchEntry(
+    {
+      sourceTable: 'projects',
+      sourceId: project.id,
+      title,
+      excerpt,
+      searchText,
+      url,
+    },
+    client
+  )
 }
 
-export async function reindexArticle(article: Article): Promise<void> {
+export async function reindexArticle(article: Article, client?: SupabaseClient): Promise<void> {
   const title = article.title ?? article.title_en ?? 'Artigo'
   const excerpt = article.summary ?? article.summary_en ?? ''
   const searchText = buildSearchText(
@@ -85,53 +89,69 @@ export async function reindexArticle(article: Article): Promise<void> {
     article.content_md_en
   )
 
-  await reindexSearchEntry({
-    sourceTable: 'articles',
-    sourceId: article.id,
-    title,
-    excerpt,
-    searchText,
-    url: `/artigos/${article.id}`,
-  })
+  await reindexSearchEntry(
+    {
+      sourceTable: 'articles',
+      sourceId: article.id,
+      title,
+      excerpt,
+      searchText,
+      url: `/artigos/${article.id}`,
+    },
+    client
+  )
 }
 
-export async function reindexLanguage(language: Language): Promise<void> {
-  await reindexSearchEntry({
-    sourceTable: 'languages',
-    sourceId: language.id,
-    title: language.name,
-    excerpt: '',
-    searchText: language.name,
-    url: `/projetos?tech=${language.id}`,
-  })
+export async function reindexLanguage(language: Language, client?: SupabaseClient): Promise<void> {
+  await reindexSearchEntry(
+    {
+      sourceTable: 'languages',
+      sourceId: language.id,
+      title: language.name,
+      excerpt: '',
+      searchText: language.name,
+      url: `/projetos?tech=${language.id}`,
+    },
+    client
+  )
 }
 
-export async function reindexSobreTexto(pt: string | null, en: string | null): Promise<void> {
+export async function reindexSobreTexto(pt: string | null, en: string | null, client?: SupabaseClient): Promise<void> {
   if (!pt && !en) {
-    await removeSearchEntry('site_content', 'sobre_texto')
+    await removeSearchEntry('site_content', 'sobre_texto', client)
     return
   }
-  await reindexSearchEntry({
-    sourceTable: 'site_content',
-    sourceId: 'sobre_texto',
-    title: 'Sobre mim',
-    excerpt: (pt ?? en ?? '').slice(0, 160),
-    searchText: buildSearchText(pt, en),
-    url: '/sobre',
-  })
+  await reindexSearchEntry(
+    {
+      sourceTable: 'site_content',
+      sourceId: 'sobre_texto',
+      title: 'Sobre mim',
+      excerpt: (pt ?? en ?? '').slice(0, 160),
+      searchText: buildSearchText(pt, en),
+      url: '/sobre',
+    },
+    client
+  )
 }
 
-export async function reindexResume(contentMd: string | null, contentMdEn: string | null): Promise<void> {
+export async function reindexResume(
+  contentMd: string | null,
+  contentMdEn: string | null,
+  client?: SupabaseClient
+): Promise<void> {
   if (!contentMd && !contentMdEn) {
-    await removeSearchEntry('resume', 'main')
+    await removeSearchEntry('resume', 'main', client)
     return
   }
-  await reindexSearchEntry({
-    sourceTable: 'resume',
-    sourceId: 'main',
-    title: 'Currículo',
-    excerpt: (contentMd ?? contentMdEn ?? '').slice(0, 160),
-    searchText: buildSearchText(contentMd, contentMdEn),
-    url: '/curriculo',
-  })
+  await reindexSearchEntry(
+    {
+      sourceTable: 'resume',
+      sourceId: 'main',
+      title: 'Currículo',
+      excerpt: (contentMd ?? contentMdEn ?? '').slice(0, 160),
+      searchText: buildSearchText(contentMd, contentMdEn),
+      url: '/curriculo',
+    },
+    client
+  )
 }
