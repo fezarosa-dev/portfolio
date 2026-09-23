@@ -293,6 +293,68 @@
     left: -3px;
     top: -3px;
   }
+  .theme-switch-cloud {
+    position: absolute;
+    border-radius: 50%;
+    animation: theme-switch-cloud-move 6s infinite;
+  }
+  .theme-switch-cloud-dark {
+    background-color: #cfd8dc;
+    animation-delay: 1s;
+  }
+  .theme-switch-cloud-light {
+    background-color: #eceff1;
+  }
+  .theme-switch-cloud-1 {
+    width: 10px;
+    height: 4px;
+    left: 27px;
+    top: 3px;
+  }
+  .theme-switch-cloud-2 {
+    width: 6px;
+    height: 3px;
+    left: 34px;
+    top: 2px;
+  }
+  .theme-switch-cloud-3 {
+    width: 8px;
+    height: 3px;
+    left: 22px;
+    top: 6px;
+  }
+  .theme-switch-cloud-4 {
+    width: 10px;
+    height: 4px;
+    left: 28px;
+    top: 4px;
+  }
+  .theme-switch-cloud-5 {
+    width: 6px;
+    height: 3px;
+    left: 35px;
+    top: 3px;
+  }
+  .theme-switch-cloud-6 {
+    width: 8px;
+    height: 3px;
+    left: 23px;
+    top: 7px;
+  }
+  @keyframes theme-switch-cloud-move {
+    0% {
+      transform: translateX(0);
+    }
+    40% {
+      transform: translateX(1px);
+    }
+    80% {
+      transform: translateX(-1px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
   .theme-switch-stars {
     position: absolute;
     inset: 0;
@@ -374,7 +436,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background-color: #d7062a;
+    background-color: #50ac5d;
     transform: translateY(-50%);
     transition:
       left 0.2s ease-in-out,
@@ -382,7 +444,7 @@
   }
   .motion-switch input:checked + .motion-switch-slider .motion-switch-thumb {
     left: 23px;
-    background-color: #50ac5d;
+    background-color: #d7062a;
   }
   .motion-switch-icon {
     position: absolute;
@@ -400,20 +462,21 @@
     stroke-miterlimit: 10;
   }
   .motion-switch-off {
-    opacity: 1;
+    opacity: 0;
   }
   .motion-switch-on {
-    opacity: 0;
+    opacity: 1;
   }
   .motion-switch input:checked + .motion-switch-slider .motion-switch-off {
-    opacity: 0;
+    opacity: 1;
   }
   .motion-switch input:checked + .motion-switch-slider .motion-switch-on {
-    opacity: 1;
+    opacity: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .theme-switch-star {
+    .theme-switch-star,
+    .theme-switch-cloud {
       animation: none;
     }
   }
