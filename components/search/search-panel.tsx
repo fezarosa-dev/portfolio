@@ -123,6 +123,17 @@ export function SearchPanel({
         className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-sm font-mono"
       />
       <div className="mt-3">
+        {/* altura reservada mesmo sem carregar, pra não empurrar o resto ao aparecer/sumir */}
+        <div className="flex h-4 items-center gap-1.5" aria-hidden={!loading}>
+          {loading && (
+            <>
+              <span className="h-2 w-2 animate-bounce-dot rounded-full bg-signal" />
+              <span className="h-2 w-2 animate-bounce-dot rounded-full bg-signal/75 [animation-delay:0.16s]" />
+              <span className="h-2 w-2 animate-bounce-dot rounded-full bg-signal/55 [animation-delay:0.32s]" />
+              <span className="h-2 w-2 animate-bounce-dot rounded-full bg-signal/35 [animation-delay:0.48s]" />
+            </>
+          )}
+        </div>
         {showError && <p className="font-mono text-xs text-steel">{error}</p>}
         {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
         {showTechStats && (
@@ -160,8 +171,10 @@ export function SearchPanel({
                   onClick={onNavigate}
                   className="block rounded-md px-3 py-2 transition-colors hover:bg-card"
                 >
-                  <p className="font-mono text-sm text-foreground">{result.title}</p>
-                  {result.excerpt && <p className="truncate text-xs text-steel">{result.excerpt}</p>}
+                  <p className="line-clamp-2 font-mono text-sm text-foreground">{result.title}</p>
+                  {result.excerpt && (
+                    <p className="line-clamp-2 text-xs text-steel">{result.excerpt}</p>
+                  )}
                 </Link>
               </li>
             )
