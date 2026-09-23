@@ -17,6 +17,7 @@ const TABS = [
   { href: '/admin/personalizacao', label: 'Personalização', icon: '✎' },
   { href: '/admin/curriculo', label: 'Currículo', icon: '▤' },
   { href: '/admin/imagens', label: 'Imagens', icon: '▨' },
+  { href: '/admin/mcp', label: 'Conexões MCP', icon: '⎔' },
   { href: '/admin/preview', label: 'Preview', icon: '◉' },
 ]
 

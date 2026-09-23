@@ -16,6 +16,7 @@ Site pessoal e portfólio, construído com Next.js (App Router) e Supabase. Incl
 - Exportação dos dados do portfólio em JSON (`/api`).
 - Grid de projetos em masonry, com busca por tecnologia, empresa e coautor.
 - Busca híbrida (full-text + semântica) sobre projetos, artigos e páginas — veja [Busca](#busca) abaixo.
+- Servidor MCP (`/api/mcp`), configurável pelo painel admin, pra uma IA ler e editar o conteúdo do site sob permissão — veja [Conexões MCP](#conexões-mcp) abaixo.
 
 ## Stack
 
@@ -44,7 +45,10 @@ Crie um `.env.local` na raiz do projeto:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 GOOGLE_DRIVE_API_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
+
+A `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API, no Supabase) é usada só pelo servidor MCP (`/api/mcp`) pra autenticar conexões pelo próprio token, sem depender da sessão de login do admin — bypassa RLS, nunca é exposta ao client e não é necessária pra rodar o resto do site.
 
 ### Supabase
 
@@ -92,6 +96,15 @@ Outros detalhes:
 - **Reindexação**: ao salvar um projeto, artigo, tecnologia, "sobre" ou currículo pelo admin, a linha correspondente em `search_index` é recalculada na hora — texto e embedding juntos (`lib/supabase/search-index.ts`). O botão "Reindexar tudo" (Personalização) refaz esse processo pra todo o conteúdo, útil após uma mudança no modelo ou pra recuperar embeddings perdidos. O modelo é aquecido (`/api/search/warmup`) para reduzir a latência da primeira busca depois de um cold start.
 - **Bundling na Vercel**: `@huggingface/transformers` e sua dependência `onnxruntime-node` usam binários nativos (`.node`) carregados por caminho calculado em runtime, que o file-tracing automático da Vercel não detecta sozinho. `next.config.ts` declara `outputFileTracingIncludes` explicitamente para as rotas `/admin/**` e `/api/search/**`, incluindo só os binários linux/x64 necessários (excluindo os providers CUDA/TensorRT, que sozinhos passam de 200MB).
 
+## Conexões MCP
+
+O painel admin (`/admin/mcp`) permite criar conexões [MCP](https://modelcontextprotocol.io) — cada uma gera um token de acesso pra um cliente de IA (Claude Desktop, Claude Code etc.) ler e editar o conteúdo do site em nome do dono, apontando pra `/api/mcp` com `Authorization: Bearer <token>`.
+
+- **Permissões por recurso**: cada conexão tem leitura/escrita configuráveis separadamente para Projetos (inclui empresas e vínculos), Artigos, Tecnologias, Autores, Currículo e Conteúdo do site (textos, SEO, personalização, links de contato). Só as tools correspondentes às permissões concedidas ficam visíveis pro cliente MCP daquela conexão (`lib/mcp/tools.ts`). Mensagens recebidas pelo formulário de contato não são expostas por aqui — são dados privados de terceiros, fora do escopo de "conteúdo do site".
+- **Autenticação**: token opaco gerado na criação (`mcp_...`), mostrado uma única vez; só o hash SHA-256 fica salvo (`mcp_connections.token_hash`). Uma conexão pode ser renomeada, revogada/reativada ou removida a qualquer momento pelo painel.
+- **Sem sessão de admin**: como o cliente MCP não faz login pelo Supabase Auth, o endpoint usa a service role (`SUPABASE_SERVICE_ROLE_KEY`, bypassa RLS) — a autorização real acontece na aplicação, checando a permissão da conexão antes de cada leitura/escrita, não no banco.
+- **Implementação**: `@modelcontextprotocol/sdk`, transporte Streamable HTTP em modo stateless (um `McpServer` novo por request, sem estado entre invocações — compatível com o modelo serverless da Vercel). Escritas via MCP reindexam a busca do mesmo jeito que uma edição pelo admin.
+
 ## Fluxo de trabalho
 
 Desenvolvimento acontece na branch `dev`; mudanças vão pra `main` (produção, com deploy automático na Vercel) via pull request, depois que o CI passa.
@@ -104,7 +117,7 @@ Toda mensagem de commit segue `tipo: descrição` (ex: `feat: adiciona busca por
 
 ## Deploy
 
-O projeto está preparado para deploy na [Vercel](https://vercel.com/): conecte o repositório, configure as três variáveis de ambiente acima e o deploy roda automaticamente a cada push na branch principal.
+O projeto está preparado para deploy na [Vercel](https://vercel.com/): conecte o repositório, configure as variáveis de ambiente acima e o deploy roda automaticamente a cada push na branch principal.
 
 ## Segurança
 
