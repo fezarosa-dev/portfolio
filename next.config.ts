@@ -14,6 +14,9 @@ const ONNXRUNTIME_NODE_FILES = [
   './node_modules/onnxruntime-node/bin/napi-v6/linux/x64/onnxruntime_binding.node',
   './node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime.so.1',
   './node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so',
+  // onnxruntime-node exige isso em runtime via require CJS -- o tracing
+  // automático só pegava o build ESM sozinho, faltando o cjs/index.js
+  './node_modules/onnxruntime-common/**',
 ]
 
 const nextConfig: NextConfig = {
