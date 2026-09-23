@@ -5,6 +5,7 @@ import { getDictionary } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavSettings } from '@/components/nav-settings'
+import { SearchTrigger } from '@/components/search/search-trigger'
 import { CollapsibleOnScroll } from '@/components/collapsible-on-scroll'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -48,7 +49,8 @@ export async function Nav() {
             aria-hidden
           />
           <span className="truncate">{statusText}</span>
-          <span className="ml-auto flex items-center">
+          <span className="ml-auto flex items-center gap-2">
+            <SearchTrigger label={dict.busca.title} />
             <NavSettings initialDark={isDark} locale={locale} label={dict.nav.settings} />
           </span>
         </div>
@@ -74,6 +76,7 @@ export async function Nav() {
           openLabel={dict.nav.menuOpen}
           closeLabel={dict.nav.menuClose}
           settingsLabel={dict.nav.settings}
+          searchLabel={dict.busca.title}
           initialDark={isDark}
           locale={locale}
         />

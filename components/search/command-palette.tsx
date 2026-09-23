@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { SearchPanel } from '@/components/search/search-panel'
+import { OPEN_SEARCH_EVENT } from '@/components/search/search-trigger'
 import type { Locale } from '@/lib/i18n'
 
 export function CommandPalette({
@@ -31,6 +32,14 @@ export function CommandPalette({
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    function handleOpenSearch() {
+      setOpen(true)
+    }
+    window.addEventListener(OPEN_SEARCH_EVENT, handleOpenSearch)
+    return () => window.removeEventListener(OPEN_SEARCH_EVENT, handleOpenSearch)
   }, [])
 
   return (

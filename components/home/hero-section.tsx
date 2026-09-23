@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { ChevronDownIcon } from 'lucide-react'
 import { iconUrl } from '@/lib/icons'
 import { Typewriter } from '@/components/typewriter'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
@@ -25,7 +26,7 @@ export function HeroSection({
   const noAnim = reduceMotion ? { duration: 0 } : undefined
 
   return (
-    <section className="flex min-h-[80vh] flex-col items-center justify-center px-6 text-center">
+    <section className="relative flex min-h-[80vh] flex-col items-center justify-center px-6 text-center">
       <motion.p
         initial={reduceMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -78,6 +79,20 @@ export function HeroSection({
           ))}
         </motion.ul>
       )}
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={noAnim ?? { duration: 0.4, delay: 1.3 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        aria-hidden
+      >
+        <motion.div
+          animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
+          transition={reduceMotion ? undefined : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <ChevronDownIcon className="h-6 w-6 text-steel" />
+        </motion.div>
+      </motion.div>
     </section>
   )
 }
