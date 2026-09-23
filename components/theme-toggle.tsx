@@ -8,15 +8,13 @@ export function ThemeToggle({ initialDark, locale }: { initialDark: boolean; loc
 
   useEffect(() => {
     // syncs with the beforeInteractive script that applies prefers-color-scheme
-    // when there's no theme cookie yet, so the caption/checkbox match the real class
+    // when there's no theme cookie yet, so the checkbox matches the real class
     const actual = document.documentElement.classList.contains('dark')
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (actual !== dark) setDark(actual)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const label = locale === 'en' ? 'Toggle dark mode' : 'Alternar modo escuro'
-  const captionOn = locale === 'en' ? 'dark' : 'escuro'
-  const captionOff = locale === 'en' ? 'light' : 'claro'
 
   function toggle() {
     const next = !dark
@@ -26,26 +24,32 @@ export function ThemeToggle({ initialDark, locale }: { initialDark: boolean; loc
   }
 
   return (
-    <label
-      className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 font-mono text-xs"
-      title={label}
-      aria-label={label}
-    >
-      <input type="checkbox" checked={dark} onChange={toggle} className="peer sr-only" />
-      <span
-        className={`
-          relative h-4 w-8 rounded border border-black bg-background
-          shadow-[2px_2px_0_#000] transition-colors
-          dark:not-peer-checked:border-white dark:not-peer-checked:shadow-[2px_2px_0_#fff]
-          peer-checked:border-signal
-          before:absolute before:top-0.5 before:left-0.5 before:h-2.5 before:w-2.5
-          before:rounded-sm before:border before:border-black before:bg-background
-          before:shadow-[1px_1px_0_#000] before:transition-transform before:content-['']
-          dark:not-peer-checked:before:border-white dark:not-peer-checked:before:shadow-[1px_1px_0_#fff]
-          peer-checked:before:translate-x-4 peer-checked:before:border-signal peer-checked:before:bg-signal
-        `}
-      />
-      <span className="text-steel">{dark ? captionOn : captionOff}</span>
+    <label className="theme-switch" title={label} aria-label={label}>
+      <input type="checkbox" checked={dark} onChange={toggle} />
+      <span className="theme-switch-slider">
+        <span className="theme-switch-sun-moon">
+          <span className="theme-switch-moon-dot theme-switch-moon-dot-1" />
+          <span className="theme-switch-moon-dot theme-switch-moon-dot-2" />
+          <span className="theme-switch-moon-dot theme-switch-moon-dot-3" />
+          <span className="theme-switch-light-ray theme-switch-light-ray-1" />
+          <span className="theme-switch-light-ray theme-switch-light-ray-2" />
+          <span className="theme-switch-light-ray theme-switch-light-ray-3" />
+        </span>
+        <span className="theme-switch-stars" aria-hidden>
+          <svg className="theme-switch-star theme-switch-star-1" viewBox="0 0 20 20">
+            <path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z" />
+          </svg>
+          <svg className="theme-switch-star theme-switch-star-2" viewBox="0 0 20 20">
+            <path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z" />
+          </svg>
+          <svg className="theme-switch-star theme-switch-star-3" viewBox="0 0 20 20">
+            <path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z" />
+          </svg>
+          <svg className="theme-switch-star theme-switch-star-4" viewBox="0 0 20 20">
+            <path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z" />
+          </svg>
+        </span>
+      </span>
     </label>
   )
 }
