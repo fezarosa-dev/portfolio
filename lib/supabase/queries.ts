@@ -163,6 +163,18 @@ export async function getSiteContent(client?: SupabaseClient): Promise<Record<st
   return Object.fromEntries(data.map((row) => [row.key, row.value]))
 }
 
+export async function getLastSearchReindexAt(client?: SupabaseClient): Promise<string | null> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('search_index')
+    .select('updated_at')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return data?.updated_at ?? null
+}
+
 export async function getResume(client?: SupabaseClient): Promise<{
   content_md: string | null
   content_md_en: string | null

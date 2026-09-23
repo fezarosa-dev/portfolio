@@ -4,7 +4,7 @@ import { getDictionary, getLocale } from '@/lib/i18n'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
 import { getVisibleProjects, getVisibleArticles, getLanguages } from '@/lib/supabase/queries-cached'
-import { getLanguages as getLanguagesLive } from '@/lib/supabase/queries'
+import { getSiteContent, getLastSearchReindexAt } from '@/lib/supabase/queries'
 import { createPublicClient } from '@/lib/supabase/public-client'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -48,25 +48,39 @@ function StatCard({
   )
 }
 
-async function measureSupabaseLatencyMs(): Promise<number> {
-  const start = Date.now()
-  await getLanguagesLive(createPublicClient())
-  return Date.now() - start
+function formatDate(iso: string | null, locale: string): string | null {
+  if (!iso) return null
+  return new Date(iso).toLocaleString(locale === 'en' ? 'en-US' : 'pt-BR')
+}
+
+// isolado numa função à parte pra não chamar Date.now() (impuro) direto no
+// corpo do server component, que o eslint (react-hooks/purity) rejeita.
+function timestamp(): number {
+  return Date.now()
 }
 
 export default async function StatusPage() {
-  const [{ dict }, projects, articles, languages, latencyMs] = await Promise.all([
+  const startedAt = timestamp()
+
+  const [{ dict, locale }, projects, articles, languages, content, lastReindexAt] = await Promise.all([
     getDictionary(),
     getVisibleProjects(),
     getVisibleArticles(),
     getLanguages(),
-    measureSupabaseLatencyMs(),
+    getSiteContent(createPublicClient()),
+    getLastSearchReindexAt(createPublicClient()),
   ])
+
+  // latência do próprio servidor (Vercel) atendendo essa requisição — inclui
+  // as consultas acima, não é um ping isolado a nenhum serviço específico.
+  const latencyMs = timestamp() - startedAt
 
   const sha = process.env.VERCEL_GIT_COMMIT_SHA
   const commitMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE?.split('\n')[0].slice(0, 80)
   const branch = process.env.VERCEL_GIT_COMMIT_REF
   const region = process.env.VERCEL_REGION
+  const lastRepublishAt = formatDate(content.last_republish_at ?? null, locale)
+  const lastReindexAtFormatted = formatDate(lastReindexAt, locale)
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-20">
@@ -94,6 +108,8 @@ export default async function StatusPage() {
           value={`Node ${process.version}`}
           hint={`Next ${nextVersion}`}
         />
+        <StatCard label={dict.status.cacheLabel} value={lastRepublishAt ?? dict.status.never} />
+        <StatCard label={dict.status.reindexLabel} value={lastReindexAtFormatted ?? dict.status.never} />
         <div className="rounded-lg border border-hairline bg-card p-6 sm:col-span-2">
           <p className="font-mono text-xs text-steel">{dict.status.contentLabel}</p>
           <div className="mt-2 flex flex-wrap gap-x-8 gap-y-3">
