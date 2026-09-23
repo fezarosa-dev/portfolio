@@ -39,7 +39,7 @@ export async function saveProject(formData: FormData) {
   })
   await setProjectLanguages(project.id, formData.getAll('language_ids').map(String))
   await setProjectAuthors(project.id, formData.getAll('author_ids').map(String))
-  await syncProjectSearchIndex(project.id)
+  if (formData.get('reindex') === 'true') await syncProjectSearchIndex(project.id)
   revalidatePath('/admin/projetos')
 }
 

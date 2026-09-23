@@ -16,7 +16,7 @@ export async function saveLanguage(formData: FormData) {
   const iconUrl = String(formData.get('iconUrl') ?? '').trim()
 
   const language = await addLanguage(name, iconUrl || undefined)
-  await reindexLanguage(language)
+  if (formData.get('reindex') === 'true') await reindexLanguage(language)
   revalidatePath('/admin/tecnologias')
 }
 
@@ -26,7 +26,7 @@ export async function editLanguage(id: string, formData: FormData) {
   const iconUrl = String(formData.get('iconUrl') ?? '').trim()
 
   const language = await updateLanguage(id, name, iconUrl || undefined)
-  await reindexLanguage(language)
+  if (formData.get('reindex') === 'true') await reindexLanguage(language)
   revalidatePath('/admin/tecnologias')
 }
 

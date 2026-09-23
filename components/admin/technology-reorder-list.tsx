@@ -83,6 +83,7 @@ function TechnologyRow({
         action={editAction.bind(null, lang.id)}
         successMessage="Tecnologia atualizada"
         className="flex flex-1 flex-col gap-1"
+        confirmReindex
       >
         <div className="flex gap-2">
           <Input name="name" defaultValue={lang.name} className="h-8" />

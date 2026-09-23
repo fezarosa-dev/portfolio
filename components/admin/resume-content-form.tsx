@@ -22,6 +22,7 @@ export function ResumeContentForm({
       action={action}
       successMessage="Currículo salvo"
       className="mt-4 flex max-w-2xl flex-col gap-4"
+      confirmReindex
     >
       <LanguageToggle language={language} onChange={setLanguage} />
       <BilingualField
