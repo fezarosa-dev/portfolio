@@ -27,11 +27,16 @@ export async function Nav() {
     locale
   )
   const statusColor = STATUS_COLORS[content.status_color] ?? STATUS_COLORS.green
-  const navLinks = (
-    content.artigos_ativo === 'false'
-      ? dict.nav.links.filter((link) => link.href !== '/artigos')
-      : dict.nav.links
-  ).map((link) => ({ ...link, href: `/${locale}${link.href === '/' ? '' : link.href}` }))
+  const hiddenLinks = new Set(
+    (content.nav_hidden_links ?? '')
+      .split(',')
+      .map((href) => href.trim())
+      .filter(Boolean)
+  )
+  const navLinks = dict.nav.links
+    .filter((link) => link.href === '/artigos' ? content.artigos_ativo !== 'false' : true)
+    .filter((link) => !hiddenLinks.has(link.href))
+    .map((link) => ({ ...link, href: `/${locale}${link.href === '/' ? '' : link.href}` }))
 
   return (
     <div className="sticky top-0 z-40 border-b border-hairline bg-background/80 backdrop-blur">
