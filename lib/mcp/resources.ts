@@ -5,6 +5,7 @@ export const MCP_RESOURCES = [
   'autores',
   'curriculo',
   'conteudo_site',
+  'mensagens',
 ] as const
 
 export type McpResource = (typeof MCP_RESOURCES)[number]
@@ -20,6 +21,7 @@ export const MCP_RESOURCE_LABELS: Record<McpResource, string> = {
   autores: 'Autores',
   curriculo: 'Currículo (e seus links)',
   conteudo_site: 'Conteúdo do site (textos, SEO, personalização, links de contato)',
+  mensagens: 'Mensagens recebidas pelo formulário de contato',
 }
 
 export function canRead(permissions: McpPermissions, resource: McpResource): boolean {

@@ -14,7 +14,7 @@ export default async function McpPage() {
           MCP
         </a>
         . Configure o cliente MCP com a URL <code className="font-mono text-xs">/api/mcp</code> deste site e o token
-        gerado abaixo. Mensagens recebidas pelo formulário de contato não ficam acessíveis por aqui.
+        gerado abaixo.
       </p>
       <McpConnectionsPanel
         connections={connections}

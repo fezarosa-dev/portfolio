@@ -29,6 +29,9 @@ import {
   addContactLink,
   updateContactLink,
   deleteContactLink,
+  listMessages,
+  markMessageRead,
+  deleteMessage,
 } from '@/lib/supabase/admin-queries'
 import { reindexProject, reindexArticle, reindexLanguage, reindexResume } from '@/lib/supabase/search-index'
 import { mapProjectRow, PROJECT_SELECT, type ProjectRow } from '@/lib/supabase/queries'
@@ -339,6 +342,36 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       { title: 'Excluir link de contato', inputSchema: { id: z.string().uuid() } },
       async ({ id }) => {
         await deleteContactLink(id, client)
+        return textResult({ deleted: id })
+      }
+    )
+  }
+
+  // --- mensagens recebidas pelo formulário de contato ---
+  if (canRead(permissions, 'mensagens')) {
+    server.registerTool(
+      'list_mensagens',
+      { title: 'Listar mensagens', description: 'Lista as mensagens recebidas pelo formulário de contato, mais recentes primeiro.' },
+      async () => textResult(await listMessages(client))
+    )
+  }
+  if (canWrite(permissions, 'mensagens')) {
+    server.registerTool(
+      'marcar_mensagem_lida',
+      {
+        title: 'Marcar mensagem como lida/não lida',
+        inputSchema: { id: z.string().uuid(), read: z.boolean() },
+      },
+      async ({ id, read }) => {
+        await markMessageRead(id, read, client)
+        return textResult({ id, read })
+      }
+    )
+    server.registerTool(
+      'delete_mensagem',
+      { title: 'Excluir mensagem', description: 'Remove uma mensagem permanentemente.', inputSchema: { id: z.string().uuid() } },
+      async ({ id }) => {
+        await deleteMessage(id, client)
         return textResult({ deleted: id })
       }
     )
