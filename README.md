@@ -1,7 +1,7 @@
 # Portfólio — Felipe Zanoni da Rosa
 
 [![CI](https://github.com/fezarosa-dev/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/fezarosa-dev/portfolio/actions/workflows/ci.yml)
-[![Licença MIT](https://img.shields.io/badge/licença-MIT-blue.svg)](./LICENSE)
+[![Licença MIT + Commons Clause](https://img.shields.io/badge/licença-MIT%20%2B%20Commons%20Clause-blue.svg)](./LICENSE)
 
 Site pessoal e portfólio, construído com Next.js (App Router) e Supabase. Inclui um painel administrativo em `/admin` para gerenciar projetos, artigos, currículo, mensagens de contato e os textos/imagens do site, sem precisar mexer em código.
 
@@ -15,13 +15,15 @@ Site pessoal e portfólio, construído com Next.js (App Router) e Supabase. Incl
 - Painel administrativo (`/admin`) com CRUD de projetos, empresas, tecnologias, artigos, currículo e conteúdo geral do site.
 - Exportação dos dados do portfólio em JSON (`/api`).
 - Grid de projetos em masonry, com busca por tecnologia, empresa e coautor.
+- Busca híbrida (full-text + semântica) sobre projetos, artigos e páginas — veja [Busca](#busca) abaixo.
 
 ## Stack
 
 - [Next.js](https://nextjs.org/) (App Router, TypeScript)
 - [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
 - [Framer Motion](https://www.framer.com/motion/) para animações
-- [Supabase](https://supabase.com/) (Postgres + Auth) como backend
+- [Supabase](https://supabase.com/) (Postgres + Auth + `pgvector`) como backend
+- [`@huggingface/transformers`](https://github.com/huggingface/transformers.js) rodando localmente no servidor, para os embeddings da busca semântica (sem custo de API externa)
 - [react-markdown](https://github.com/remarkjs/react-markdown) para o conteúdo em Markdown do site
 - Google Drive API (somente leitura) para hospedar as imagens do site
 
@@ -75,6 +77,21 @@ lib/          lógica pura (ícones, SEO, etc.) — coberta por testes em lib/*.
 supabase/     migrações do banco
 ```
 
+## Busca
+
+A busca (`/busca`, `⌘K`) combina dois motores independentes e funde os resultados:
+
+1. **Full-text** — Postgres nativo. Cada item indexável (projeto, artigo, página) vira uma linha em `search_index`, com uma coluna `tsvector` gerada (`to_tsvector('portuguese', search_text)`) e um índice GIN. A busca usa `websearch_to_tsquery` (aceita frases entre aspas, `-exclusão`, `OU`) via a RPC `search_index_fulltext`, ordenando por `ts_rank`.
+2. **Semântica** — cada linha também guarda um `embedding vector(384)` (extensão `pgvector`, índice HNSW com `vector_cosine_ops`). O texto do item e a query de busca são convertidos em vetores pelo modelo [`Xenova/paraphrase-multilingual-MiniLM-L12-v2`](https://huggingface.co/Xenova/paraphrase-multilingual-MiniLM-L12-v2) (multilíngue PT/EN, quantizado em `q8`), rodando **localmente no servidor** via `@huggingface/transformers` — sem chamada a API externa nem custo por busca. A RPC `match_search_index` ordena por distância de cosseno (`embedding <=> query_embedding`).
+
+Os dois resultados (rankings de IDs, não scores comparáveis entre si) são combinados por **Reciprocal Rank Fusion** (`lib/search/rank.ts`): cada item recebe `1 / (k + posição + 1)` em cada lista em que aparece (`k = 60`, a constante usual do RRF) e as pontuações são somadas. Isso favorece itens bem colocados em qualquer um dos dois motores, sem precisar normalizar full-text rank e distância vetorial pra uma escala comum. Se a busca semântica falhar ou estourar o timeout, a rota usa só o resultado full-text (degradação graciosa).
+
+Outros detalhes:
+
+- **Rate limit por IP**, configurável pelo painel admin (Personalização → Busca): nº máx. de buscas por janela de tempo, tamanho máximo da query, timeout da busca semântica e nº de resultados retornados. Os defaults ficam em `app/api/search/route.ts`; requisições são logadas em `search_requests` pra contagem.
+- **Reindexação**: ao salvar um projeto, artigo, tecnologia, "sobre" ou currículo pelo admin, a linha correspondente em `search_index` é recalculada na hora — texto e embedding juntos (`lib/supabase/search-index.ts`). O botão "Reindexar tudo" (Personalização) refaz esse processo pra todo o conteúdo, útil após uma mudança no modelo ou pra recuperar embeddings perdidos. O modelo é aquecido (`/api/search/warmup`) para reduzir a latência da primeira busca depois de um cold start.
+- **Bundling na Vercel**: `@huggingface/transformers` e sua dependência `onnxruntime-node` usam binários nativos (`.node`) carregados por caminho calculado em runtime, que o file-tracing automático da Vercel não detecta sozinho. `next.config.ts` declara `outputFileTracingIncludes` explicitamente para as rotas `/admin/**` e `/api/search/**`, incluindo só os binários linux/x64 necessários (excluindo os providers CUDA/TensorRT, que sozinhos passam de 200MB).
+
 ## Fluxo de trabalho
 
 Desenvolvimento acontece na branch `dev`; mudanças vão pra `main` (produção, com deploy automático na Vercel) via pull request, depois que o CI passa.
@@ -95,4 +112,4 @@ Encontrou uma vulnerabilidade? Veja [SECURITY.md](./SECURITY.md) antes de report
 
 ## Licença
 
-Distribuído sob a licença MIT — veja [LICENSE](./LICENSE).
+Distribuído sob MIT + Commons Clause — veja [LICENSE](./LICENSE). Uso, cópia, modificação e distribuição são livres, inclusive em produto fechado/privado; a única restrição é vender o software (ou um serviço cujo valor vem substancialmente dele) sem uma licença comercial separada.
