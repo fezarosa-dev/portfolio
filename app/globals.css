@@ -181,8 +181,20 @@
   .animate-blink {
     animation: blink 1s step-end infinite;
   }
+  @keyframes bounce-dot {
+    0% {
+      transform: translateY(-4px);
+    }
+    100% {
+      transform: translateY(4px);
+    }
+  }
+  .animate-bounce-dot {
+    animation: bounce-dot 0.5s ease-in infinite alternate;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .animate-blink {
+    .animate-blink,
+    .animate-bounce-dot {
       animation: none;
     }
   }
