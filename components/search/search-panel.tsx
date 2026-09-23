@@ -104,6 +104,13 @@ export function SearchPanel({
   }
 
   const trimmedQuery = query.trim()
+  // mantém a lista de tecnologias visível enquanto a busca carrega, em vez de
+  // sumir na hora que a pessoa digita a 1ª letra — sem isso o conteúdo colapsa
+  // pra quase nada e volta a crescer a cada resultado, um layout shift feio
+  const showTechStats = techStats.length > 0 && (!trimmedQuery || loading)
+  const showError = trimmedQuery && !loading && Boolean(error)
+  const showNoResults = trimmedQuery && !loading && !error && results.length === 0
+  const showResults = trimmedQuery && !loading && !error && results.length > 0
 
   return (
     <div>
@@ -116,12 +123,9 @@ export function SearchPanel({
         className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-sm font-mono"
       />
       <div className="mt-3">
-        {trimmedQuery && loading && <p className="font-mono text-xs text-steel">…</p>}
-        {trimmedQuery && !loading && error && <p className="font-mono text-xs text-steel">{error}</p>}
-        {trimmedQuery && !loading && !error && results.length === 0 && (
-          <p className="font-mono text-xs text-steel">{noResultsLabel}</p>
-        )}
-        {!trimmedQuery && techStats.length > 0 && (
+        {showError && <p className="font-mono text-xs text-steel">{error}</p>}
+        {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
+        {showTechStats && (
           <ul className="flex flex-col gap-2">
             {techStats.map((stat) => (
               <li key={stat.id} className="flex items-center gap-2">
@@ -145,7 +149,7 @@ export function SearchPanel({
           </ul>
         )}
         <ul className="flex flex-col gap-1">
-          {trimmedQuery && results.map((result) => {
+          {showResults && results.map((result) => {
             const isExternal = result.url.startsWith('http')
             return (
               <li key={result.id}>
