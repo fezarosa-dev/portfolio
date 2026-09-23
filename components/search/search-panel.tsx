@@ -124,7 +124,7 @@ export function SearchPanel({
       />
       <div className="mt-3">
         {/* altura reservada mesmo sem carregar, pra não empurrar o resto ao aparecer/sumir */}
-        <div className="flex h-4 items-center gap-1.5" aria-hidden={!loading}>
+        <div className="flex h-8 items-center justify-center gap-1.5" aria-hidden={!loading}>
           {loading && (
             <>
               <span className="h-2 w-2 animate-bounce-dot rounded-full bg-signal" />
