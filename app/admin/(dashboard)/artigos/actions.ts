@@ -1,13 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import {
-  upsertArticle,
-  deleteArticle,
-  setArticleVisibility,
-  upsertSiteContent,
-  getAllArticles,
-} from '@/lib/supabase/admin-queries'
+import { upsertArticle, deleteArticle, setArticleVisibility } from '@/lib/supabase/admin-queries'
 import { getArticleById } from '@/lib/supabase/queries'
 import { reindexArticle, removeSearchEntry } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
@@ -46,17 +40,6 @@ export async function toggleArticleVisibility(id: string, visible: boolean) {
     if (article) await reindexArticle(article)
   } else {
     await removeSearchEntry('articles', id)
-  }
-  revalidatePath('/admin/artigos')
-}
-
-export async function toggleArtigosAtivo(ativo: boolean) {
-  await upsertSiteContent('artigos_ativo', ativo ? 'true' : 'false')
-  const articles = await getAllArticles()
-  if (ativo) {
-    await Promise.all(articles.filter((article) => article.visible).map((article) => reindexArticle(article)))
-  } else {
-    await Promise.all(articles.map((article) => removeSearchEntry('articles', article.id)))
   }
   revalidatePath('/admin/artigos')
 }

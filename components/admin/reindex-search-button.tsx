@@ -26,7 +26,14 @@ export function ReindexSearchButton({
   }
 
   return (
-    <Button type="button" variant="outline" onClick={handleClick} disabled={loading}>
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="w-full"
+      onClick={handleClick}
+      disabled={loading}
+    >
       {loading ? 'Reindexando…' : 'Reindexar busca'}
     </Button>
   )

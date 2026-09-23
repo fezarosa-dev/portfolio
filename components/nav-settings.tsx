@@ -13,16 +13,18 @@ export function NavSettings({
   initialDark,
   locale,
   label,
+  easterEggsAtivo = true,
 }: {
   initialDark: boolean
   locale: Locale
   label: string
+  easterEggsAtivo?: boolean
 }) {
   const [open, setOpen] = useState(false)
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <KonamiAdmin active={open} />
+      {easterEggsAtivo && <KonamiAdmin active={open} />}
       <Popover.Trigger
         aria-label={label}
         title={label}

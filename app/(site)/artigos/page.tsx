@@ -1,6 +1,5 @@
-import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getVisibleArticles, getSiteContent } from '@/lib/supabase/queries-cached'
+import { getVisibleArticles } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ArticleCard } from '@/components/article-card'
 import { pageMetadata } from '@/lib/seo'
@@ -9,19 +8,13 @@ import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [content, locale] = await Promise.all([getSiteContent(), getLocale()])
-  if (content.artigos_ativo === 'false') return {}
+  const locale = await getLocale()
   const seo = await getPageSeo('artigos', locale)
   return pageMetadata(locale, '/artigos', seo.title, seo.description)
 }
 
 export default async function ArtigosPage() {
-  const [articles, content, { dict, locale }] = await Promise.all([
-    getVisibleArticles(),
-    getSiteContent(),
-    getDictionary(),
-  ])
-  if (content.artigos_ativo === 'false') notFound()
+  const [articles, { dict, locale }] = await Promise.all([getVisibleArticles(), getDictionary()])
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-20">

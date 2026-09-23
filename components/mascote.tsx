@@ -9,10 +9,17 @@ import { RickrollPlayer } from '@/components/rickroll-player'
 
 const JOKE_API_URL = 'https://api.chucknorris.io/jokes/random?category=dev'
 const FRASES_FALLBACK = ['Au au!', '$ pet dog.exe', 'zzz... quem chamou?', 'café ☕ pra acordar']
-const RICKROLL_CLICKS = 3
 const RICKROLL_WINDOW_MS = 900
 
-export function Mascote({ ativo, rickrollVideoId }: { ativo: boolean; rickrollVideoId: string | null }) {
+export function Mascote({
+  ativo,
+  rickrollVideoId,
+  rickrollClicks = 3,
+}: {
+  ativo: boolean
+  rickrollVideoId: string | null
+  rickrollClicks?: number
+}) {
   const [acordado, setAcordado] = useState(false)
   const [frase, setFrase] = useState('...')
   const [rickrollOpen, setRickrollOpen] = useState(false)
@@ -60,7 +67,7 @@ export function Mascote({ ativo, rickrollVideoId }: { ativo: boolean; rickrollVi
     recent.push(now)
     clickTimestampsRef.current = recent
 
-    if (recent.length >= RICKROLL_CLICKS) {
+    if (recent.length >= rickrollClicks) {
       clickTimestampsRef.current = []
       // o play() precisa rodar dentro do mesmo clique pro navegador liberar som
       setRickrollOpen(true)

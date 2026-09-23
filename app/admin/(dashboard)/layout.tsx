@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { Toaster } from 'sonner'
 import { signOut } from '../actions'
 import { RepublishButton } from '@/components/admin/republish-button'
+import { ReindexSearchButton } from '@/components/admin/reindex-search-button'
 import { Button } from '@/components/ui/button'
+import { reindexAllSearchContent } from './personalizacao/actions'
 
 const TABS = [
   { href: '/admin/projetos', label: 'Projetos', icon: '▣' },
@@ -21,7 +23,7 @@ const TABS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col sm:flex-row">
-      <aside className="flex shrink-0 flex-col border-hairline bg-card sm:w-56 sm:border-r">
+      <aside className="flex shrink-0 flex-col border-hairline bg-card sm:sticky sm:top-0 sm:h-screen sm:w-56 sm:overflow-y-auto sm:border-r">
         <div className="border-b border-hairline px-5 py-5">
           <p className="font-mono text-sm font-medium tracking-tight">
             zanoni<span className="text-signal">.admin</span>
@@ -43,6 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
         <div className="flex flex-col gap-2 border-t border-hairline p-3">
           <RepublishButton />
+          <ReindexSearchButton action={reindexAllSearchContent} />
           <form action={signOut}>
             <Button type="submit" variant="outline" size="sm" className="w-full">
               Sair
