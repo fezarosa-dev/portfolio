@@ -6,6 +6,14 @@ import { warmUpModel } from '@/lib/search/embed'
 // (idempotente e barato). Rate-limitar isso so serviria pra competir pelo mesmo
 // balde do /api/search (mesma tabela search_requests), derrubando o limite real.
 export async function POST() {
-  await warmUpModel()
-  return NextResponse.json({ ok: true })
+  try {
+    await warmUpModel()
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    // TEMP DEBUG -- remover depois de diagnosticar a falha em produção
+    return NextResponse.json(
+      { ok: false, error: String(err), stack: err instanceof Error ? err.stack : null },
+      { status: 500 }
+    )
+  }
 }
