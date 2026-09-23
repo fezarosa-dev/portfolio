@@ -35,6 +35,14 @@ export function ThemeToggle({ initialDark, locale }: { initialDark: boolean; loc
           <span className="theme-switch-light-ray theme-switch-light-ray-2" />
           <span className="theme-switch-light-ray theme-switch-light-ray-3" />
         </span>
+        <span aria-hidden>
+          <span className="theme-switch-cloud theme-switch-cloud-dark theme-switch-cloud-1" />
+          <span className="theme-switch-cloud theme-switch-cloud-dark theme-switch-cloud-2" />
+          <span className="theme-switch-cloud theme-switch-cloud-dark theme-switch-cloud-3" />
+          <span className="theme-switch-cloud theme-switch-cloud-light theme-switch-cloud-4" />
+          <span className="theme-switch-cloud theme-switch-cloud-light theme-switch-cloud-5" />
+          <span className="theme-switch-cloud theme-switch-cloud-light theme-switch-cloud-6" />
+        </span>
         <span className="theme-switch-stars" aria-hidden>
           <svg className="theme-switch-star theme-switch-star-1" viewBox="0 0 20 20">
             <path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z" />
