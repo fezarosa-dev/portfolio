@@ -43,8 +43,7 @@ export function MarkdownContent({
   return (
     <motion.div
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.1 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={CLASS_NAME}
     >

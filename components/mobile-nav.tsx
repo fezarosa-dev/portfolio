@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { NavSettings } from '@/components/nav-settings'
+import { SearchTrigger } from '@/components/search/search-trigger'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { Locale } from '@/lib/i18n/dictionaries'
 
@@ -12,6 +13,7 @@ export function MobileNav({
   openLabel,
   closeLabel,
   settingsLabel,
+  searchLabel,
   initialDark,
   locale,
 }: {
@@ -19,6 +21,7 @@ export function MobileNav({
   openLabel: string
   closeLabel: string
   settingsLabel: string
+  searchLabel: string
   initialDark: boolean
   locale: Locale
 }) {
@@ -38,7 +41,10 @@ export function MobileNav({
           </Link>
         </li>
       ))}
-      <li className="flex justify-end py-3">
+      <li className="flex justify-end gap-2 py-3">
+        <span onClick={() => setOpen(false)}>
+          <SearchTrigger label={searchLabel} />
+        </span>
         <NavSettings initialDark={initialDark} locale={locale} label={settingsLabel} />
       </li>
     </>
