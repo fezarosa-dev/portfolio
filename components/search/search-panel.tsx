@@ -152,7 +152,7 @@ export function SearchPanel({
           {showResults && results.map((result) => {
             const isExternal = result.url.startsWith('http')
             return (
-              <li key={result.id}>
+              <li key={result.id} className="min-w-0">
                 <Link
                   href={isExternal ? result.url : `/${locale}${result.url}`}
                   target={isExternal ? '_blank' : undefined}

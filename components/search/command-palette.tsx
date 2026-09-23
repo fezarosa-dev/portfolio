@@ -35,7 +35,7 @@ export function CommandPalette({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[80vh] overflow-x-hidden overflow-y-auto pt-10 sm:max-w-lg">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <SearchPanel
           locale={locale}
