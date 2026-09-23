@@ -98,7 +98,7 @@ Outros detalhes:
 
 ## Conexões MCP
 
-O painel admin (`/admin/mcp`) permite criar conexões [MCP](https://modelcontextprotocol.io) — cada uma gera um token de acesso pra um cliente de IA (Claude Desktop, Claude Code etc.) ler e editar o conteúdo do site em nome do dono, apontando pra `/api/mcp` com `Authorization: Bearer <token>`.
+O painel admin (`/admin/mcp`) permite criar conexões [MCP](https://modelcontextprotocol.io) — cada uma gera um token de acesso pra um cliente de IA (Claude Desktop, Claude Code etc.) ler e editar o conteúdo do site em nome do dono, apontando pra `/api/mcp` com `Authorization: Bearer <token>`. Como alguns conectores (ex.: claude.ai) reservam o cabeçalho `Authorization` pro próprio fluxo OAuth e não deixam setar manualmente, o token também é aceito via `X-Auth-Token: <token>` (sem "Bearer").
 
 - **Permissões por recurso**: cada conexão tem leitura/escrita configuráveis separadamente para Projetos (inclui empresas e vínculos), Artigos, Tecnologias, Autores, Currículo, Conteúdo do site (textos, SEO, personalização, links de contato) e Mensagens (recebidas pelo formulário de contato). Só as tools correspondentes às permissões concedidas ficam visíveis pro cliente MCP daquela conexão (`lib/mcp/tools.ts`).
 - **Autenticação**: token opaco gerado na criação (`mcp_...`), mostrado uma única vez; só o hash SHA-256 fica salvo (`mcp_connections.token_hash`). Uma conexão pode ser renomeada, revogada/reativada ou removida a qualquer momento pelo painel.

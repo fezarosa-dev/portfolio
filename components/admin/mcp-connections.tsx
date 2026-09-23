@@ -145,8 +145,10 @@ function CreateConnectionDialog({ create }: { create: Actions['create'] }) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            URL do servidor MCP: <code className="font-mono">/api/mcp</code>, autenticação por cabeçalho{' '}
-            <code className="font-mono">Authorization: Bearer &lt;token&gt;</code>.
+            URL do servidor MCP: <code className="font-mono">/api/mcp</code>. Autenticação por cabeçalho{' '}
+            <code className="font-mono">Authorization: Bearer &lt;token&gt;</code> — se o cliente não deixar setar
+            esse cabeçalho manualmente (ex.: conectores da claude.ai), use{' '}
+            <code className="font-mono">X-Auth-Token: &lt;token&gt;</code> (sem &ldquo;Bearer&rdquo;) no lugar.
           </p>
         </DialogContent>
       </Dialog>

@@ -3,13 +3,25 @@ import { authenticateMcpToken } from '@/lib/mcp/auth'
 import { buildMcpServer } from '@/lib/mcp/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
+function extractToken(request: Request): string | null {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7).trim()
+
+  // fallback pra clientes cuja UI reserva o cabeçalho "Authorization" pro
+  // próprio fluxo OAuth do conector (ex.: claude.ai) e não deixa setar manual.
+  const custom = request.headers.get('x-auth-token')
+  return custom?.trim() || null
+}
+
 // stateless: cada request cria server/transport próprios, sem estado
 // compartilhado entre invocações — combina com o modelo serverless da Vercel.
 async function handler(request: Request): Promise<Response> {
-  const authHeader = request.headers.get('authorization') ?? ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null
+  const token = extractToken(request)
   if (!token) {
-    return Response.json({ error: 'Token ausente. Use o cabeçalho "Authorization: Bearer <token>".' }, { status: 401 })
+    return Response.json(
+      { error: 'Token ausente. Use o cabeçalho "Authorization: Bearer <token>" ou "X-Auth-Token: <token>".' },
+      { status: 401 }
+    )
   }
 
   let auth
