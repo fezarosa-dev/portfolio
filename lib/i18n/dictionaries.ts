@@ -79,6 +79,9 @@ export type Dictionary = {
     branchLabel: string
     branchLocal: string
     latencyLabel: string
+    cacheLabel: string
+    reindexLabel: string
+    never: string
     runtimeLabel: string
     contentLabel: string
     projects: string
@@ -184,7 +187,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
       deployLocal: 'ambiente local',
       branchLabel: 'branch / região',
       branchLocal: 'sem info (local)',
-      latencyLabel: 'latência real (Supabase)',
+      latencyLabel: 'latência do servidor (Vercel)',
+      cacheLabel: 'última republicação (cache)',
+      reindexLabel: 'última reindexação da busca',
+      never: 'nunca',
       runtimeLabel: 'runtime',
       contentLabel: 'conteúdo no banco',
       projects: 'projetos',
@@ -289,7 +295,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
       deployLocal: 'local environment',
       branchLabel: 'branch / region',
       branchLocal: 'no info (local)',
-      latencyLabel: 'live latency (Supabase)',
+      latencyLabel: 'server latency (Vercel)',
+      cacheLabel: 'last republish (cache)',
+      reindexLabel: 'last search reindex',
+      never: 'never',
       runtimeLabel: 'runtime',
       contentLabel: 'content in the database',
       projects: 'projects',
