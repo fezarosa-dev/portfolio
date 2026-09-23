@@ -112,9 +112,12 @@ export function SiteContentForm({
     <form action={handleSubmit} className="flex max-w-2xl flex-col gap-6">
       <LanguageToggle language={language} onChange={setLanguage} />
 
-      <Tabs defaultValue="conteudo">
+      <Tabs defaultValue="home">
         <TabsList className="h-auto flex-wrap">
-          <TabsTrigger value="conteudo">conteúdo</TabsTrigger>
+          <TabsTrigger value="home">home</TabsTrigger>
+          <TabsTrigger value="sobre-servicos">sobre & serviços</TabsTrigger>
+          <TabsTrigger value="guia">guia do site</TabsTrigger>
+          <TabsTrigger value="legal">páginas legais</TabsTrigger>
           <TabsTrigger value="contato">contato & redes</TabsTrigger>
           <TabsTrigger value="navegacao">navegação</TabsTrigger>
           <TabsTrigger value="seo">seo</TabsTrigger>
@@ -122,7 +125,7 @@ export function SiteContentForm({
           <TabsTrigger value="avancado">avançado</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="conteudo" keepMounted className="mt-4 flex flex-col gap-4">
+        <TabsContent value="home" keepMounted className="mt-4 flex flex-col gap-4">
           <Section title="ícone do site">
             <div>
               <Label>Ícone (favicon)</Label>
@@ -151,7 +154,9 @@ export function SiteContentForm({
               defaultValueEn={lookup('hero_subtitle_en')}
             />
           </Section>
+        </TabsContent>
 
+        <TabsContent value="sobre-servicos" keepMounted className="mt-4 flex flex-col gap-4">
           <Section title="sobre-mim">
             <BilingualField
               name="sobre_texto"
@@ -180,7 +185,9 @@ export function SiteContentForm({
               rows={6}
             />
           </Section>
+        </TabsContent>
 
+        <TabsContent value="guia" keepMounted className="mt-4 flex flex-col gap-4">
           <Section title="guia do site">
             <BilingualField
               name="como_usar_texto"
@@ -192,7 +199,9 @@ export function SiteContentForm({
               rows={16}
             />
           </Section>
+        </TabsContent>
 
+        <TabsContent value="legal" keepMounted className="mt-4 flex flex-col gap-4">
           <Section title="páginas legais">
             <BilingualField
               name="privacidade_texto"
