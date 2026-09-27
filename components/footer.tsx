@@ -43,6 +43,13 @@ export async function Footer() {
           >
             {dict.footer.busca}
           </a>
+          <a
+            href={`/${locale}/como-funciona`}
+            title="Mapa da arquitetura deste site"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:scale-105 hover:border-signal hover:text-signal active:scale-95 motion-reduce:transition-none"
+          >
+            {dict.footer.comoFunciona}
+          </a>
         </p>
         <div className="flex gap-5">
           {links.map((link) => (
