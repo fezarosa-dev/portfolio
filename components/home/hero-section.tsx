@@ -27,14 +27,21 @@ export function HeroSection({
 
   return (
     <section className="relative flex min-h-[62vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
-      <motion.p
+      <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 12, rotate: -4 }}
         animate={{ opacity: 1, y: 0, rotate: -3 }}
+        whileHover={reduceMotion ? undefined : { rotate: 0, scale: 1.05 }}
         transition={noAnim ?? { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative inline-block rounded-md border-2 border-dashed border-signal/60 bg-card/70 px-3 py-1 font-mono text-sm text-signal"
+        className="relative inline-block"
       >
-        {whoamiLabel}
-      </motion.p>
+        <Link
+          href={`/${locale}/sobre`}
+          title="Sobre mim"
+          className="inline-block rounded-md border-2 border-dashed border-signal/60 bg-card/70 px-3 py-1 font-mono text-sm text-signal transition-colors hover:border-signal"
+        >
+          {whoamiLabel}
+        </Link>
+      </motion.div>
       <motion.h1
         initial={reduceMotion ? false : { opacity: 0, y: 24, rotate: -1 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
@@ -91,7 +98,7 @@ export function HeroSection({
                   <img
                     src={iconUrl(lang.devicon_slug, lang.devicon_variant ?? 'plain', lang.icon_source)}
                     alt=""
-                    className="h-3.5 w-3.5"
+                    className="h-4 w-4"
                   />
                 )}
                 {lang.name}

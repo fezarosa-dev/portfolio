@@ -26,6 +26,7 @@ export function ReduceMotionProvider({
   useEffect(() => {
     if (cookieSet) return
     const osReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.documentElement.classList.toggle('reduce-motion', osReduce)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (osReduce !== enabled) setEnabled(osReduce)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -34,6 +35,7 @@ export function ReduceMotionProvider({
   function toggle() {
     const next = !enabled
     setEnabled(next)
+    document.documentElement.classList.toggle('reduce-motion', next)
     document.cookie = `reduce-motion=${next}; path=/; max-age=${60 * 60 * 24 * 365}`
   }
 

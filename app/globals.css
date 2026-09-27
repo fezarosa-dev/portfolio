@@ -281,6 +281,19 @@
     }
   }
 
+  /* switch "reduzir animações" das configurações (independente do
+     prefers-reduced-motion do sistema) -- trava qualquer transição/animação
+     CSS pura que não passa pelo MotionConfig do Framer Motion (hovers de
+     card, pills, sublinhado do nav, etc.) */
+  html.reduce-motion *,
+  html.reduce-motion *::before,
+  html.reduce-motion *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: -0.001ms !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: -0.001ms !important;
+  }
+
   /* switch de tema (sol vira lua) -- seletores por classe, não por id, porque
      o menu de configurações é renderizado 2x na página (desktop + mobile) */
   .theme-switch {
