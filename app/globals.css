@@ -130,6 +130,88 @@
   --status: #46cc85;
 }
 
+/* Tema "tiozão-tech" quente, aplicado só no site público (ver .site-warm em
+   app/(site)/layout.tsx) — mesmo mecanismo de override do .dark, mas nunca
+   toca o admin. Paleta extraída de public/img/mascote-cachorro.svg (o
+   cachorro mascote): rust/ferrugem, caramelo e cinza-malva do pelo. */
+.site-warm {
+  --background: #f6eae3;
+  --foreground: #4c353a;
+  --card: #fbe5cf;
+  --card-foreground: #4c353a;
+  --popover: #fbe5cf;
+  --popover-foreground: #4c353a;
+  --primary: #c14e15;
+  --primary-foreground: #fbe5cf;
+  --secondary: #ecdae0;
+  --secondary-foreground: #4c353a;
+  --muted: #e1d5db;
+  --muted-foreground: #7a6366;
+  --accent: #b0775a;
+  --accent-foreground: #fbe5cf;
+  --border: #cbbabc;
+  --input: #cbbabc;
+  --ring: #c14e15;
+  --signal: #c14e15;
+  --steel: #7a6366;
+  --hairline: #cbbabc;
+  --status: #4c8c4a;
+  --font-display: var(--font-display-site);
+  background-color: var(--background);
+}
+.site-warm [data-slot="card"] {
+  border-color: var(--border);
+  position: relative;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(76, 53, 58, 0.05) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(76, 53, 58, 0.05) 0 1px, transparent 1px 4px);
+  box-shadow:
+    0 16px 32px -18px rgba(76, 53, 58, 0.4),
+    0 3px 8px -2px rgba(76, 53, 58, 0.22);
+}
+/* Mesma paleta (rust/caramelo/malva do mascote), versão escura -- entra
+   quando o usuário liga o modo escuro (.dark no <html>), sem trocar pro
+   cinza genérico do tema .dark padrão. */
+.dark .site-warm {
+  --background: #2b2024;
+  --foreground: #f6eae3;
+  --card: #453646;
+  --card-foreground: #f6eae3;
+  --popover: #453646;
+  --popover-foreground: #f6eae3;
+  --primary: #f2661d;
+  --primary-foreground: #2b2024;
+  --secondary: #5e4447;
+  --secondary-foreground: #f6eae3;
+  --muted: #4c353a;
+  --muted-foreground: #c9b3b7;
+  --accent: #b0775a;
+  --accent-foreground: #f6eae3;
+  --border: #684a4c;
+  --input: #684a4c;
+  --ring: #f2661d;
+  --signal: #f2661d;
+  --steel: #b1a0a7;
+  --hairline: #684a4c;
+}
+.dark .site-warm [data-slot="card"] {
+  background-image:
+    repeating-linear-gradient(45deg, rgba(246, 234, 227, 0.045) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(246, 234, 227, 0.045) 0 1px, transparent 1px 4px);
+  box-shadow:
+    0 16px 32px -18px rgba(0, 0, 0, 0.55),
+    0 3px 8px -2px rgba(0, 0, 0, 0.35);
+}
+/* Bricolage Grotesque fica mais "quebrada"/irregular no eixo opsz alto —
+   é assim que a fonte foi desenhada pra ficar torta de propósito, não é
+   outra fonte. */
+.site-warm h1,
+.site-warm h2,
+.site-warm h3,
+.site-warm h4 {
+  font-variation-settings: "opsz" 96;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

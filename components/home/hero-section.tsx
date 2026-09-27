@@ -26,28 +26,44 @@ export function HeroSection({
   const noAnim = reduceMotion ? { duration: 0 } : undefined
 
   return (
-    <section className="relative flex min-h-[80vh] flex-col items-center justify-center px-6 text-center">
+    <section className="relative flex min-h-[62vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
       <motion.p
-        initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 12, rotate: -4 }}
+        animate={{ opacity: 1, y: 0, rotate: -3 }}
         transition={noAnim ?? { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="font-mono text-sm text-signal"
+        className="relative inline-block rounded-md border-2 border-dashed border-signal/60 bg-card/70 px-3 py-1 font-mono text-sm text-signal"
       >
         {whoamiLabel}
       </motion.p>
       <motion.h1
-        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={noAnim ?? { duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-3 text-5xl font-medium tracking-tight sm:text-7xl"
+        initial={reduceMotion ? false : { opacity: 0, y: 24, rotate: -1 }}
+        animate={{ opacity: 1, y: 0, rotate: 0 }}
+        transition={noAnim ?? { type: 'spring', stiffness: 140, damping: 14, delay: 0.1 }}
+        className="relative mt-4 text-5xl font-medium tracking-tight sm:text-7xl [font-family:var(--font-hero)]"
       >
         {title}
       </motion.h1>
+      <motion.svg
+        aria-hidden
+        viewBox="0 0 220 24"
+        className="relative mt-1 h-6 w-40 overflow-visible text-signal sm:w-56"
+        initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={noAnim ?? { duration: 0.7, delay: 0.55, ease: 'easeOut' }}
+      >
+        <motion.path
+          d="M4 12c20-8 40 8 60 0s40-8 60 0 40 8 60 0 26-6 32-2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+      </motion.svg>
       <motion.p
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={noAnim ?? { duration: 0.4, delay: 0.9 }}
-        className="mt-4 max-w-xl text-xl text-steel"
+        className="relative mt-5 max-w-xl text-xl text-steel"
       >
         <Typewriter text={subtitle} startDelay={900} />
       </motion.p>
@@ -56,14 +72,19 @@ export function HeroSection({
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={noAnim ?? { duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 flex flex-wrap justify-center gap-2"
+          className="relative mt-8 flex flex-wrap justify-center gap-3"
         >
-          {languages.map((lang) => (
-            <li key={lang.id}>
+          {languages.map((lang, i) => (
+            <motion.li
+              key={lang.id}
+              style={{ rotate: i % 2 === 0 ? -2 : 2 }}
+              whileHover={reduceMotion ? undefined : { rotate: 0, scale: 1.08 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            >
               <Link
                 href={`/${locale}/projetos?tech=${lang.id}`}
                 title={`Ver projetos com ${lang.name}`}
-                className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-mono text-xs text-steel transition-colors hover:border-signal hover:text-signal"
+                className="flex items-center gap-1.5 rounded-full border border-hairline bg-card/70 px-3 py-1 font-mono text-xs text-steel shadow-sm transition-colors hover:border-signal hover:text-signal"
               >
                 {lang.devicon_slug && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -75,7 +96,7 @@ export function HeroSection({
                 )}
                 {lang.name}
               </Link>
-            </li>
+            </motion.li>
           ))}
         </motion.ul>
       )}
