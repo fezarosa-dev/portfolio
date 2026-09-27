@@ -61,15 +61,18 @@ export async function Nav() {
         </div>
       </CollapsibleOnScroll>
       <nav className="relative flex items-center justify-between px-6 py-4">
-        <Link href={`/${locale}`} className="font-mono text-sm font-medium tracking-tight">
-          zanoni<span className="text-signal">.dev.br</span>
+        <Link href={`/${locale}`} className="group font-mono text-sm font-medium tracking-tight">
+          zanoni
+          <span className="inline-block text-signal transition-transform duration-200 ease-out group-hover:-rotate-6 motion-reduce:transition-none">
+            .dev.br
+          </span>
         </Link>
         <ul className="hidden gap-5 text-sm md:flex md:gap-7">
           {navLinks.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="text-foreground/80 transition-colors hover:text-signal"
+                className="relative text-foreground/80 transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-signal after:transition-transform after:duration-200 after:ease-out hover:text-signal hover:after:scale-x-100 motion-reduce:after:transition-none"
               >
                 {link.label}
               </Link>

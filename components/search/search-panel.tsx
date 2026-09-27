@@ -107,9 +107,11 @@ export function SearchPanel({
   }
 
   const trimmedQuery = query.trim()
-  // mantém a lista de tecnologias visível enquanto a busca carrega, em vez de
-  // sumir na hora que a pessoa digita a 1ª letra — sem isso o conteúdo colapsa
-  // pra quase nada e volta a crescer a cada resultado, um layout shift feio
+  // a lista de tecnologias fica sempre montada (só escondida com `invisible`)
+  // pra reservar a altura com base na qtde de tecnologias -- é isso que
+  // define o tamanho da caixa; erro/sem resultado/resultados entram por
+  // cima, num overlay absoluto do mesmo tamanho, com scroll interno se
+  // precisar, em vez de crescer/encolher a caixa a cada estado
   const showTechStats = techStats.length > 0 && (!trimmedQuery || loading)
   const showError = trimmedQuery && !loading && Boolean(error)
   const showNoResults = trimmedQuery && !loading && !error && results.length === 0
@@ -137,82 +139,99 @@ export function SearchPanel({
             </>
           )}
         </div>
-        {showError && <p className="font-mono text-xs text-steel">{error}</p>}
-        {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
-        {showTechStats && (
-          <TooltipProvider>
-            <ul className="flex flex-col gap-2">
-              {techStats.map((stat) => {
-                const projectNames = stat.projects
-                  .map((project) => resolveText(project.title, project.title_en, locale))
-                  .filter(Boolean)
-                return (
-                  <li key={stat.id} className="flex items-center gap-2">
-                    <Link
-                      href={`/${locale}/projetos?tech=${stat.id}`}
-                      title={`Ver projetos com ${stat.name}`}
-                      onClick={onNavigate}
-                      className="flex w-24 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
-                    >
-                      {stat.devicon_slug && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={iconUrl(stat.devicon_slug, stat.devicon_variant ?? 'plain', stat.icon_source)}
-                          alt=""
-                          className="h-3.5 w-3.5 shrink-0"
-                        />
-                      )}
-                      <span className="truncate font-mono text-xs text-foreground">{stat.name}</span>
-                    </Link>
-                    <Tooltip>
-                      <TooltipTrigger
-                        type="button"
-                        className="h-1.5 flex-1 overflow-hidden rounded-full bg-hairline"
-                        aria-label={`Projetos com ${stat.name}: ${projectNames.join(', ')}`}
+        <div className="relative">
+          <div className={showTechStats ? '' : 'invisible'} aria-hidden={!showTechStats}>
+            <TooltipProvider>
+              <ul className="flex flex-col gap-2">
+                {techStats.map((stat) => {
+                  const projectLinks = stat.projects
+                    .map((project) => ({
+                      id: project.id,
+                      name: resolveText(project.title, project.title_en, locale),
+                    }))
+                    .filter((project) => Boolean(project.name))
+                  return (
+                    <li key={stat.id} className="flex items-center gap-2">
+                      <Link
+                        href={`/${locale}/projetos?tech=${stat.id}`}
+                        title={`Ver projetos com ${stat.name}`}
+                        onClick={onNavigate}
+                        className="flex w-24 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
                       >
-                        <div className="h-full rounded-full bg-signal" style={{ width: `${stat.percentage}%` }} />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="mb-1 font-mono font-medium text-foreground">{stat.name}</p>
-                        <ul className="flex flex-col gap-0.5 text-steel">
-                          {projectNames.map((name) => (
-                            <li key={name} className="truncate">
-                              {name}
-                            </li>
-                          ))}
-                        </ul>
-                      </TooltipContent>
-                    </Tooltip>
-                    <span className="w-8 shrink-0 text-right font-mono text-[10px] text-steel">
-                      {stat.percentage}%
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-          </TooltipProvider>
-        )}
-        <ul className="flex flex-col gap-1">
-          {showResults && results.map((result) => {
-            const isExternal = result.url.startsWith('http')
-            return (
-              <li key={result.id} className="min-w-0">
-                <Link
-                  href={isExternal ? result.url : `/${locale}${result.url}`}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noopener noreferrer' : undefined}
-                  onClick={onNavigate}
-                  className="block rounded-md px-3 py-2 transition-colors hover:bg-card"
-                >
-                  <p className="line-clamp-2 font-mono text-sm text-foreground">{result.title}</p>
-                  {result.excerpt && (
-                    <p className="line-clamp-2 text-xs text-steel">{result.excerpt}</p>
-                  )}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+                        {stat.devicon_slug && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={iconUrl(stat.devicon_slug, stat.devicon_variant ?? 'plain', stat.icon_source)}
+                            alt=""
+                            className="h-4 w-4 shrink-0"
+                          />
+                        )}
+                        <span className="truncate font-mono text-xs text-foreground">{stat.name}</span>
+                      </Link>
+                      <Tooltip>
+                        <TooltipTrigger
+                          type="button"
+                          className="h-1.5 flex-1 overflow-hidden rounded-full bg-hairline"
+                          aria-label={`Projetos com ${stat.name}: ${projectLinks.map((p) => p.name).join(', ')}`}
+                        >
+                          <div className="h-full rounded-full bg-signal" style={{ width: `${stat.percentage}%` }} />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="mb-1 font-mono font-medium text-foreground">{stat.name}</p>
+                          <ul className="flex flex-col gap-0.5 text-steel">
+                            {projectLinks.map((project) => (
+                              <li key={project.id} className="truncate">
+                                <Link
+                                  href={`/${locale}/projetos/${project.id}`}
+                                  onClick={onNavigate}
+                                  className="transition-colors hover:text-signal hover:underline"
+                                >
+                                  {project.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </TooltipContent>
+                      </Tooltip>
+                      <span className="w-8 shrink-0 text-right font-mono text-[10px] text-steel">
+                        {stat.percentage}%
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </TooltipProvider>
+          </div>
+          {!showTechStats && (
+            <div className="absolute inset-0 overflow-y-auto">
+              {showError && <p className="font-mono text-xs text-steel">{error}</p>}
+              {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
+              {showResults && (
+                <ul className="flex flex-col gap-1">
+                  {results.map((result) => {
+                    const isExternal = result.url.startsWith('http')
+                    return (
+                      <li key={result.id} className="min-w-0">
+                        <Link
+                          href={isExternal ? result.url : `/${locale}${result.url}`}
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                          onClick={onNavigate}
+                          className="block rounded-md px-3 py-2 transition-colors hover:bg-card"
+                        >
+                          <p className="line-clamp-2 font-mono text-sm text-foreground">{result.title}</p>
+                          {result.excerpt && (
+                            <p className="line-clamp-2 text-xs text-steel">{result.excerpt}</p>
+                          )}
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

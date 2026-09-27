@@ -90,7 +90,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const easterEggsAtivo = content.easter_eggs_ativo !== 'false'
 
   return (
-    <>
+    <div className="site-warm flex min-h-full flex-1 flex-col bg-background text-foreground">
       <Nav />
       {children}
       <Footer />
@@ -112,6 +112,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         placeholder={dict.busca.placeholder}
         noResultsLabel={dict.busca.noResults}
       />
-    </>
+    </div>
   )
 }
