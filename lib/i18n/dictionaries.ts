@@ -15,6 +15,7 @@ export type Dictionary = {
     status: string
     busca: string
     comoUsar: string
+    comoFunciona: string
     privacidade: string
     termos: string
     cookies: string
@@ -89,6 +90,7 @@ export type Dictionary = {
     technologies: string
   }
   comoUsar: { eyebrow: string; title: string }
+  comoFunciona: { eyebrow: string; title: string; subtitle: string }
   privacidade: { eyebrow: string; title: string }
   termos: { eyebrow: string; title: string }
   cookiesPage: { eyebrow: string; title: string }
@@ -124,6 +126,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       status: 'status',
       busca: 'busca (⌘K)',
       comoUsar: 'como usar',
+      comoFunciona: 'como funciona',
       privacidade: 'privacidade',
       termos: 'termos de uso',
       cookies: 'cookies',
@@ -198,6 +201,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       technologies: 'tecnologias',
     },
     comoUsar: { eyebrow: 'guia', title: 'Como usar este site' },
+    comoFunciona: {
+      eyebrow: 'arquitetura',
+      title: 'Como este site funciona',
+      subtitle: 'Um mapa de como cada peça do projeto se conecta — passe o mouse pra ver os detalhes.',
+    },
     privacidade: { eyebrow: 'privacidade', title: 'Política de Privacidade' },
     termos: { eyebrow: 'termos', title: 'Termos de Uso' },
     cookiesPage: { eyebrow: 'cookies', title: 'Política de Cookies' },
@@ -232,6 +240,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       status: 'status',
       busca: 'search (⌘K)',
       comoUsar: 'how to use',
+      comoFunciona: 'how it works',
       privacidade: 'privacy',
       termos: 'terms of use',
       cookies: 'cookies',
@@ -306,6 +315,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       technologies: 'technologies',
     },
     comoUsar: { eyebrow: 'guide', title: 'How to use this site' },
+    comoFunciona: {
+      eyebrow: 'architecture',
+      title: 'How this site works',
+      subtitle: 'A map of how every piece of the project connects — hover for details.',
+    },
     privacidade: { eyebrow: 'privacy', title: 'Privacy Policy' },
     termos: { eyebrow: 'terms', title: 'Terms of Use' },
     cookiesPage: { eyebrow: 'cookies', title: 'Cookie Policy' },

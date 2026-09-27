@@ -173,6 +173,18 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
       description: "A complete guide to Felipe Zanoni da Rosa's site — pages, features and even the hidden easter eggs.",
     },
   },
+  comoFunciona: {
+    pt: {
+      title: 'Como este site funciona',
+      description:
+        'Mapa da arquitetura do portfólio de Felipe Zanoni da Rosa — como as páginas, a busca, o Supabase, o admin e as conexões MCP se conectam.',
+    },
+    en: {
+      title: 'How this site works',
+      description:
+        "A map of Felipe Zanoni da Rosa's portfolio architecture — how the pages, search, Supabase, admin and MCP connections fit together.",
+    },
+  },
   privacidade: {
     pt: {
       title: 'Política de Privacidade',

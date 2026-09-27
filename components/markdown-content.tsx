@@ -35,7 +35,7 @@ function useReveal() {
     initial: { opacity: 0, y: 24, filter: 'blur(6px)' },
     whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' },
     viewport: { once: true, amount: 0.5 },
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   }
 }
 
@@ -48,7 +48,13 @@ export function MarkdownContent({
 }) {
   const reveal = useReveal()
 
-  type TagProps<T extends keyof React.JSX.IntrinsicElements> = ComponentPropsWithoutRef<T> & {
+  // onDrag/onAnimation* do DOM têm assinatura incompatível com as do Framer
+  // Motion -- omitidos porque o motion.* nunca herda esses handlers do
+  // react-markdown de qualquer forma
+  type TagProps<T extends keyof React.JSX.IntrinsicElements> = Omit<
+    ComponentPropsWithoutRef<T>,
+    'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd'
+  > & {
     node?: unknown
   }
 
