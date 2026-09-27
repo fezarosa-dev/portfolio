@@ -203,7 +203,10 @@ export const architectureEdges: ArchEdge[] = [
   { from: 'drive', to: 'paginas-publicas', label: 'imagens/vídeos' },
   { from: 'contato', to: 'supabase', label: 'envia mensagem' },
   { from: 'supabase', to: 'admin', label: 'mensagens recebidas' },
-  { from: 'easter-eggs', to: 'paginas-publicas', label: 'ativados por flag' },
+  // era "easter-eggs -> páginas públicas" (rótulo dizia "ativados por
+  // flag", mas a seta ia no sentido contrário do que ativa o quê -- a flag
+  // que liga/desliga vive no conteúdo do site, no Supabase, não nos
+  // próprios easter eggs). Corrigido pra sair de onde a flag realmente mora.
+  { from: 'supabase', to: 'easter-eggs', label: 'flag liga/desliga' },
   { from: 'status', to: 'supabase', label: 'latência/volume' },
-  { from: 'status', to: 'busca', label: 'último reindex', fromStep: 2 },
 ]

@@ -62,6 +62,43 @@ function nodePoint(node: ArchNode, step?: number) {
   }
 }
 
+// limite do mapa: a área que realmente tem coisa (nós + a ponta de cada
+// pipeline), com uma margem por volta -- dá pra arrastar até ver essa
+// margem, mas não pra longe disso a ponto de perder o conteúdo de vista
+const MARGIN_UNITS_X = 18
+const MARGIN_UNITS_Y = 14
+const CONTENT_BOUNDS = (() => {
+  let minX = 0
+  let maxX = 100
+  let minY = 0
+  let maxY = 100
+  for (const node of architectureNodes) {
+    const tip = nodePoint(node, node.microSteps.length - 1)
+    minX = Math.min(minX, node.x, tip.x)
+    maxX = Math.max(maxX, node.x, tip.x)
+    minY = Math.min(minY, node.y, tip.y)
+    maxY = Math.max(maxY, node.y, tip.y)
+  }
+  return {
+    minX: toX(minX - MARGIN_UNITS_X),
+    maxX: toX(maxX + MARGIN_UNITS_X),
+    minY: toY(minY - MARGIN_UNITS_Y),
+    maxY: toY(maxY + MARGIN_UNITS_Y),
+  }
+})()
+
+function clamp(value: number, min: number, max: number) {
+  return min <= max ? Math.min(max, Math.max(min, value)) : (min + max) / 2
+}
+
+function clampTransform(t: { x: number; y: number; scale: number }, viewportW: number, viewportH: number) {
+  const minTx = -CONTENT_BOUNDS.maxX * t.scale
+  const maxTx = viewportW - CONTENT_BOUNDS.minX * t.scale
+  const minTy = -CONTENT_BOUNDS.maxY * t.scale
+  const maxTy = viewportH - CONTENT_BOUNDS.minY * t.scale
+  return { ...t, x: clamp(t.x, minTx, maxTx), y: clamp(t.y, minTy, maxTy) }
+}
+
 function curvePath(x1: number, y1: number, x2: number, y2: number) {
   const mx = (x1 + x2) / 2
   return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`
@@ -81,11 +118,13 @@ export function ArchitectureMap() {
     // centraliza na área onde os 9 nós macro ficam (x:15-85, y:5-90), não no
     // mundo inteiro -- os pipelines se estendem pra fora disso, e é sempre
     // pra essa vista "de longe" que o botão de recentralizar deve voltar
-    setTransform({
-      x: el.clientWidth / 2 - toX(50) * scale,
-      y: el.clientHeight / 2 - toY(47) * scale,
-      scale,
-    })
+    setTransform(
+      clampTransform(
+        { x: el.clientWidth / 2 - toX(50) * scale, y: el.clientHeight / 2 - toY(47) * scale, scale },
+        el.clientWidth,
+        el.clientHeight
+      )
+    )
   }
 
   useEffect(() => {
@@ -100,8 +139,15 @@ export function ArchitectureMap() {
   }
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const d = dragRef.current
-    if (!d) return
-    setTransform((t) => ({ ...t, x: d.origX + (e.clientX - d.startX), y: d.origY + (e.clientY - d.startY) }))
+    const el = containerRef.current
+    if (!d || !el) return
+    setTransform((t) =>
+      clampTransform(
+        { ...t, x: d.origX + (e.clientX - d.startX), y: d.origY + (e.clientY - d.startY) },
+        el.clientWidth,
+        el.clientHeight
+      )
+    )
   }
   function handlePointerUp() {
     dragRef.current = null
@@ -111,7 +157,12 @@ export function ArchitectureMap() {
   // preciso pra "zoom no ponteiro" seria mais código pra pouco ganho aqui,
   // já que o pan resolve o resto
   function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
-    setTransform((t) => ({ ...t, scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, t.scale - e.deltaY * 0.001)) }))
+    const el = containerRef.current
+    if (!el) return
+    setTransform((t) => {
+      const scale = clamp(t.scale - e.deltaY * 0.001, MIN_SCALE, MAX_SCALE)
+      return clampTransform({ ...t, scale }, el.clientWidth, el.clientHeight)
+    })
   }
 
   return (
