@@ -77,7 +77,12 @@ export const architectureNodes: ArchNode[] = [
       'Guarda projetos, artigos, tecnologias, mensagens de contato, currículo e o conteúdo editável do site. RLS + grant em toda tabela nova.',
     x: 50,
     y: 50,
-    dir: { dx: 0.7, dy: 0.7 },
+    // não usa diagonal "pura" (0.7,0.7) de propósito -- numa grade simétrica
+    // como essa, a diagonal a partir do centro cai quase em cima do nó do
+    // canto (nesse caso, ia bater perto de "busca"). Essa direção sobe
+    // levemente pra direita, passando entre drive (acima) e os dois nós da
+    // coluna direita, sem cruzar o pipeline de nenhum dos dois.
+    dir: { dx: 0.25, dy: -1 },
     microSteps: [
       { label: 'Toda tabela nova', detail: 'Migração cria a tabela + política de RLS + grant explícito -- RLS sozinha não libera o client JS do Supabase, precisa do grant também.' },
       { label: 'Leitura pública', detail: 'lib/supabase/queries.ts usa a anon key, só leitura, filtrando pelas policies de RLS (ex: só conteúdo visível).' },
