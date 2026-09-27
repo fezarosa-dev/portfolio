@@ -139,6 +139,17 @@ export function ArchitectureMap() {
             >
               <path d="M0,0 L10,5 L0,10 z" fill="var(--signal)" />
             </marker>
+            <marker
+              id="arch-arrow-accent"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="4"
+              markerHeight="4"
+              orient="auto-start-reverse"
+            >
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)" />
+            </marker>
           </defs>
           {architectureEdges.map((edge) => {
             const from = nodeById.get(edge.from)
@@ -172,12 +183,17 @@ export function ArchitectureMap() {
                   d={curvePath(toX(prevUnitX), toY(prevUnitY), toX(stepUnitX), toY(stepUnitY))}
                   fill="none"
                   stroke="var(--accent)"
+                  strokeOpacity={0.8}
                   strokeWidth={2}
                   strokeLinecap="round"
-                  initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: reduceMotion ? 0 : i * 0.1, ease: 'easeOut' }}
+                  strokeDasharray="3 10"
+                  markerEnd="url(#arch-arrow-accent)"
+                  animate={reduceMotion ? undefined : { strokeDashoffset: [0, -26] }}
+                  transition={
+                    reduceMotion
+                      ? undefined
+                      : { duration: 1, ease: 'linear', repeat: Infinity, delay: i * 0.15 }
+                  }
                 />
               )
             })
