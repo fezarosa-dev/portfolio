@@ -35,9 +35,15 @@ export function NavSettings({
       >
         <motion.span
           className="flex"
-          animate={reduceMotion ? undefined : { rotate: open ? 180 : 0 }}
-          whileHover={reduceMotion ? undefined : { rotate: 45 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          animate={reduceMotion ? undefined : { rotate: open ? 360 : 0 }}
+          whileHover={reduceMotion || open ? undefined : { rotate: 45 }}
+          transition={
+            reduceMotion
+              ? undefined
+              : open
+                ? { duration: 1.1, repeat: Infinity, ease: 'linear' }
+                : { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+          }
         >
           <SettingsIcon className="h-3.5 w-3.5" aria-hidden />
         </motion.span>
