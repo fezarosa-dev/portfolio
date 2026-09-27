@@ -50,22 +50,6 @@ export function HeroSection({
       >
         {title}
       </motion.h1>
-      <motion.svg
-        aria-hidden
-        viewBox="0 0 220 24"
-        className="relative mt-1 h-6 w-40 overflow-visible text-signal sm:w-56"
-        initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={noAnim ?? { duration: 0.7, delay: 0.55, ease: 'easeOut' }}
-      >
-        <motion.path
-          d="M4 12c20-8 40 8 60 0s40-8 60 0 40 8 60 0 26-6 32-2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-      </motion.svg>
       <motion.p
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
