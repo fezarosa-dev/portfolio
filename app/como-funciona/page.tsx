@@ -28,7 +28,7 @@ export default async function ComoFuncionaPage() {
         <p className="text-foreground">{dict.comoFunciona.title}</p>
         <p className="mt-1">{dict.comoFunciona.subtitle}</p>
       </div>
-      <ArchitectureMap />
+      <ArchitectureMap locale={locale} />
     </div>
   )
 }

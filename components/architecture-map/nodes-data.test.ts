@@ -22,13 +22,31 @@ test('nenhum nó fica fora do mapa (0-100 em x e y)', () => {
   }
 })
 
-test('todo nó tem pelo menos 2 passos "micro" (o que o código faz)', () => {
+test('todo nó tem pelo menos 2 passos "micro" (o que o código faz), em pt e en', () => {
   for (const node of architectureNodes) {
     assert.ok(node.microSteps.length >= 2, `${node.id} tem poucos microSteps`)
     for (const step of node.microSteps) {
-      assert.ok(step.label.length > 0, `${node.id} tem microStep sem label`)
-      assert.ok(step.detail.length > 0, `${node.id} tem microStep sem detail`)
+      assert.ok(step.label.pt.length > 0, `${node.id} tem microStep sem label.pt`)
+      assert.ok(step.label.en.length > 0, `${node.id} tem microStep sem label.en`)
+      assert.ok(step.detail.pt.length > 0, `${node.id} tem microStep sem detail.pt`)
+      assert.ok(step.detail.en.length > 0, `${node.id} tem microStep sem detail.en`)
     }
+  }
+})
+
+test('todo nó tem label/summary/detail em pt e en', () => {
+  for (const node of architectureNodes) {
+    for (const field of [node.label, node.summary, node.detail]) {
+      assert.ok(field.pt.length > 0, `${node.id} tem campo sem pt`)
+      assert.ok(field.en.length > 0, `${node.id} tem campo sem en`)
+    }
+  }
+})
+
+test('toda conexão tem label em pt e en', () => {
+  for (const edge of architectureEdges) {
+    assert.ok(edge.label.pt.length > 0, `edge ${edge.from}->${edge.to} sem label.pt`)
+    assert.ok(edge.label.en.length > 0, `edge ${edge.from}->${edge.to} sem label.en`)
   }
 })
 

@@ -17,7 +17,9 @@ import {
 } from 'lucide-react'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { architectureEdges, architectureNodes, type ArchNode, type ArchNodeId } from './nodes-data'
+import { resolveText } from '@/lib/bilingual'
+import type { Locale } from '@/lib/i18n'
+import { architectureEdges, architectureNodes, type ArchNode, type ArchNodeId, type Bilingual } from './nodes-data'
 
 const ICONS: Record<ArchNodeId, LucideIcon> = {
   'paginas-publicas': Globe,
@@ -104,8 +106,9 @@ function curvePath(x1: number, y1: number, x2: number, y2: number) {
   return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`
 }
 
-export function ArchitectureMap() {
+export function ArchitectureMap({ locale }: { locale: Locale }) {
   const { enabled: reduceMotion } = useReduceMotion()
+  const t = (field: Bilingual) => resolveText(field.pt, field.en, locale)
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: INITIAL_SCALE })
   const containerRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null)
@@ -286,7 +289,7 @@ export function ArchitectureMap() {
               style={{ left: toX((fromPoint.x + toPoint.x) / 2), top: toY((fromPoint.y + toPoint.y) / 2) }}
               className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-hairline bg-background px-2 py-0.5 font-mono text-[11px] whitespace-nowrap text-steel"
             >
-              {edge.label}
+              {t(edge.label)}
             </span>
           )
         })}
@@ -312,11 +315,11 @@ export function ArchitectureMap() {
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-mono text-sm font-medium text-foreground">{node.label}</span>
-                    <span className="block truncate text-xs text-steel">{node.summary}</span>
+                    <span className="block font-mono text-sm font-medium text-foreground">{t(node.label)}</span>
+                    <span className="block truncate text-xs text-steel">{t(node.summary)}</span>
                   </span>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-56">{node.detail}</TooltipContent>
+                <TooltipContent className="max-w-56">{t(node.detail)}</TooltipContent>
               </Tooltip>
             )
           })}
@@ -341,8 +344,8 @@ export function ArchitectureMap() {
                   {i + 1}
                 </span>
                 <span className="min-w-0">
-                  <span className="block font-mono text-xs font-medium text-foreground">{step.label}</span>
-                  <span className="block text-[11px] text-steel">{step.detail}</span>
+                  <span className="block font-mono text-xs font-medium text-foreground">{t(step.label)}</span>
+                  <span className="block text-[11px] text-steel">{t(step.detail)}</span>
                 </span>
               </motion.div>
             )
@@ -353,15 +356,17 @@ export function ArchitectureMap() {
       <button
         type="button"
         onClick={() => centerView(transform.scale)}
-        title="Recentralizar o mapa"
+        title={locale === 'en' ? 'Recenter the map' : 'Recentralizar o mapa'}
         className="absolute right-4 bottom-4 z-20 flex items-center gap-1.5 rounded-full border border-hairline bg-card/80 px-3 py-1.5 font-mono text-xs text-steel backdrop-blur transition-colors hover:border-signal hover:text-signal"
       >
         <Locate className="h-3.5 w-3.5" aria-hidden />
-        recentralizar
+        {locale === 'en' ? 'recenter' : 'recentralizar'}
       </button>
 
       <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-card/80 px-3 py-1.5 font-mono text-[11px] text-steel backdrop-blur">
-        arraste pra mover · role o mouse pra zoom
+        {locale === 'en'
+          ? 'drag to move · scroll to zoom'
+          : 'arraste pra mover · role o mouse pra zoom'}
       </div>
     </div>
   )
