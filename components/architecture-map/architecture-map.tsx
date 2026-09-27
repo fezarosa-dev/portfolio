@@ -8,6 +8,7 @@ import {
   Globe,
   HardDrive,
   LayoutDashboard,
+  Locate,
   Mail,
   Plug,
   Search,
@@ -31,12 +32,17 @@ const ICONS: Record<ArchNodeId, LucideIcon> = {
 }
 
 // canvas com tamanho fixo em px ("mundo"), que a gente translada/escala pra
-// simular pan/zoom -- os nós ficam em unidades 0-100 nos dados (nodes-data.ts)
-// e são convertidos pra px do mundo aqui.
-const WORLD_W = 1400
-const WORLD_H = 800
-const MIN_SCALE = 0.4
+// simular pan/zoom -- os nós ficam em unidades 0-100 nos dados (nodes-data.ts,
+// mas os pipelines de cada um se estendem além disso, então o mundo é bem
+// maior que a área 0-100 pra caber tudo sem sobrepor.
+const WORLD_W = 2200
+const WORLD_H = 1400
+const INITIAL_SCALE = 0.55
+const MIN_SCALE = 0.25
 const MAX_SCALE = 2.2
+// unidades (mesma escala 0-100 dos nós) que cada passo do pipeline avança
+// na direção `dir` do nó
+const STEP_DISTANCE = 16
 
 function toX(unit: number) {
   return (unit / 100) * WORLD_W
@@ -52,24 +58,27 @@ function curvePath(x1: number, y1: number, x2: number, y2: number) {
 
 export function ArchitectureMap() {
   const { enabled: reduceMotion } = useReduceMotion()
-  const [openNodeId, setOpenNodeId] = useState<ArchNodeId | null>(null)
-  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 0.85 })
+  const [transform, setTransform] = useState({ x: 0, y: 0, scale: INITIAL_SCALE })
   const containerRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null)
   const [dragging, setDragging] = useState(false)
   const nodeById = new Map(architectureNodes.map((n) => [n.id, n]))
-  const openNode = openNodeId ? nodeById.get(openNodeId) : undefined
 
-  // centraliza o conteúdo do mapa na tela quando a página carrega
-  useEffect(() => {
+  function centerView(scale = INITIAL_SCALE) {
     const el = containerRef.current
     if (!el) return
-    const scale = 0.85
+    // centraliza na área onde os 9 nós macro ficam (x:15-85, y:5-90), não no
+    // mundo inteiro -- os pipelines se estendem pra fora disso, e é sempre
+    // pra essa vista "de longe" que o botão de recentralizar deve voltar
     setTransform({
-      x: el.clientWidth / 2 - (WORLD_W / 2) * scale,
-      y: el.clientHeight / 2 - (WORLD_H * 0.48) * scale,
+      x: el.clientWidth / 2 - toX(50) * scale,
+      y: el.clientHeight / 2 - toY(47) * scale,
       scale,
     })
+  }
+
+  useEffect(() => {
+    centerView()
   }, [])
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
@@ -151,27 +160,28 @@ export function ArchitectureMap() {
               />
             )
           })}
-          {openNode &&
-            openNode.microSteps.map((_step, i) => {
-              const side = openNode.x < 50 ? 1 : -1
-              const stepUnitX = openNode.x + side * 18
-              const stepUnitY = Math.min(96, openNode.y + (i + 1) * 11)
-              const prevUnitY = i === 0 ? openNode.y : Math.min(96, openNode.y + i * 11)
-              const prevUnitX = i === 0 ? openNode.x : stepUnitX
+          {architectureNodes.map((node) =>
+            node.microSteps.map((_step, i) => {
+              const prevUnitX = node.x + node.dir.dx * STEP_DISTANCE * i
+              const prevUnitY = node.y + node.dir.dy * STEP_DISTANCE * i
+              const stepUnitX = node.x + node.dir.dx * STEP_DISTANCE * (i + 1)
+              const stepUnitY = node.y + node.dir.dy * STEP_DISTANCE * (i + 1)
               return (
                 <motion.path
-                  key={`step-edge-${openNode.id}-${i}`}
+                  key={`step-edge-${node.id}-${i}`}
                   d={curvePath(toX(prevUnitX), toY(prevUnitY), toX(stepUnitX), toY(stepUnitY))}
                   fill="none"
                   stroke="var(--accent)"
                   strokeWidth={2}
                   strokeLinecap="round"
                   initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
+                  whileInView={{ pathLength: 1, opacity: 1 }}
+                  viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: reduceMotion ? 0 : i * 0.1, ease: 'easeOut' }}
                 />
               )
-            })}
+            })
+          )}
         </svg>
 
         {architectureEdges.map((edge) => {
@@ -192,16 +202,14 @@ export function ArchitectureMap() {
         <TooltipProvider>
           {architectureNodes.map((node, i) => {
             const Icon = ICONS[node.id]
-            const isOpen = openNodeId === node.id
             return (
               <Tooltip key={node.id}>
                 <TooltipTrigger
                   render={
                     <motion.button
                       data-node
-                      onClick={() => setOpenNodeId((current) => (current === node.id ? null : node.id))}
                       style={{ left: toX(node.x), top: toY(node.y) }}
-                      className={`absolute z-10 flex w-56 -translate-x-1/2 -translate-y-1/2 items-start gap-2 rounded-xl border px-4 py-3 text-left shadow-lg transition-transform hover:scale-105 motion-reduce:transition-none ${isOpen ? 'border-signal bg-card' : 'border-hairline bg-card'}`}
+                      className="absolute z-10 flex w-56 -translate-x-1/2 -translate-y-1/2 items-start gap-2 rounded-xl border border-hairline bg-card px-4 py-3 text-left shadow-lg transition-transform hover:scale-105 motion-reduce:transition-none"
                       initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: reduceMotion ? 0 : i * 0.06, ease: [0.22, 1, 0.36, 1] }}
@@ -216,28 +224,25 @@ export function ArchitectureMap() {
                     <span className="block truncate text-xs text-steel">{node.summary}</span>
                   </span>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-56">
-                  {node.detail}
-                  <span className="mt-1 block text-signal">clique pra ver o pipeline dessa peça</span>
-                </TooltipContent>
+                <TooltipContent className="max-w-56">{node.detail}</TooltipContent>
               </Tooltip>
             )
           })}
         </TooltipProvider>
 
-        {openNode &&
-          openNode.microSteps.map((step, i) => {
-            const side = openNode.x < 50 ? 1 : -1
-            const stepUnitX = openNode.x + side * 18
-            const stepUnitY = Math.min(96, openNode.y + (i + 1) * 11)
+        {architectureNodes.map((node) =>
+          node.microSteps.map((step, i) => {
+            const stepUnitX = node.x + node.dir.dx * STEP_DISTANCE * (i + 1)
+            const stepUnitY = node.y + node.dir.dy * STEP_DISTANCE * (i + 1)
             return (
               <motion.div
-                key={`step-${openNode.id}-${i}`}
+                key={`step-${node.id}-${i}`}
                 data-node
                 style={{ left: toX(stepUnitX), top: toY(stepUnitY) }}
                 className="absolute z-10 flex w-52 -translate-x-1/2 -translate-y-1/2 items-start gap-2 rounded-lg border border-accent/50 bg-popover px-3 py-2 shadow-md"
                 initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: reduceMotion ? 0 : i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               >
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent font-mono text-[10px] text-accent">
@@ -249,11 +254,22 @@ export function ArchitectureMap() {
                 </span>
               </motion.div>
             )
-          })}
+          })
+        )}
       </div>
 
+      <button
+        type="button"
+        onClick={() => centerView(transform.scale)}
+        title="Recentralizar o mapa"
+        className="absolute right-4 bottom-4 z-20 flex items-center gap-1.5 rounded-full border border-hairline bg-card/80 px-3 py-1.5 font-mono text-xs text-steel backdrop-blur transition-colors hover:border-signal hover:text-signal"
+      >
+        <Locate className="h-3.5 w-3.5" aria-hidden />
+        recentralizar
+      </button>
+
       <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-card/80 px-3 py-1.5 font-mono text-[11px] text-steel backdrop-blur">
-        arraste pra mover · role o mouse pra zoom · clique num nó pra ver o pipeline
+        arraste pra mover · role o mouse pra zoom
       </div>
     </div>
   )

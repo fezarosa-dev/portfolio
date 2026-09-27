@@ -31,3 +31,10 @@ test('todo nó tem pelo menos 2 passos "micro" (o que o código faz)', () => {
     }
   }
 })
+
+test('todo nó tem uma direção de expansão do pipeline diferente de zero', () => {
+  for (const node of architectureNodes) {
+    const magnitude = Math.abs(node.dir.dx) + Math.abs(node.dir.dy)
+    assert.ok(magnitude > 0, `${node.id} tem dir zerado (pipeline ficaria empilhado nele mesmo)`)
+  }
+})

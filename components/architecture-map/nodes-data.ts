@@ -24,6 +24,8 @@ export type ArchNode = {
   y: number
   /** passos reais do código, em ordem -- o "micro" por trás do nó macro */
   microSteps: MicroStep[]
+  /** direção (não precisa ser unitário) pra onde o pipeline desse nó se estende, escolhida pra não bater em outro nó */
+  dir: { dx: number; dy: number }
 }
 
 export type ArchEdge = {
@@ -41,6 +43,7 @@ export const architectureNodes: ArchNode[] = [
       'App Router do Next.js, Server Components. Leem conteúdo do Supabase (cacheado) e imagens do Google Drive por nome, em Markdown.',
     x: 85,
     y: 15,
+    dir: { dx: 1, dy: 0 },
     microSteps: [
       { label: 'Requisição chega', detail: 'middleware.ts lê o path, detecta o locale (cookie ou Accept-Language) e reescreve /pt/sobre -> /sobre com o header x-locale.' },
       { label: 'Server Component roda', detail: 'A página (ex: app/(site)/sobre/page.tsx) é async e busca dados direto no servidor, sem JS extra pro cliente.' },
@@ -57,6 +60,7 @@ export const architectureNodes: ArchNode[] = [
       'POST /api/search junta busca full-text e busca semântica (embeddings) do Supabase via reciprocal rank fusion, com rate limit por IP.',
     x: 85,
     y: 75,
+    dir: { dx: 1, dy: 0 },
     microSteps: [
       { label: 'Pessoa digita', detail: 'SearchPanel espera 300ms sem digitação (debounce) antes de disparar a busca, pra não bater na API em toda letra.' },
       { label: 'POST /api/search', detail: 'app/api/search/route.ts recebe { query } e primeiro checa o rate limit (countRecentSearchesFromIp, padrão 20/min).' },
@@ -73,6 +77,7 @@ export const architectureNodes: ArchNode[] = [
       'Guarda projetos, artigos, tecnologias, mensagens de contato, currículo e o conteúdo editável do site. RLS + grant em toda tabela nova.',
     x: 50,
     y: 50,
+    dir: { dx: 0.7, dy: 0.7 },
     microSteps: [
       { label: 'Toda tabela nova', detail: 'Migração cria a tabela + política de RLS + grant explícito -- RLS sozinha não libera o client JS do Supabase, precisa do grant também.' },
       { label: 'Leitura pública', detail: 'lib/supabase/queries.ts usa a anon key, só leitura, filtrando pelas policies de RLS (ex: só conteúdo visível).' },
@@ -88,6 +93,7 @@ export const architectureNodes: ArchNode[] = [
       'app/admin — login + abas (Projetos, Artigos, Tecnologias, Autores, Mensagens, Contato, Personalização, Currículo, Imagens, MCP). Mutações via lib/supabase/admin-queries.ts.',
     x: 15,
     y: 15,
+    dir: { dx: -1, dy: 0 },
     microSteps: [
       { label: 'Tenta acessar /admin', detail: 'middleware.ts intercepta e checa a sessão do Supabase Auth via cookie.' },
       { label: 'Sem sessão -> /admin/login', detail: 'shouldRedirectToLogin decide o redirect; com sessão válida, a requisição segue normal.' },
@@ -104,6 +110,7 @@ export const architectureNodes: ArchNode[] = [
       'lib/drive.ts busca arquivos por nome numa pasta do Drive configurada no admin — nunca escreve nada lá.',
     x: 50,
     y: 5,
+    dir: { dx: 0, dy: -1 },
     microSteps: [
       { label: 'Pasta configurada no admin', detail: 'drive_folder_url no conteúdo do site guarda qual pasta do Drive é a fonte das imagens.' },
       { label: 'Markdown referencia por nome', detail: 'Um texto escreve ![foto](nome-do-arquivo.jpg); remark-drive-images resolve isso pra uma URL real.' },
@@ -119,6 +126,7 @@ export const architectureNodes: ArchNode[] = [
       'app/api/mcp + lib/mcp/* implementam um servidor MCP: cada conexão tem um token e permissões próprias (ler projetos, ler mensagens, editar conteúdo etc.), configuradas no admin.',
     x: 15,
     y: 75,
+    dir: { dx: -1, dy: 0 },
     microSteps: [
       { label: 'Conexão criada no admin', detail: 'A aba MCP gera um token novo e define quais permissões aquela conexão específica tem.' },
       { label: 'Cliente de IA chama a API', detail: 'POST /api/mcp com o token (header Authorization ou X-Auth-Token, pra clientes que não deixam setar Authorization).' },
@@ -134,6 +142,7 @@ export const architectureNodes: ArchNode[] = [
     detail: 'app/(site)/contato envia pro Supabase; aparecem na aba Mensagens do admin.',
     x: 15,
     y: 45,
+    dir: { dx: -1, dy: 0 },
     microSteps: [
       { label: 'Formulário client-side', detail: 'contact-form.tsx valida nome/e-mail/mensagem antes de enviar.' },
       { label: 'Grava no Supabase', detail: 'A mensagem é salva numa tabela própria, sem precisar de autenticação (RLS permite só o insert).' },
@@ -149,6 +158,7 @@ export const architectureNodes: ArchNode[] = [
       'Componentes client-side (SudoEasterEgg, SpinEasterEgg, Mascote com rickroll) ativados/desativados por uma flag no conteúdo do site.',
     x: 85,
     y: 45,
+    dir: { dx: 1, dy: 0 },
     microSteps: [
       { label: 'Flag geral no admin', detail: 'easter_eggs_ativo liga/desliga todos de uma vez, sem precisar deploy novo.' },
       { label: 'Cada um é independente', detail: 'SudoEasterEgg, SpinEasterEgg e Mascote são componentes client separados, cada um escutando seu próprio gatilho.' },
@@ -163,6 +173,7 @@ export const architectureNodes: ArchNode[] = [
       '/status mostra métricas reais: deploy atual, latência do banco, última republicação e último reindex de busca — nada simulado.',
     x: 50,
     y: 90,
+    dir: { dx: 0, dy: 1 },
     microSteps: [
       { label: 'Página busca ao vivo', detail: 'A cada acesso a /status, o servidor mede as métricas na hora -- nada fica pré-calculado.' },
       { label: 'Latência do banco', detail: 'Uma query simples é cronometrada contra o Supabase pra mostrar o tempo real de resposta.' },
