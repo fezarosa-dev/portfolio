@@ -14,7 +14,7 @@ export function ArchitectureMap() {
   const nodeById = new Map(architectureNodes.map((n) => [n.id, n]))
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-visible">
+    <div className="relative h-full w-full overflow-hidden">
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
