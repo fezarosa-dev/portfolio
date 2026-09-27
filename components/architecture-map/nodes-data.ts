@@ -32,6 +32,12 @@ export type ArchEdge = {
   from: ArchNodeId
   to: ArchNodeId
   label: string
+  /** índice (0-based) de um passo específico do pipeline de `from`/`to` --
+   * quando presente, a conexão sai/chega nesse passo em vez da bolha do nó,
+   * pra mostrar que é aquele passo específico (não o nó genérico) que segue
+   * pra frente/recebe o valor. */
+  fromStep?: number
+  toStep?: number
 }
 
 export const architectureNodes: ArchNode[] = [
@@ -104,6 +110,7 @@ export const architectureNodes: ArchNode[] = [
       { label: 'Sem sessão -> /admin/login', detail: 'shouldRedirectToLogin decide o redirect; com sessão válida, a requisição segue normal.' },
       { label: 'Edita numa aba', detail: 'Cada aba (Projetos, Artigos...) chama uma função de admin-queries.ts, ex: upsertProjeto.' },
       { label: 'Grava no Postgres', detail: 'A mutação passa pelas policies de RLS que exigem usuário autenticado.' },
+      { label: 'Reindexa pra busca', detail: 'reindexProject/reindexArticle (lib/supabase/search-index.ts) geram um embedding novo do texto e gravam na tabela search_index -- é o que a busca semântica lê depois.' },
       { label: 'Cache do site precisa atualizar', detail: 'Como o público lê via cache (unstable_cache), a mutação revalida a tag certa pra a mudança aparecer no site.' },
     ],
   },
@@ -198,5 +205,5 @@ export const architectureEdges: ArchEdge[] = [
   { from: 'supabase', to: 'admin', label: 'mensagens recebidas' },
   { from: 'easter-eggs', to: 'paginas-publicas', label: 'ativados por flag' },
   { from: 'status', to: 'supabase', label: 'latência/volume' },
-  { from: 'status', to: 'busca', label: 'último reindex' },
+  { from: 'status', to: 'busca', label: 'último reindex', fromStep: 2 },
 ]

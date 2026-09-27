@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { architectureEdges, architectureNodes, type ArchNodeId } from './nodes-data'
+import { architectureEdges, architectureNodes, type ArchNode, type ArchNodeId } from './nodes-data'
 
 const ICONS: Record<ArchNodeId, LucideIcon> = {
   'paginas-publicas': Globe,
@@ -49,6 +49,17 @@ function toX(unit: number) {
 }
 function toY(unit: number) {
   return (unit / 100) * WORLD_H
+}
+
+// posição (em unidades) do nó, ou de um passo específico do pipeline dele
+// quando `step` é passado -- mesma fórmula usada pros cards de passo, pra
+// garantir que a conexão sempre chega exatamente no lugar certo
+function nodePoint(node: ArchNode, step?: number) {
+  if (step === undefined) return { x: node.x, y: node.y }
+  return {
+    x: node.x + node.dir.dx * STEP_DISTANCE * (step + 1),
+    y: node.y + node.dir.dy * STEP_DISTANCE * (step + 1),
+  }
 }
 
 function curvePath(x1: number, y1: number, x2: number, y2: number) {
@@ -165,10 +176,12 @@ export function ArchitectureMap() {
             const from = nodeById.get(edge.from)
             const to = nodeById.get(edge.to)
             if (!from || !to) return null
+            const fromPoint = nodePoint(from, edge.fromStep)
+            const toPoint = nodePoint(to, edge.toStep)
             return (
               <motion.path
                 key={`${edge.from}-${edge.to}`}
-                d={curvePath(toX(from.x), toY(from.y), toX(to.x), toY(to.y))}
+                d={curvePath(toX(fromPoint.x), toY(fromPoint.y), toX(toPoint.x), toY(toPoint.y))}
                 fill="none"
                 stroke="var(--signal)"
                 strokeOpacity={0.55}
@@ -214,10 +227,12 @@ export function ArchitectureMap() {
           const from = nodeById.get(edge.from)
           const to = nodeById.get(edge.to)
           if (!from || !to) return null
+          const fromPoint = nodePoint(from, edge.fromStep)
+          const toPoint = nodePoint(to, edge.toStep)
           return (
             <span
               key={`label-${edge.from}-${edge.to}`}
-              style={{ left: toX((from.x + to.x) / 2), top: toY((from.y + to.y) / 2) }}
+              style={{ left: toX((fromPoint.x + toPoint.x) / 2), top: toY((fromPoint.y + toPoint.y) / 2) }}
               className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-hairline bg-background px-2 py-0.5 font-mono text-[11px] whitespace-nowrap text-steel"
             >
               {edge.label}
