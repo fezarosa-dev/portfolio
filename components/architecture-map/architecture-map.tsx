@@ -126,7 +126,17 @@ export function ArchitectureMap() {
           transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
         }}
       >
-        <svg width={WORLD_W} height={WORLD_H} className="absolute inset-0" aria-hidden>
+        {/* overflow-visible é essencial: os passos de um pipeline se estendem
+            além da caixa WORLD_W x WORLD_H (ex: busca vai de x=85 até x=165
+            em unidades), e SVG recorta filhos fora da própria largura/altura
+            por padrão -- sem isso, as conexões entre os passos mais distantes
+            do nó ficavam invisíveis, cortadas pelo próprio <svg>. */}
+        <svg
+          width={WORLD_W}
+          height={WORLD_H}
+          className="absolute inset-0 overflow-visible"
+          aria-hidden
+        >
           <defs>
             <marker
               id="arch-arrow"
