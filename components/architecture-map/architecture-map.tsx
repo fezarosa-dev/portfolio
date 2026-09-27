@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { architectureEdges, architectureNodes, type ArchNode } from './nodes-data'
 
 function edgePoints(from: ArchNode, to: ArchNode) {
@@ -57,16 +58,28 @@ export function ArchitectureMap() {
           )
         })}
       </svg>
-      {architectureNodes.map((node) => (
-        <button
-          key={node.id}
-          type="button"
-          style={{ left: `${node.x}%`, top: `${node.y}%` }}
-          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-hairline bg-card px-3 py-2 font-mono text-xs text-foreground shadow-sm transition-transform hover:scale-105 motion-reduce:transition-none"
-        >
-          {node.label}
-        </button>
-      ))}
+      <TooltipProvider>
+        {architectureNodes.map((node, i) => (
+          <Tooltip key={node.id}>
+            <TooltipTrigger
+              render={
+                <motion.button
+                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-hairline bg-card px-3 py-2 font-mono text-xs text-foreground shadow-sm transition-transform hover:scale-105 motion-reduce:transition-none"
+                  initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: reduceMotion ? 0 : i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                />
+              }
+            >
+              <span className="block font-medium">{node.label}</span>
+              <span className="block text-[10px] text-steel">{node.summary}</span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-56">{node.detail}</TooltipContent>
+          </Tooltip>
+        ))}
+      </TooltipProvider>
     </div>
   )
 }
