@@ -51,10 +51,11 @@ export const architectureNodes: ArchNode[] = [
     y: 15,
     dir: { dx: 1, dy: 0 },
     microSteps: [
-      { label: 'Requisição chega', detail: 'middleware.ts lê o path, detecta o locale (cookie ou Accept-Language) e reescreve /pt/sobre -> /sobre com o header x-locale.' },
+      { label: 'Requisição chega', detail: 'middleware.ts lê o path, detecta o locale (cookie "locale" ou Accept-Language via detectLocaleFromAcceptLanguage) e reescreve /pt/sobre -> /sobre com o header x-locale; /admin e /api passam direto (isPassthrough).' },
+      { label: 'Tema/animação já vêm certos', detail: 'app/layout.tsx lê os cookies "theme" e "reduce-motion" antes de renderizar -- sem cookie, o padrão é escuro e animado. Não depende de JS no cliente, então não tem flash de tema errado.' },
       { label: 'Server Component roda', detail: 'A página (ex: app/(site)/sobre/page.tsx) é async e busca dados direto no servidor, sem JS extra pro cliente.' },
       { label: 'Conteúdo vem cacheado', detail: 'getSiteContent()/queries-cached.ts usa unstable_cache do Next -- não bate no Supabase em toda requisição.' },
-      { label: 'Texto bilíngue é resolvido', detail: 'resolveText(pt, en, locale) escolhe a versão certa do texto conforme o locale detectado.' },
+      { label: 'Texto bilíngue é resolvido', detail: 'resolveText(pt, en, locale) escolhe a versão certa do texto conforme o locale detectado, usando o dicionário de lib/i18n/dictionaries.ts.' },
       { label: 'HTML pronto é enviado', detail: 'A página já renderizada chega no navegador; hidratação do React só liga as partes interativas (animações, forms).' },
     ],
   },
@@ -90,7 +91,7 @@ export const architectureNodes: ArchNode[] = [
     // coluna direita, sem cruzar o pipeline de nenhum dos dois.
     dir: { dx: 0.25, dy: -1 },
     microSteps: [
-      { label: 'Toda tabela nova', detail: 'Migração cria a tabela + política de RLS + grant explícito -- RLS sozinha não libera o client JS do Supabase, precisa do grant também.' },
+      { label: 'Toda tabela nova', detail: 'Migração cria a tabela + política de RLS + grant explícito -- RLS sozinha não libera o client JS do Supabase, precisa do grant também. Tabelas principais: projects, articles, languages, authors, companies, messages, resume, resume_links, contact_links, site_content, search_index, search_requests, mcp_connections (+ project_authors/project_languages como tabelas de junção).' },
       { label: 'Leitura pública', detail: 'lib/supabase/queries.ts usa a anon key, só leitura, filtrando pelas policies de RLS (ex: só conteúdo visível).' },
       { label: 'Mutação autenticada', detail: 'lib/supabase/admin-queries.ts usa o client autenticado da sessão do admin -- policies de RLS exigem auth.uid() válido.' },
       { label: 'Acesso via MCP', detail: 'lib/supabase/service.ts monta um client próprio por conexão MCP, respeitando as permissões daquele token específico.' },
@@ -108,7 +109,8 @@ export const architectureNodes: ArchNode[] = [
     microSteps: [
       { label: 'Tenta acessar /admin', detail: 'middleware.ts intercepta e checa a sessão do Supabase Auth via cookie.' },
       { label: 'Sem sessão -> /admin/login', detail: 'shouldRedirectToLogin decide o redirect; com sessão válida, a requisição segue normal.' },
-      { label: 'Edita numa aba', detail: 'Cada aba (Projetos, Artigos...) chama uma função de admin-queries.ts, ex: upsertProjeto.' },
+      { label: 'Login por e-mail/senha', detail: 'app/admin/login/actions.ts chama supabase.auth.signInWithPassword({ email, password }); a sessão vira cookie via @supabase/ssr, sem token separado pra gerenciar no cliente.' },
+      { label: 'Edita numa aba', detail: 'Cada aba (Projetos, Artigos, Tecnologias, Autores, Empresas, Mensagens, Contato, Personalização, Currículo, Imagens, MCP, Preview) chama uma função de admin-queries.ts, ex: upsertProjeto.' },
       { label: 'Grava no Postgres', detail: 'A mutação passa pelas policies de RLS que exigem usuário autenticado.' },
       { label: 'Reindexa pra busca', detail: 'reindexProject/reindexArticle (lib/supabase/search-index.ts) geram um embedding novo do texto e gravam na tabela search_index -- é o que a busca semântica lê depois.' },
       { label: 'Cache do site precisa atualizar', detail: 'Como o público lê via cache (unstable_cache), a mutação revalida a tag certa pra a mudança aparecer no site.' },
@@ -144,7 +146,7 @@ export const architectureNodes: ArchNode[] = [
       { label: 'Cliente de IA chama a API', detail: 'POST /api/mcp com o token (header Authorization ou X-Auth-Token, pra clientes que não deixam setar Authorization).' },
       { label: 'Token é validado', detail: 'lib/mcp/auth.ts confere o token e carrega as permissões daquela conexão específica.' },
       { label: 'Servidor MCP é montado', detail: 'lib/mcp/server.ts + registerMcpTools só registram as tools/resources que aquela conexão tem permissão de usar.' },
-      { label: 'Tool roda no Supabase', detail: 'Cada tool lê ou escreve via lib/supabase/service.ts, dentro do que foi permitido pra aquele token.' },
+      { label: 'Tool roda no Supabase', detail: 'Cada tool lê ou escreve via lib/supabase/service.ts, dentro do que foi permitido pra aquele token. Cobre CRUD completo por permissão: projetos, artigos, tecnologias, autores, empresas (upsert/delete/list de cada); mensagens (list/marcar lida/delete); links de contato e de currículo; currículo (read/update); e o conteúdo do site (read/set/delete de cada chave).' },
     ],
   },
   {
@@ -187,7 +189,7 @@ export const architectureNodes: ArchNode[] = [
     y: 90,
     dir: { dx: 0, dy: 1 },
     microSteps: [
-      { label: 'Página busca ao vivo', detail: 'A cada acesso a /status, o servidor mede as métricas na hora -- nada fica pré-calculado.' },
+      { label: 'Página busca ao vivo', detail: 'A cada acesso a /status, o servidor mede as métricas na hora -- nada fica pré-calculado. Mostra também o deploy atual e a branch em uso, lidos de verdade, não hardcoded.' },
       { label: 'Latência do banco', detail: 'Uma query simples é cronometrada contra o Supabase pra mostrar o tempo real de resposta.' },
       { label: 'Última republicação/reindex', detail: 'Timestamps guardados no próprio conteúdo do site, atualizados quando o conteúdo muda ou a busca é reindexada.' },
     ],
