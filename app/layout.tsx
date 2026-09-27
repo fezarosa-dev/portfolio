@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { cookies, headers } from "next/headers";
-import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono, Bricolage_Grotesque, Climate_Crisis } from "next/font/google";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { ReduceMotionProvider } from "@/components/reduce-motion-provider";
 import { getSiteContent } from "@/lib/supabase/queries-cached";
@@ -9,6 +8,19 @@ import "./globals.css";
 
 const display = Space_Grotesk({
   variable: "--font-display",
+  subsets: ["latin"],
+});
+
+// Fonte só pro site público (ver .site-warm em app/globals.css, que
+// sobrescreve --font-display com esta) — admin continua em Space Grotesk.
+const displaySite = Bricolage_Grotesque({
+  variable: "--font-display-site",
+  subsets: ["latin"],
+});
+
+// Só pro título da hero (ver components/home/hero-section.tsx).
+const heroFont = Climate_Crisis({
+  variable: "--font-hero",
   subsets: ["latin"],
 });
 
@@ -68,7 +80,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [headerList, cookieStore] = await Promise.all([headers(), cookies()]);
   const locale = headerList.get("x-locale") === "en" ? "en" : "pt-BR";
-  const dark = cookieStore.get("theme")?.value === "dark";
+  // padrão é escuro, independente do tema do sistema -- só muda pelo switch
+  // de configurações (que grava o cookie "theme")
+  const dark = cookieStore.get("theme")?.value !== "light";
   const reduceMotionCookie = cookieStore.get("reduce-motion")?.value;
   const analyticsConsent = cookieStore.get("cookie-consent")?.value === "accepted";
 
@@ -76,13 +90,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased${dark ? " dark" : ""}`}
+      className={`${display.variable} ${displaySite.variable} ${heroFont.variable} ${sans.variable} ${mono.variable} h-full antialiased${dark ? " dark" : ""}${reduceMotionCookie === "true" ? " reduce-motion" : ""}`}
     >
-      <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{var m=document.cookie.match(/(?:^|; )theme=([^;]*)/);if(!m){var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.toggle('dark',d);}}catch(e){}})();`}
-        </Script>
-      </head>
       <body className="min-h-full flex flex-col">
         <div
           aria-hidden

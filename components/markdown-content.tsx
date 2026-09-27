@@ -1,5 +1,6 @@
 'use client'
 
+import type { ComponentPropsWithoutRef } from 'react'
 import { motion } from 'framer-motion'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -23,6 +24,21 @@ const MarkdownImage: Components['img'] = ({ src, alt }) => {
   return <img src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} />
 }
 
+// revela cada bloco (parágrafo, item de lista, título, citação) sozinho
+// conforme entra na tela, em vez do markdown inteiro de uma vez -- usado no
+// currículo, artigos e páginas de projeto, que costumam ser textos longos
+// onde uma única animação no topo passa desapercebida ao rolar
+function useReveal() {
+  const { enabled: reduceMotion } = useReduceMotion()
+  if (reduceMotion) return {}
+  return {
+    initial: { opacity: 0, y: 24, filter: 'blur(6px)' },
+    whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' },
+    viewport: { once: true, amount: 0.5 },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
+  }
+}
+
 export function MarkdownContent({
   content,
   driveImages,
@@ -30,24 +46,36 @@ export function MarkdownContent({
   content: string
   driveImages: DriveMedia[]
 }) {
-  const { enabled: reduceMotion } = useReduceMotion()
-  const markdown = (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm, [remarkDriveImages, driveImages]]}
-      components={{ img: MarkdownImage }}
-    >
-      {content}
-    </ReactMarkdown>
-  )
+  const reveal = useReveal()
+
+  // onDrag/onAnimation* do DOM têm assinatura incompatível com as do Framer
+  // Motion -- omitidos porque o motion.* nunca herda esses handlers do
+  // react-markdown de qualquer forma
+  type TagProps<T extends keyof React.JSX.IntrinsicElements> = Omit<
+    ComponentPropsWithoutRef<T>,
+    'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd'
+  > & {
+    node?: unknown
+  }
 
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className={CLASS_NAME}
-    >
-      {markdown}
-    </motion.div>
+    <div className={CLASS_NAME}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, [remarkDriveImages, driveImages]]}
+        components={{
+          img: MarkdownImage,
+          p: ({ node, ...props }: TagProps<'p'>) => <motion.p {...reveal} {...props} />,
+          li: ({ node, ...props }: TagProps<'li'>) => <motion.li {...reveal} {...props} />,
+          h1: ({ node, ...props }: TagProps<'h1'>) => <motion.h1 {...reveal} {...props} />,
+          h2: ({ node, ...props }: TagProps<'h2'>) => <motion.h2 {...reveal} {...props} />,
+          h3: ({ node, ...props }: TagProps<'h3'>) => <motion.h3 {...reveal} {...props} />,
+          blockquote: ({ node, ...props }: TagProps<'blockquote'>) => (
+            <motion.blockquote {...reveal} {...props} />
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   )
 }

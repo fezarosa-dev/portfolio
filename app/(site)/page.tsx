@@ -60,6 +60,8 @@ export default async function HomePage() {
       <SearchTeaser
         locale={locale}
         eyebrow={dict.busca.eyebrow}
+        title={dict.busca.title}
+        subtitle={dict.busca.subtitle}
         placeholder={dict.busca.placeholder}
         noResultsLabel={dict.busca.noResults}
       />
