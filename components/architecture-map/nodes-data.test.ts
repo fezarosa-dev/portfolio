@@ -21,3 +21,13 @@ test('nenhum nó fica fora do mapa (0-100 em x e y)', () => {
     assert.ok(node.y >= 0 && node.y <= 100, `${node.id} com y fora do intervalo`)
   }
 })
+
+test('todo nó tem pelo menos 2 passos "micro" (o que o código faz)', () => {
+  for (const node of architectureNodes) {
+    assert.ok(node.microSteps.length >= 2, `${node.id} tem poucos microSteps`)
+    for (const step of node.microSteps) {
+      assert.ok(step.label.length > 0, `${node.id} tem microStep sem label`)
+      assert.ok(step.detail.length > 0, `${node.id} tem microStep sem detail`)
+    }
+  }
+})
