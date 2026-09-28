@@ -610,3 +610,25 @@ html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
   border-radius: 9999px;
   border: 2px solid var(--primary);
 }
+
+/* Barra de rolagem fina, só no site público (html não está dentro de .site-warm) */
+html:has(.site-warm) {
+  scrollbar-width: thin;
+  scrollbar-color: #c14e15 transparent;
+}
+html:has(.site-warm)::-webkit-scrollbar {
+  width: 10px;
+}
+html:has(.site-warm)::-webkit-scrollbar-track {
+  background: transparent;
+}
+html:has(.site-warm)::-webkit-scrollbar-thumb {
+  background: #c14e15;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+html:has(.site-warm)::-webkit-scrollbar-thumb:hover {
+  background: #e0722f;
+  background-clip: padding-box;
+}
