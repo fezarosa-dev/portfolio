@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import Image from 'next/image'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { RickrollPlayer } from '@/components/rickroll-player'
 
@@ -21,6 +20,7 @@ export function Mascote({
   rickrollClicks?: number
 }) {
   const [acordado, setAcordado] = useState(false)
+  const [everWoke, setEverWoke] = useState(false)
   const [frase, setFrase] = useState('...')
   const [rickrollOpen, setRickrollOpen] = useState(false)
   const [rickrollPreload, setRickrollPreload] = useState(false)
@@ -37,6 +37,7 @@ export function Mascote({
     const requestId = ++requestIdRef.current
     setFrase('...')
     setAcordado(true)
+    setEverWoke(true)
     timeoutRef.current = setTimeout(() => setAcordado(false), 6000)
 
     fetch(JOKE_API_URL)
@@ -90,51 +91,24 @@ export function Mascote({
         type="button"
         onClick={handleClick}
         aria-label="Cutucar o mascote"
-        className="relative block h-[116px] w-16 cursor-pointer"
+        className="relative block h-[116px] w-[72px] cursor-pointer"
       >
-        <AnimatePresence initial={false}>
-          {acordado ? (
-            <motion.div
-              key="acordado"
-              className="absolute inset-0 origin-bottom"
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={reduceMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.4, ease: 'easeInOut' }}
-            >
-              <Image
-                src="/img/mascote-cachorro-acordado.svg"
-                alt=""
-                aria-hidden
-                width={64}
-                height={116}
-                priority
-                className="!h-[116px] !w-16"
-              />
-            </motion.div>
-          ) : (
-            // dormindo: respira devagar (em vez de flutuar pra cima e pra baixo)
-            <motion.div
-              key="dormindo"
-              className="absolute inset-0 origin-bottom"
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1, scaleY: reduceMotion ? 1 : [1, 1.035, 1] }}
-              exit={reduceMotion ? undefined : { opacity: 0, transition: { duration: 0.4 } }}
-              transition={{ opacity: { duration: 0.3 }, scaleY: { duration: 3, ease: 'easeInOut', repeat: Infinity } }}
-            >
-              <Image
-                src="/img/mascote-cachorro.svg"
-                alt=""
-                aria-hidden
-                width={64}
-                height={116}
-                priority
-                className="!h-[116px] !w-16"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+        {/* folha de 18 quadros (public/img/mascote-acordando.webp): 1º = dormindo, último = sentado.
+            Acordar toca a folha pra frente, voltar a dormir toca de trás pra frente (ver .dog-* em globals.css) */}
+        <motion.div
+          className="absolute inset-0 origin-bottom"
+          animate={{ scaleY: acordado || reduceMotion ? 1 : [1, 1.03, 1] }}
+          transition={
+            acordado || reduceMotion ? { duration: 0.2 } : { duration: 3, ease: 'easeInOut', repeat: Infinity }
+          }
+        >
+          <div
+            aria-hidden
+            className={`dog-sprite ${
+              reduceMotion ? (acordado ? 'dog-awake-static' : '') : acordado ? 'dog-wake' : everWoke ? 'dog-sleep' : ''
+            }`}
+          />
+        </motion.div>
       </motion.button>
 
       {acordado ? (
@@ -153,7 +127,7 @@ export function Mascote({
         </div>
       ) : (
         // Zs subindo em zigue-zague da cabeça do cachorro dormindo (CSS: .dog-z em globals.css)
-        <div aria-hidden className="pointer-events-none absolute top-[50px] left-4 font-mono font-semibold text-signal">
+        <div aria-hidden className="pointer-events-none absolute top-[52px] left-5 font-mono font-semibold text-signal">
           {reduceMotion ? (
             <span className="absolute text-base opacity-60">Z</span>
           ) : (

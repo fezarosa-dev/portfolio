@@ -756,3 +756,27 @@ html:not(.reduce-motion) [data-slot="button"] {
     opacity: 0;
   }
 }
+
+/* Mascote: folha de quadros dormindo -> sentado (components/mascote.tsx) */
+.dog-sprite {
+  width: 72px;
+  height: 116px;
+  background: url("/img/mascote-acordando.webp") 0 0 / 1800% 100% no-repeat;
+}
+.dog-wake {
+  animation: dog-frames 1.3s steps(17) forwards;
+}
+.dog-sleep {
+  animation: dog-frames 1s steps(17) reverse forwards;
+}
+.dog-awake-static {
+  background-position: 100% 0;
+}
+@keyframes dog-frames {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
