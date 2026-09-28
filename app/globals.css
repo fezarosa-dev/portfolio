@@ -757,17 +757,22 @@ html:not(.reduce-motion) [data-slot="button"] {
   }
 }
 
-/* Mascote: folha de quadros dormindo -> sentado (components/mascote.tsx) */
+/* Mascote: folha de 20 quadros dormindo -> sentado (components/mascote.tsx).
+   Quadros 0-7: dormindo se mexendo; 8-19: sentado surgindo da nuvem (public/img/mascote-acordando.webp,
+   gerada por morph entre as duas poses) */
 .dog-sprite {
   width: 72px;
   height: 116px;
-  background: url("/img/mascote-acordando.webp") 0 0 / 1800% 100% no-repeat;
+  background: url("/img/mascote-acordando.webp") 0 0 / 2000% 100% no-repeat;
 }
 .dog-wake {
-  animation: dog-frames 1.3s steps(17) forwards;
+  animation: dog-frames 1.5s steps(19) forwards;
+}
+.dog-repop {
+  animation: dog-frames-pop 0.8s steps(11) forwards;
 }
 .dog-sleep {
-  animation: dog-frames 1s steps(17) reverse forwards;
+  animation: dog-frames 1.1s steps(19) reverse forwards;
 }
 .dog-awake-static {
   background-position: 100% 0;
@@ -778,5 +783,54 @@ html:not(.reduce-motion) [data-slot="button"] {
   }
   to {
     background-position: 100% 0;
+  }
+}
+@keyframes dog-frames-pop {
+  from {
+    background-position: 42.105% 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
+
+.dog-puff {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --puff-delay: 0.3s;
+}
+.dog-puff-repop {
+  --puff-delay: 0s;
+}
+.dog-puff-sleep {
+  --puff-delay: 0.25s;
+}
+.dog-puff span {
+  position: absolute;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--card) 88%, white);
+  border: 1.5px solid var(--hairline);
+  opacity: 0;
+  animation: dog-puff 0.8s ease-out both;
+  animation-delay: calc(var(--puff-delay) + var(--d, 0s));
+}
+.dog-puff span:nth-child(1) { left: 6px; top: 66px; width: 26px; height: 26px; --d: 0s; }
+.dog-puff span:nth-child(2) { left: 24px; top: 46px; width: 32px; height: 32px; --d: 0.04s; }
+.dog-puff span:nth-child(3) { left: 44px; top: 64px; width: 26px; height: 26px; --d: 0.02s; }
+.dog-puff span:nth-child(4) { left: 14px; top: 84px; width: 28px; height: 28px; --d: 0.06s; }
+.dog-puff span:nth-child(5) { left: 40px; top: 86px; width: 26px; height: 26px; --d: 0.03s; }
+@keyframes dog-puff {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
   }
 }

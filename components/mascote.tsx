@@ -20,7 +20,10 @@ export function Mascote({
   rickrollClicks?: number
 }) {
   const [acordado, setAcordado] = useState(false)
-  const [everWoke, setEverWoke] = useState(false)
+  // 'idle' = dormindo parado; 'wake' = acorda (folha inteira); 'repop' = já acordado e cutucado de novo
+  // (só a parte do cachorro sentado surgindo da nuvem); 'sleep' = volta a dormir (folha de trás pra frente).
+  // `key` muda a cada clique pra remontar o elemento e reiniciar a animação CSS.
+  const [anim, setAnim] = useState<{ mode: 'idle' | 'wake' | 'repop' | 'sleep'; key: number }>({ mode: 'idle', key: 0 })
   const [frase, setFrase] = useState('...')
   const [rickrollOpen, setRickrollOpen] = useState(false)
   const [rickrollPreload, setRickrollPreload] = useState(false)
@@ -36,9 +39,12 @@ export function Mascote({
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     const requestId = ++requestIdRef.current
     setFrase('...')
+    setAnim((a) => ({ mode: acordado ? 'repop' : 'wake', key: a.key + 1 }))
     setAcordado(true)
-    setEverWoke(true)
-    timeoutRef.current = setTimeout(() => setAcordado(false), 6000)
+    timeoutRef.current = setTimeout(() => {
+      setAcordado(false)
+      setAnim((a) => ({ mode: 'sleep', key: a.key + 1 }))
+    }, 6000)
 
     fetch(JOKE_API_URL)
       .then((res) => res.json())
@@ -103,12 +109,19 @@ export function Mascote({
           }
         >
           <div
+            key={anim.key}
             aria-hidden
-            className={`dog-sprite ${
-              reduceMotion ? (acordado ? 'dog-awake-static' : '') : acordado ? 'dog-wake' : everWoke ? 'dog-sleep' : ''
-            }`}
+            className={`dog-sprite ${reduceMotion ? (acordado ? 'dog-awake-static' : '') : `dog-${anim.mode}`}`}
           />
         </motion.div>
+        {/* nuvem de fumaça que esconde a troca de pose no meio da animação */}
+        {!reduceMotion && anim.mode !== 'idle' && (
+          <div key={`puff-${anim.key}`} aria-hidden className={`dog-puff dog-puff-${anim.mode}`}>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span key={i} />
+            ))}
+          </div>
+        )}
       </motion.button>
 
       {acordado ? (
