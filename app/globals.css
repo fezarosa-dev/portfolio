@@ -584,27 +584,17 @@ html.cursor-custom * {
 html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
   cursor: text !important;
 }
-.cursor-dot,
-.cursor-ring {
+.cursor-arrow {
   position: fixed;
   top: 0;
   left: 0;
   z-index: 9999;
   pointer-events: none;
-  border-radius: 9999px;
   transition: opacity 0.2s;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.25));
 }
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--primary);
-}
-.cursor-ring {
-  width: 34px;
-  height: 34px;
-  border: 1.5px solid var(--primary);
-  transition: opacity 0.2s, background-color 0.2s;
-}
-.cursor-ring[data-hover="true"] {
-  background: color-mix(in oklab, var(--primary) 18%, transparent);
+.cursor-arrow svg {
+  display: block;
+  transform-origin: 4px 2.5px;
+  transition: transform 0.15s ease-out;
 }
