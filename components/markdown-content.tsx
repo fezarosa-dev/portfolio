@@ -9,7 +9,7 @@ import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { DriveMedia } from '@/lib/drive'
 
 const CLASS_NAME =
-  'prose dark:prose-invert max-w-none break-words prose-headings:font-display prose-headings:tracking-tight prose-a:text-signal prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-hr:border-hairline prose-blockquote:border-signal prose-pre:overflow-x-auto prose-img:mx-auto'
+  'prose dark:prose-invert max-w-none break-words prose-headings:font-display prose-headings:tracking-tight prose-a:text-signal prose-a:no-underline prose-strong:text-foreground prose-hr:border-hairline prose-blockquote:border-signal prose-pre:overflow-x-auto prose-img:mx-auto'
 
 const VIDEO_EXTENSION_RE = /\.(mp4|webm|mov|ogv)(\?|#|$)/i
 

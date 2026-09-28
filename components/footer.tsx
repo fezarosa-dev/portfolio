@@ -68,7 +68,7 @@ export async function Footer() {
       <div className="mx-auto mt-4 flex max-w-4xl flex-col items-center justify-between gap-2 font-mono text-[11px] text-steel/70 sm:flex-row">
         <div className="flex gap-4">
           {legalLinks.map((link) => (
-            <a key={link.href} href={link.href} className="transition-colors hover:text-signal">
+            <a key={link.href} href={link.href} className="link-underline transition-colors hover:text-signal">
               {link.label}
             </a>
           ))}

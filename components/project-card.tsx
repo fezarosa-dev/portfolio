@@ -32,7 +32,7 @@ export function ProjectCard({
   const summary = resolveText(project.summary, project.summary_en, locale)
 
   return (
-    <div className="group rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <div data-tilt className="group rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <Link
         href={href}
         target={isExternal ? '_blank' : undefined}

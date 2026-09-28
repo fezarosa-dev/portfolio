@@ -656,3 +656,29 @@ html.custom-scrollbar::-webkit-scrollbar {
   color: var(--primary-foreground);
   text-shadow: none;
 }
+
+/* Sublinhado que se desenha da esquerda pra direita no hover (links do footer e do markdown) */
+.link-underline,
+.site-warm .prose a {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0% 1px no-repeat;
+  transition: background-size 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.15s;
+}
+.link-underline:hover,
+.site-warm .prose a:hover {
+  background-size: 100% 1px;
+}
+
+/* Cards inclinando em 3D com brilho seguindo o mouse (components/hover-effects.tsx) */
+html:not(.reduce-motion) [data-tilt] {
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  background-image: radial-gradient(
+    260px circle at var(--mx, -999px) var(--my, -999px),
+    color-mix(in oklab, var(--primary) 14%, transparent),
+    transparent 70%
+  );
+}
+/* Botões puxados de leve na direção do mouse */
+html:not(.reduce-motion) [data-slot="button"] {
+  transform: translate(var(--px, 0px), var(--py, 0px));
+}
