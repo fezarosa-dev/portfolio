@@ -738,3 +738,21 @@ html:not(.reduce-motion) [data-slot="button"] {
     translate: 220%;
   }
 }
+
+/* Zs do cachorro dormindo (components/mascote.tsx): sobem pra direita balançando e somem */
+.dog-z {
+  position: absolute;
+  font-size: 15px;
+  opacity: 0;
+  animation: dog-z-float 2.4s ease-out infinite;
+}
+@keyframes dog-z-float {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.7);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(26px, -46px) rotate(28deg) scale(1.15);
+    opacity: 0;
+  }
+}

@@ -117,9 +117,9 @@ export function Mascote({
         />
       </motion.button>
 
-      <div className="pointer-events-none absolute right-8 bottom-[108px] w-max max-w-[220px] rounded-2xl border border-hairline bg-card px-2 py-1 font-mono text-[10px] leading-snug break-words text-foreground/80 shadow-sm">
-        <AnimatePresence mode="wait">
-          {acordado ? (
+      {acordado ? (
+        <div className="pointer-events-none absolute right-8 bottom-[108px] w-max max-w-[220px] rounded-2xl border border-hairline bg-card px-2 py-1 font-mono text-[10px] leading-snug break-words text-foreground/80 shadow-sm">
+          <AnimatePresence mode="wait">
             <motion.span
               key={frase}
               initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
@@ -129,47 +129,21 @@ export function Mascote({
             >
               {frase}
             </motion.span>
+          </AnimatePresence>
+        </div>
+      ) : (
+        // Zs subindo em zigue-zague da cabeça do cachorro dormindo (CSS: .dog-z em globals.css)
+        <div aria-hidden className="pointer-events-none absolute top-7 right-9 font-mono font-semibold text-signal">
+          {reduceMotion ? (
+            <span className="absolute text-base opacity-60">Z</span>
           ) : (
-            <motion.span key="zzz" className="inline-flex gap-0.5" aria-hidden>
-              {['Z', 'z', 'z'].map((letra, i) => (
-                <motion.span
-                  key={i}
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : { y: [0, -4, 0], opacity: [0.4, 1, 0.4] }
-                  }
-                  transition={
-                    reduceMotion
-                      ? undefined
-                      : { duration: 1.4, ease: 'easeInOut', repeat: Infinity, delay: i * 0.25 }
-                  }
-                >
-                  {letra}
-                </motion.span>
-              ))}
-            </motion.span>
+            [0, 1, 2, 3].map((i) => (
+              <span key={i} className="dog-z" style={{ animationDelay: `${i * 0.6}s` }}>
+                Z
+              </span>
+            ))
           )}
-        </AnimatePresence>
-      </div>
-
-      {!acordado && (
-        <>
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute top-6 right-9 h-2 w-2 rounded-full border border-hairline bg-card"
-            animate={reduceMotion ? undefined : { scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
-            transition={reduceMotion ? undefined : { duration: 1.8, ease: 'easeInOut', repeat: Infinity }}
-          />
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute top-4 right-7 h-1.5 w-1.5 rounded-full border border-hairline bg-card"
-            animate={reduceMotion ? undefined : { scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
-            transition={
-              reduceMotion ? undefined : { duration: 1.8, ease: 'easeInOut', repeat: Infinity, delay: 0.3 }
-            }
-          />
-        </>
+        </div>
       )}
 
       {rickrollVideoId && rickrollPreload && (
