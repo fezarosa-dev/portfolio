@@ -5,7 +5,6 @@ import { getDictionary } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavSettings } from '@/components/nav-settings'
-import { SideNav } from '@/components/side-nav'
 import { SearchPill } from '@/components/search/search-trigger'
 import { CollapsibleOnScroll } from '@/components/collapsible-on-scroll'
 
@@ -41,60 +40,56 @@ export async function Nav() {
   const easterEggsAtivo = content.easter_eggs_ativo !== 'false'
 
   return (
-    <>
-      <div className="sticky top-0 z-40 border-b border-hairline bg-background/80 backdrop-blur">
-        <CollapsibleOnScroll className="hidden md:grid">
-          <div className="flex items-center gap-2 border-b border-hairline px-6 py-1.5 font-mono text-[11px] text-steel">
-            <span
-              className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{ backgroundColor: statusColor }}
-              aria-hidden
-            />
-            <span className="truncate">{statusText}</span>
-            <span className="ml-auto flex items-center gap-2">
-              <NavSettings
-                initialDark={isDark}
-                locale={locale}
-                label={dict.nav.settings}
-                easterEggsAtivo={easterEggsAtivo}
-              />
-            </span>
-          </div>
-        </CollapsibleOnScroll>
-        <nav className="relative flex items-center justify-between px-6 py-4">
-          <Link href={`/${locale}`} className="group font-mono text-sm font-medium tracking-tight">
-            zanoni
-            <span className="inline-block text-signal transition-transform duration-200 ease-out group-hover:-rotate-6 motion-reduce:transition-none">
-              .dev.br
-            </span>
-          </Link>
-          <ul className="hidden gap-5 text-sm md:flex md:gap-7 xl:hidden">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="relative text-foreground/80 transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-signal after:transition-transform after:duration-200 after:ease-out hover:text-signal hover:after:scale-x-100 motion-reduce:after:transition-none"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <SearchPill label={dict.busca.title} className="hidden md:flex xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
-          <MobileNav
-            links={navLinks}
-            openLabel={dict.nav.menuOpen}
-            closeLabel={dict.nav.menuClose}
-            settingsLabel={dict.nav.settings}
-            searchLabel={dict.busca.title}
-            initialDark={isDark}
-            locale={locale}
-            easterEggsAtivo={easterEggsAtivo}
+    <div className="sticky top-0 z-40 border-b border-hairline bg-background/80 backdrop-blur">
+      <CollapsibleOnScroll className="hidden md:grid">
+        <div className="flex items-center gap-2 border-b border-hairline px-6 py-1.5 font-mono text-[11px] text-steel">
+          <span
+            className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: statusColor }}
+            aria-hidden
           />
-        </nav>
-      </div>
-      {/* fora do sticky: o backdrop-blur dele viraria o referencial do `fixed` */}
-      <SideNav links={navLinks} />
-    </>
+          <span className="truncate">{statusText}</span>
+          <span className="ml-auto flex items-center gap-2">
+            <NavSettings
+              initialDark={isDark}
+              locale={locale}
+              label={dict.nav.settings}
+              easterEggsAtivo={easterEggsAtivo}
+            />
+          </span>
+        </div>
+      </CollapsibleOnScroll>
+      <nav className="relative flex items-center justify-between px-6 py-4">
+        <Link href={`/${locale}`} className="group font-mono text-sm font-medium tracking-tight">
+          zanoni
+          <span className="inline-block text-signal transition-transform duration-200 ease-out group-hover:-rotate-6 motion-reduce:transition-none">
+            .dev.br
+          </span>
+        </Link>
+        <ul className="hidden gap-5 text-sm md:flex md:gap-7">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="relative text-foreground/80 transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-signal after:transition-transform after:duration-200 after:ease-out hover:text-signal hover:after:scale-x-100 motion-reduce:after:transition-none"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <SearchPill label={dict.busca.title} className="hidden md:flex" />
+        <MobileNav
+          links={navLinks}
+          openLabel={dict.nav.menuOpen}
+          closeLabel={dict.nav.menuClose}
+          settingsLabel={dict.nav.settings}
+          searchLabel={dict.busca.title}
+          initialDark={isDark}
+          locale={locale}
+          easterEggsAtivo={easterEggsAtivo}
+        />
+      </nav>
+    </div>
   )
 }
