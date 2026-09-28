@@ -19,7 +19,7 @@ export const PAGE_TEXTS = [
 
 export type PageTextKey = (typeof PAGE_TEXTS)[number]['key']
 
-export const STACK_DEFAULT = 'Python, Linux, Docker, ROS, Supabase, Next.js'
+export const STACK_DEFAULT = 'Python, Linux, Docker, Supabase, Next.js'
 
 export function defaultPageText(item: (typeof PAGE_TEXTS)[number], locale: Locale): string {
   const page = dictionaries[locale][item.page] as Record<string, string>

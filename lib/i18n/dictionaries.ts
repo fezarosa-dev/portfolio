@@ -158,7 +158,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       lead: 'Trabalhando com você, em um time ou em projetos sob medida.',
       hireTitle: 'Aberto a oportunidades',
       hireText:
-        'Recrutando? Busco oportunidades como engenheiro de software: backend, automação, sistemas embarcados e full stack. Veja meu currículo ou me chame direto.',
+        'Recrutando? Busco oportunidades como engenheiro de software: backend, automação e full stack. Veja meu currículo ou me chame direto.',
       hireResume: 'Ver currículo',
       hireContact: 'Me chamar',
       projectsTitle: 'Projetos sob demanda',
@@ -286,7 +286,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       lead: 'Working with you, on a team or on custom projects.',
       hireTitle: 'Open to opportunities',
       hireText:
-        "Hiring? I'm looking for software engineering roles: backend, automation, embedded systems and full stack. Check my resume or reach out directly.",
+        "Hiring? I'm looking for software engineering roles: backend, automation and full stack. Check my resume or reach out directly.",
       hireResume: 'View resume',
       hireContact: 'Get in touch',
       projectsTitle: 'Projects on demand',
