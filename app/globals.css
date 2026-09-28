@@ -611,42 +611,41 @@ html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
   border: 2px solid var(--primary);
 }
 
-/* Barra de rolagem fina, só no site público (html não está dentro de .site-warm) */
-html:has(.site-warm) {
-  scrollbar-width: thin;
-  scrollbar-color: #c14e15 transparent;
+/* Barra de rolagem própria (components/custom-scrollbar.tsx): esconde a nativa */
+html.custom-scrollbar {
+  scrollbar-width: none;
 }
-html:has(.site-warm)::-webkit-scrollbar {
-  width: 12px;
+html.custom-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-html:has(.site-warm)::-webkit-scrollbar-track {
-  background: transparent;
-}
-html:has(.site-warm)::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #e0722f, #c14e15 55%, #8f3a10);
-  border-radius: 9999px;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-}
-html:has(.site-warm)::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ff9a55, #e0722f 55%, #c14e15);
-  background-clip: padding-box;
-}
-html:has(.site-warm)::-webkit-scrollbar-thumb:active {
-  border-width: 2px;
-  background-clip: padding-box;
-}
-
-/* Barra de progresso de leitura no topo (components/scroll-progress.tsx) */
-.scroll-progress {
+.scrollbar-track {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
+  top: 10px;
+  right: 3px;
+  bottom: 10px;
+  width: 18px;
   z-index: 60;
-  transform-origin: 0 50%;
-  background: linear-gradient(90deg, #ff9a55, #c14e15);
-  box-shadow: 0 0 10px rgb(193 78 21 / 0.6);
-  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.scrollbar-track[data-visible="true"] {
+  opacity: 1;
+}
+.scrollbar-thumb {
+  width: 6px;
+  margin-right: 4px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 35%, transparent);
+  cursor: none;
+  touch-action: none;
+  transition: width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), margin 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s;
+}
+.scrollbar-track:hover .scrollbar-thumb,
+.scrollbar-track[data-dragging="true"] .scrollbar-thumb {
+  width: 10px;
+  margin-right: 2px;
+  background: var(--primary);
 }
