@@ -6,7 +6,7 @@ import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
-import { pageText, STACK_DEFAULT } from '@/lib/page-texts'
+import { pageText } from '@/lib/page-texts'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 import { buttonVariants } from '@/components/ui/button'
@@ -33,7 +33,6 @@ function parseServices(text: string) {
 export default async function ServicosPage() {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const t = (key: Parameters<typeof pageText>[2]) => pageText(content, locale, key)
-  const stack = (content.servicos_stack ?? STACK_DEFAULT).split(',').map((x) => x.trim()).filter(Boolean)
   const services = parseServices(resolveText(content.servicos_texto ?? '', content.servicos_texto_en, locale))
 
   return (
@@ -53,13 +52,6 @@ export default async function ServicosPage() {
             <h2 className="font-display text-2xl font-medium tracking-tight">{t('servicos_hire_title')}</h2>
           </div>
           <p className="mt-4 max-w-2xl leading-relaxed text-foreground/90">{t('servicos_hire_text')}</p>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {stack.map((tech) => (
-              <li key={tech} className="rounded-full border border-hairline bg-card px-2.5 py-1 font-mono text-[11px] text-steel">
-                {tech}
-              </li>
-            ))}
-          </ul>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={`/${locale}/curriculo`} className={buttonVariants({ size: 'lg' })} data-slot="button">
               {t('servicos_hire_resume')}

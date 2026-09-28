@@ -33,7 +33,6 @@ const KEYS = [
   'easter_eggs_ativo',
   'rickroll_video_filename',
   'rickroll_clicks',
-  'servicos_stack',
 ] as const
 
 const BILINGUAL_KEYS = [
