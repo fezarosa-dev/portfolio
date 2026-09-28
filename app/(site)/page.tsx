@@ -3,6 +3,7 @@ import { getSiteContent, getVisibleProjects, getLanguages } from '@/lib/supabase
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
+import { pageText } from '@/lib/page-texts'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
@@ -40,6 +41,7 @@ export default async function HomePage() {
       <HeroSection
         title={resolveText(content.hero_title ?? '', content.hero_title_en, locale)}
         subtitle={heroSubtitle}
+        tagline={pageText(content, locale, 'hero_tagline')}
         languages={languages.filter((lang) => lang.show_on_home)}
         whoamiLabel={dict.home.whoami}
         locale={locale}

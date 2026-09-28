@@ -581,8 +581,9 @@ html.cursor-custom,
 html.cursor-custom * {
   cursor: none !important;
 }
-html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
-  cursor: text !important;
+/* Piscar do texto na cor da marca (o "I" do mouse é desenhado em components/custom-cursor.tsx) */
+.site-warm :is(input, textarea, [contenteditable="true"]) {
+  caret-color: var(--primary);
 }
 .cursor-layer {
   position: fixed;

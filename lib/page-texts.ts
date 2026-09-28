@@ -1,10 +1,11 @@
 import { resolveText } from '@/lib/bilingual'
 import { dictionaries, type Dictionary, type Locale } from '@/lib/i18n/dictionaries'
 
-// Textos das páginas de Serviços e Contato editáveis em /admin/personalizacao.
+// Textos da hero, de Serviços e de Contato editáveis em /admin/personalizacao.
 // Cada campo tem um texto padrão no dicionário (dict[page][field]); o valor salvo no
 // site_content (chave + '_en') sobrescreve. Fonte única pro admin, pra action e pras páginas.
 export const PAGE_TEXTS = [
+  { key: 'hero_tagline', page: 'home', field: 'tagline', label: 'Frase de impacto (abaixo do subtítulo)' },
   { key: 'servicos_lead', page: 'servicos', field: 'lead', label: 'Frase de apresentação' },
   { key: 'servicos_hire_title', page: 'servicos', field: 'hireTitle', label: 'Destaque de vagas — título' },
   { key: 'servicos_hire_text', page: 'servicos', field: 'hireText', label: 'Destaque de vagas — texto', multiline: true },

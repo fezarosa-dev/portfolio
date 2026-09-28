@@ -12,12 +12,14 @@ import type { Locale } from '@/lib/i18n'
 export function HeroSection({
   title,
   subtitle,
+  tagline,
   languages,
   whoamiLabel,
   locale,
 }: {
   title: string
   subtitle: string
+  tagline: string
   languages: Language[]
   whoamiLabel: string
   locale: Locale
@@ -58,6 +60,16 @@ export function HeroSection({
       >
         <Typewriter text={subtitle} startDelay={900} />
       </motion.p>
+      {tagline && (
+        <motion.p
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={noAnim ?? { duration: 0.6, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mt-4 max-w-2xl font-display text-xl font-medium tracking-tight text-foreground sm:text-2xl"
+        >
+          {tagline}
+        </motion.p>
+      )}
       {languages.length > 0 && (
         <motion.ul
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}

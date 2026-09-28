@@ -22,6 +22,7 @@ export function CustomCursor() {
   const [active, setActive] = useState(false)
   const [hovering, setHovering] = useState(false)
   const [hidden, setHidden] = useState(true)
+  const [text, setText] = useState(false)
   const [pressed, setPressed] = useState(false)
   const [ripples, setRipples] = useState<Ripple[]>([])
 
@@ -47,7 +48,8 @@ export function CustomCursor() {
       x.set(e.clientX)
       y.set(e.clientY)
       const t = e.target as Element | null
-      setHidden(!!t?.closest(TEXT_FIELD))
+      setHidden(false)
+      setText(!!t?.closest(TEXT_FIELD))
       setHovering(!!t?.closest(INTERACTIVE))
     }
     const down = (e: PointerEvent) => {
@@ -99,7 +101,7 @@ export function CustomCursor() {
           height="20"
           viewBox="0 0 512 512"
           style={{ rotate: tilt, transformOrigin: '5px 2.5px' }}
-          animate={{ scale: pressed ? 0.82 : hovering ? 1.25 : 1 }}
+          animate={{ scale: text ? 0 : pressed ? 0.82 : hovering ? 1.25 : 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 18 }}
         >
           <path
@@ -110,6 +112,25 @@ export function CustomCursor() {
             paintOrder="stroke"
             strokeLinejoin="round"
           />
+        </motion.svg>
+      </motion.div>
+
+      {/* cursor de texto (I-beam arredondado, mesmo estilo da seta) sobre campos de escrita */}
+      <motion.div className="cursor-arrow" style={{ x, y }}>
+        <motion.svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          style={{ marginLeft: -6, marginTop: -8.5 }}
+          initial={false}
+          animate={{ scale: text ? (pressed ? 0.85 : 1) : 0, opacity: text ? [1, 0.55, 1] : 0 }}
+          transition={{
+            scale: { type: 'spring', stiffness: 500, damping: 18 },
+            opacity: text ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.1 },
+          }}
+        >
+          <path d="M8.5 4 H15.5 M12 4 V20 M8.5 20 H15.5" fill="none" stroke="var(--background)" strokeWidth="6" strokeLinecap="round" />
+          <path d="M8.5 4 H15.5 M12 4 V20 M8.5 20 H15.5" fill="none" stroke="var(--foreground)" strokeWidth="2.6" strokeLinecap="round" />
         </motion.svg>
       </motion.div>
     </div>

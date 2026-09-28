@@ -161,6 +161,16 @@ export function SiteContentForm({
               defaultValuePt={lookup('hero_subtitle')}
               defaultValueEn={lookup('hero_subtitle_en')}
             />
+            {PAGE_TEXTS.filter((t) => t.page === 'home').map((t) => (
+              <BilingualField
+                key={t.key}
+                name={t.key}
+                label={t.label}
+                language={language}
+                defaultValuePt={lookup(t.key) ?? defaultPageText(t, 'pt')}
+                defaultValueEn={lookup(`${t.key}_en`) ?? defaultPageText(t, 'en')}
+              />
+            ))}
           </Section>
         </TabsContent>
 

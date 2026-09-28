@@ -26,6 +26,7 @@ export type Dictionary = {
     projectsEyebrow: string
     projectsHeading: string
     seeAll: string
+    tagline: string
   }
   sobre: { eyebrow: string; title: string }
   servicos: {
@@ -150,6 +151,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       projectsEyebrow: 'projetos',
       projectsHeading: 'Coisas que construí',
       seeAll: 'ver todos os projetos →',
+      tagline: 'Eu resolvo problemas. O código é só a ferramenta.',
     },
     sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
     servicos: {
@@ -278,6 +280,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       projectsEyebrow: 'projects',
       projectsHeading: 'Things I built',
       seeAll: 'see all projects →',
+      tagline: 'I solve problems. Code is just the tool.',
     },
     sobre: { eyebrow: 'about-me', title: 'About me' },
     servicos: {
