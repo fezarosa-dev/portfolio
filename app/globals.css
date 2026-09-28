@@ -609,11 +609,6 @@ html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
   border-radius: 9999px;
   background: radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%);
 }
-.cursor-box {
-  border: 1.5px solid var(--primary);
-  background: color-mix(in oklab, var(--primary) 10%, transparent);
-  box-shadow: 0 0 18px color-mix(in oklab, var(--primary) 35%, transparent);
-}
 .cursor-ripple {
   width: 70px;
   height: 70px;

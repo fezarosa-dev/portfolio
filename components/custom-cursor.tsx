@@ -12,21 +12,16 @@ import {
 
 const INTERACTIVE = 'a, button, [role="button"], summary, label, select, [data-cursor="hover"]'
 const TEXT_FIELD = 'input, textarea, [contenteditable="true"]'
-const PAD = 6
-const MAX_W = 420
-const MAX_H = 160
-
-type Box = { x: number; y: number; w: number; h: number; r: number }
 type Ripple = { id: number; x: number; y: number }
 
 // Seta laranja no lugar do cursor nativo, com:
 //  - brilho que chega atrasado (spring) e a seta inclinando com a velocidade;
-//  - moldura que "abraça" o elemento clicável sob o mouse (estilo ponteiro do iPadOS);
+//  - brilho que se expande sobre elementos clicáveis;
 //  - onda que se expande a cada clique.
 // Só em ponteiro fino (mouse) e sem "reduzir movimento"; senão fica o cursor nativo.
 export function CustomCursor() {
   const [active, setActive] = useState(false)
-  const [box, setBox] = useState<Box | null>(null)
+  const [hovering, setHovering] = useState(false)
   const [hidden, setHidden] = useState(true)
   const [pressed, setPressed] = useState(false)
   const [ripples, setRipples] = useState<Ripple[]>([])
@@ -49,27 +44,14 @@ export function CustomCursor() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActive(true)
 
-    let target: Element | null = null
     let rid = 0
-
-    const measure = (el: Element | null) => {
-      if (!el) return setBox(null)
-      const b = el.getBoundingClientRect()
-      if (b.width > MAX_W || b.height > MAX_H) return setBox(null)
-      const r = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 8
-      setBox({ x: b.left - PAD, y: b.top - PAD, w: b.width + PAD * 2, h: b.height + PAD * 2, r: r + PAD })
-    }
 
     const move = (e: PointerEvent) => {
       x.set(e.clientX)
       y.set(e.clientY)
       const t = e.target as Element | null
       setHidden(!!t?.closest(TEXT_FIELD))
-      const next = t?.closest(INTERACTIVE) ?? null
-      if (next !== target) {
-        target = next
-        measure(next)
-      }
+      setHovering(!!t?.closest(INTERACTIVE))
     }
     const down = (e: PointerEvent) => {
       setPressed(true)
@@ -77,12 +59,10 @@ export function CustomCursor() {
     }
     const up = () => setPressed(false)
     const leave = () => setHidden(true)
-    const scroll = () => target && measure(target)
 
     window.addEventListener('pointermove', move, { passive: true })
     window.addEventListener('pointerdown', down)
     window.addEventListener('pointerup', up)
-    window.addEventListener('scroll', scroll, { passive: true })
     document.addEventListener('pointerleave', leave)
 
     return () => {
@@ -90,34 +70,20 @@ export function CustomCursor() {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointerup', up)
-      window.removeEventListener('scroll', scroll)
       document.removeEventListener('pointerleave', leave)
     }
   }, [x, y])
 
   if (!active) return null
 
-  const hovering = box !== null
   return (
     <div aria-hidden className="cursor-layer" style={{ opacity: hidden ? 0 : 1 }}>
       {/* brilho atrasado */}
       <motion.div
         className="cursor-glow"
         style={{ x: glowX, y: glowY }}
-        animate={{ scale: hovering ? 0.6 : 1, opacity: hovering ? 0.5 : 0.8 }}
+        animate={{ scale: hovering ? 1.9 : 1, opacity: hovering ? 0.9 : 0.8 }}
         transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-      />
-
-      {/* moldura que abraça o elemento clicável */}
-      <motion.div
-        className="cursor-box"
-        initial={false}
-        animate={
-          box
-            ? { x: box.x, y: box.y, width: box.w, height: box.h, borderRadius: box.r, opacity: 1, scale: pressed ? 0.96 : 1 }
-            : { opacity: 0, scale: 0.9 }
-        }
-        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
       />
 
       {/* ondas de clique */}
