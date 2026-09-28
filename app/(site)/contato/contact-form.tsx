@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Send } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,6 @@ import type { Dictionary } from '@/lib/i18n'
 
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
 const MAX_MESSAGE = 4000
-const MIN_HEIGHT = 176
 const MAX_HEIGHT = 720
 
 export function ContactForm({
@@ -28,29 +27,11 @@ export function ContactForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [length, setLength] = useState(0)
   const { enabled: reduceMotion } = useReduceMotion()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [dragging, setDragging] = useState(false)
 
-  // alça própria de redimensionar (a nativa do navegador não dá pra estilizar): arrasta pra mudar a altura
-  function startResize(e: React.PointerEvent<HTMLDivElement>) {
-    const el = textareaRef.current!
-    const handle = e.currentTarget
-    handle.setPointerCapture(e.pointerId)
-    setDragging(true)
-    const startY = e.clientY
-    const startHeight = el.offsetHeight
-    const move = (ev: PointerEvent) => {
-      el.style.height = `${Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, startHeight + ev.clientY - startY))}px`
-    }
-    const end = () => {
-      setDragging(false)
-      handle.removeEventListener('pointermove', move)
-      handle.removeEventListener('pointerup', end)
-      handle.removeEventListener('pointercancel', end)
-    }
-    handle.addEventListener('pointermove', move)
-    handle.addEventListener('pointerup', end)
-    handle.addEventListener('pointercancel', end)
+  // cresce só em altura conforme o texto (até MAX_HEIGHT, depois rola por dentro)
+  function autoGrow(el: HTMLTextAreaElement) {
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(MAX_HEIGHT, el.scrollHeight)}px`
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -153,31 +134,18 @@ export function ContactForm({
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="contact-message">{dict.messageLabel}</Label>
-        <div className="relative">
-          <Textarea
-            ref={textareaRef}
-            id="contact-message"
-            name="message"
-            placeholder={dict.messagePlaceholder}
-            required
-            maxLength={MAX_MESSAGE}
-            onChange={(e) => setLength(e.target.value.length)}
-            style={{ height: 256 }}
-            className="resize-none px-3 py-2.5 pb-7 leading-relaxed [field-sizing:fixed]"
-          />
-          <div
-            data-cursor="hover"
-            onPointerDown={startResize}
-            title="Arraste para ajustar a altura"
-            className="group absolute bottom-1.5 right-1.5 grid h-6 w-8 cursor-none touch-none place-items-center"
-          >
-            <span
-              className={`h-1.5 w-6 rounded-full transition-[background-color,width] duration-200 ${
-                dragging ? 'w-8 bg-signal' : 'bg-foreground/30 group-hover:w-8 group-hover:bg-signal'
-              }`}
-            />
-          </div>
-        </div>
+        <Textarea
+          id="contact-message"
+          name="message"
+          placeholder={dict.messagePlaceholder}
+          required
+          maxLength={MAX_MESSAGE}
+          onChange={(e) => {
+            setLength(e.target.value.length)
+            autoGrow(e.target)
+          }}
+          className="min-h-64 resize-none px-3 py-2.5 leading-relaxed [field-sizing:fixed]"
+        />
         <p className="self-end font-mono text-xs text-steel">
           {length}/{MAX_MESSAGE}
         </p>
