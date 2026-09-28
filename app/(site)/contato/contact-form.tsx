@@ -13,7 +13,15 @@ import type { Dictionary } from '@/lib/i18n'
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
 const MAX_MESSAGE = 4000
 
-export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
+export function ContactForm({
+  dict,
+  defaultCategory,
+  defaultSubject,
+}: {
+  dict: Dictionary['contato']
+  defaultCategory?: (typeof CATEGORIES)[number]
+  defaultSubject?: string
+}) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [length, setLength] = useState(0)
@@ -70,7 +78,14 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((key, i) => (
             <label key={key} className="cursor-pointer">
-              <input type="radio" name="category" value={key} required={i === 0} className="peer sr-only" />
+              <input
+                type="radio"
+                name="category"
+                value={key}
+                required={i === 0}
+                defaultChecked={key === defaultCategory}
+                className="peer sr-only"
+              />
               <span className="inline-block rounded-full border border-input px-3.5 py-1.5 text-sm transition-colors hover:border-signal peer-checked:border-signal peer-checked:bg-signal peer-checked:text-primary-foreground peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50">
                 {dict.categories[key]}
               </span>
@@ -102,6 +117,7 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
         <Input
           id="contact-subject"
           name="subject"
+          defaultValue={defaultSubject}
           placeholder={dict.subjectPlaceholder}
           required
           maxLength={120}

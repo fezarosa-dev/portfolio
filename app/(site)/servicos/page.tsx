@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Boxes, Code2, Globe, Server, Terminal, Workflow } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Briefcase, Boxes, Code2, Globe, Server, Terminal, Workflow } from 'lucide-react'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
@@ -32,6 +32,8 @@ function parseServices(text: string) {
 
 export default async function ServicosPage() {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
+  const contactHref = (categoria: 'vaga' | 'projeto', assunto?: string) =>
+    `/${locale}/contato?categoria=${categoria}${assunto ? `&assunto=${encodeURIComponent(assunto)}` : ''}#formulario`
   const t = (key: Parameters<typeof pageText>[2]) => pageText(content, locale, key)
   const services = parseServices(resolveText(content.servicos_texto ?? '', content.servicos_texto_en, locale))
 
@@ -56,7 +58,7 @@ export default async function ServicosPage() {
             <Link href={`/${locale}/curriculo`} className={buttonVariants({ size: 'lg' })} data-slot="button">
               {t('servicos_hire_resume')}
             </Link>
-            <Link href={`/${locale}/contato`} className={buttonVariants({ size: 'lg', variant: 'outline' })} data-slot="button">
+            <Link href={contactHref('vaga')} className={buttonVariants({ size: 'lg', variant: 'outline' })} data-slot="button">
               {t('servicos_hire_contact')}
               <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
@@ -70,19 +72,26 @@ export default async function ServicosPage() {
           const Icon = ICONS[i % ICONS.length]
           return (
             <FadeIn immediate key={service.title} delay={0.05 * i}>
-              <div
+              <Link
+                href={contactHref('projeto', service.title)}
                 data-tilt
-                className="group h-full rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                className="group block h-full rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
                 <div className="flex items-start justify-between">
                   <span className="grid h-11 w-11 place-items-center rounded-lg bg-signal/10 text-signal transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <span className="font-mono text-xs text-steel">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="flex items-center gap-1 font-mono text-xs text-steel">
+                    {String(i + 1).padStart(2, '0')}
+                    <ArrowUpRight
+                      aria-hidden
+                      className="h-4 w-4 opacity-0 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signal group-hover:opacity-100"
+                    />
+                  </span>
                 </div>
                 <h2 className="mt-5 font-display text-xl font-medium tracking-tight">{service.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-steel">{service.description}</p>
-              </div>
+              </Link>
             </FadeIn>
           )
         })}
@@ -91,7 +100,7 @@ export default async function ServicosPage() {
       <FadeIn immediate className="mt-12">
         <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-signal/40 bg-signal/5 p-6 sm:flex-row sm:items-center">
           <p className="font-display text-xl font-medium tracking-tight">{t('servicos_cta_title')}</p>
-          <Link href={`/${locale}/contato`} className={buttonVariants({ size: 'lg' })} data-slot="button">
+          <Link href={contactHref('projeto')} className={buttonVariants({ size: 'lg' })} data-slot="button">
             {t('servicos_cta_button')}
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
