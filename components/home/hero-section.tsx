@@ -28,7 +28,7 @@ export function HeroSection({
   const noAnim = reduceMotion ? { duration: 0 } : undefined
 
   return (
-    <section className="relative flex min-h-[62vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
+    <section className="relative flex min-h-[calc(100svh-9rem)] flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-8 text-center">
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 12, rotate: -4 }}
         animate={{ opacity: 1, y: 0, rotate: -3 }}
@@ -65,7 +65,7 @@ export function HeroSection({
           initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={noAnim ?? { duration: 0.6, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mt-4 max-w-2xl font-display text-xl font-medium tracking-tight text-foreground sm:text-2xl"
+          className="relative mt-4 max-w-2xl font-display text-lg font-medium tracking-tight text-foreground sm:text-xl"
         >
           {tagline}
         </motion.p>
