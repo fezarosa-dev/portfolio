@@ -4,6 +4,7 @@ import { Footer } from '@/components/footer'
 import { Mascote } from '@/components/mascote'
 import { SudoEasterEgg } from '@/components/sudo-easter-egg'
 import { SpinEasterEgg } from '@/components/spin-easter-egg'
+import { CustomCursor } from '@/components/custom-cursor'
 import { CookieConsent } from '@/components/cookie-consent'
 import { CommandPalette } from '@/components/search/command-palette'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
@@ -105,6 +106,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           <SpinEasterEgg />
         </>
       )}
+      <CustomCursor />
       <CookieConsent />
       <CommandPalette
         locale={locale}

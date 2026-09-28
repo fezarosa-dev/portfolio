@@ -576,3 +576,35 @@
     }
   }
 }
+/* Cursor customizado (components/custom-cursor.tsx) */
+html.cursor-custom,
+html.cursor-custom * {
+  cursor: none !important;
+}
+html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
+  cursor: text !important;
+}
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 9999px;
+  transition: opacity 0.2s;
+}
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+}
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--primary);
+  transition: opacity 0.2s, background-color 0.2s;
+}
+.cursor-ring[data-hover="true"] {
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+}
