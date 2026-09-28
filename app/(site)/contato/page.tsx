@@ -30,17 +30,17 @@ export default async function ContatoPage() {
     getDictionary(),
   ])
   return (
-    <main className="mx-auto max-w-5xl px-6 py-20">
+    <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
       <FadeIn>
         <Eyebrow>{dict.contato.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.contato.title}</h1>
         <p className="mt-4 max-w-xl text-lg text-steel">{pageText(content, locale, 'contato_lead')}</p>
       </FadeIn>
 
-      <div className="mt-12 grid gap-8 md:grid-cols-[1fr_1.1fr]">
+      <div className="mt-10 grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-8">
         {links.length > 0 && (
           <FadeIn delay={0.05}>
-            <ul className="flex flex-col gap-3">
+            <ul className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1">
               {links.map((link) => {
                 const Icon = iconFor(link.url)
                 const external = link.url.startsWith('http')
@@ -51,12 +51,12 @@ export default async function ContatoPage() {
                       target={external || link.url.startsWith('www.') ? '_blank' : undefined}
                       rel="noopener noreferrer"
                       data-tilt
-                      className="group flex items-center gap-4 rounded-lg border border-hairline bg-card p-4 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                      className="group flex items-center gap-3 rounded-lg border border-hairline bg-card p-3 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                     >
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-signal/10 text-signal transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-signal/10 text-signal transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                         <Icon className="h-5 w-5" />
                       </span>
-                      <span className="min-w-0 flex-1 truncate font-medium">
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
                         {resolveText(link.label, link.label_en, locale)}
                       </span>
                       <ArrowUpRight className="h-4 w-4 shrink-0 text-steel transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signal" />
@@ -69,7 +69,7 @@ export default async function ContatoPage() {
         )}
 
         <FadeIn delay={0.1}>
-          <div className="rounded-lg border border-hairline bg-card p-6 sm:p-8">
+          <div className="rounded-lg border border-hairline bg-card p-6 sm:p-8 lg:p-10">
             <h2 className="mb-5 font-display text-xl font-medium tracking-tight">{pageText(content, locale, 'contato_form_title')}</h2>
             <ContactForm dict={dict.contato} />
           </div>

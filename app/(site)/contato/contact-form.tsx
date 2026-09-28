@@ -118,7 +118,7 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
           required
           maxLength={MAX_MESSAGE}
           onChange={(e) => setLength(e.target.value.length)}
-          className="min-h-48 resize-y px-3 py-2.5 leading-relaxed [field-sizing:fixed]"
+          className="min-h-64 resize-y px-3 py-2.5 leading-relaxed [field-sizing:fixed]"
         />
         <p className="self-end font-mono text-xs text-steel">
           {length}/{MAX_MESSAGE}
