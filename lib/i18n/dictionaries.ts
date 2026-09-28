@@ -66,6 +66,11 @@ export type Dictionary = {
     title: string
     lead: string
     formTitle: string
+    categoryLabel: string
+    categories: { vaga: string; projeto: string; duvida: string; outro: string }
+    subjectLabel: string
+    subjectPlaceholder: string
+    sendAnother: string
     nameLabel: string
     namePlaceholder: string
     emailLabel: string
@@ -192,6 +197,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       title: 'Vamos conversar',
       lead: 'Escolha o canal que preferir ou mande uma mensagem pelo formulário — respondo o quanto antes.',
       formTitle: 'Mande uma mensagem',
+      categoryLabel: 'Sobre o quê?',
+      categories: { vaga: 'Vaga / oportunidade', projeto: 'Projeto / freela', duvida: 'Dúvida', outro: 'Outro' },
+      subjectLabel: 'Assunto',
+      subjectPlaceholder: 'Ex.: Vaga de desenvolvedor backend',
+      sendAnother: 'Enviar outra mensagem',
       nameLabel: 'Nome',
       namePlaceholder: 'Seu nome',
       emailLabel: 'E-mail',
@@ -321,6 +331,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       title: "Let's talk",
       lead: "Pick the channel you prefer or send a message through the form — I'll reply as soon as I can.",
       formTitle: 'Send a message',
+      categoryLabel: 'What is it about?',
+      categories: { vaga: 'Job / opportunity', projeto: 'Project / freelance', duvida: 'Question', outro: 'Other' },
+      subjectLabel: 'Subject',
+      subjectPlaceholder: 'E.g.: Backend developer position',
+      sendAnother: 'Send another message',
       nameLabel: 'Name',
       namePlaceholder: 'Your name',
       emailLabel: 'Email',

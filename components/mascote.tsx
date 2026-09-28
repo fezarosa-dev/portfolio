@@ -94,23 +94,13 @@ export function Mascote({
       >
         <AnimatePresence initial={false}>
           {acordado ? (
-            // acorda esticando: começa achatado e largo, sobe com mola (overshoot) e dá um pulinho
             <motion.div
               key="acordado"
               className="absolute inset-0 origin-bottom"
-              initial={reduceMotion ? false : { scaleY: 0.5, scaleX: 1.2, opacity: 0 }}
-              animate={{ scaleY: 1, scaleX: 1, opacity: 1, y: reduceMotion ? 0 : [0, -12, 0, -5, 0] }}
-              exit={reduceMotion ? undefined : { opacity: 0, scaleY: 0.7, scaleX: 1.1, transition: { duration: 0.25 } }}
-              transition={
-                reduceMotion
-                  ? { duration: 0 }
-                  : {
-                      scaleY: { type: 'spring', stiffness: 320, damping: 11 },
-                      scaleX: { type: 'spring', stiffness: 320, damping: 11 },
-                      opacity: { duration: 0.15 },
-                      y: { duration: 0.7, delay: 0.12, ease: 'easeOut' },
-                    }
-              }
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.4, ease: 'easeInOut' }}
             >
               <Image
                 src="/img/mascote-cachorro-acordado.svg"
@@ -129,7 +119,7 @@ export function Mascote({
               className="absolute inset-0 origin-bottom"
               initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1, scaleY: reduceMotion ? 1 : [1, 1.035, 1] }}
-              exit={reduceMotion ? undefined : { opacity: 0, scale: 1.12, transition: { duration: 0.2 } }}
+              exit={reduceMotion ? undefined : { opacity: 0, transition: { duration: 0.4 } }}
               transition={{ opacity: { duration: 0.3 }, scaleY: { duration: 3, ease: 'easeInOut', repeat: Infinity } }}
             >
               <Image
@@ -145,30 +135,6 @@ export function Mascote({
           )}
         </AnimatePresence>
 
-        {/* susto ao acordar: "!" pula em cima da cabeça e poeirinha sai dos pés */}
-        {acordado && !reduceMotion && (
-          <>
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-signal"
-              initial={{ scale: 0, y: 6, opacity: 1 }}
-              animate={{ scale: [0, 1.5, 1], y: [6, -6, -3], opacity: [1, 1, 0] }}
-              transition={{ duration: 0.9, times: [0, 0.35, 1], ease: 'easeOut' }}
-            >
-              !
-            </motion.span>
-            {[-1, 1].map((dir) => (
-              <motion.span
-                key={dir}
-                aria-hidden
-                className="pointer-events-none absolute bottom-1 left-1/2 h-2 w-2 rounded-full bg-foreground/20"
-                initial={{ x: 0, scale: 0.3, opacity: 0.7 }}
-                animate={{ x: dir * 28, y: -4, scale: 1.5, opacity: 0 }}
-                transition={{ duration: 0.55, ease: 'easeOut' }}
-              />
-            ))}
-          </>
-        )}
       </motion.button>
 
       {acordado ? (

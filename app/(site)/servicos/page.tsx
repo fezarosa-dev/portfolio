@@ -37,13 +37,13 @@ export default async function ServicosPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-20">
-      <FadeIn>
+      <FadeIn immediate>
         <Eyebrow>{dict.servicos.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.servicos.title}</h1>
         <p className="mt-4 max-w-xl text-lg text-steel">{t('servicos_lead')}</p>
       </FadeIn>
 
-      <FadeIn delay={0.05} className="mt-12">
+      <FadeIn immediate delay={0.05} className="mt-12">
         <section className="rounded-lg border border-signal/40 bg-signal/5 p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-lg bg-signal text-primary-foreground">
@@ -69,7 +69,7 @@ export default async function ServicosPage() {
         {services.map((service, i) => {
           const Icon = ICONS[i % ICONS.length]
           return (
-            <FadeIn key={service.title} delay={0.05 * i}>
+            <FadeIn immediate key={service.title} delay={0.05 * i}>
               <div
                 data-tilt
                 className="group h-full rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
@@ -88,7 +88,7 @@ export default async function ServicosPage() {
         })}
       </div>
 
-      <FadeIn className="mt-12">
+      <FadeIn immediate className="mt-12">
         <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-signal/40 bg-signal/5 p-6 sm:flex-row sm:items-center">
           <p className="font-display text-xl font-medium tracking-tight">{t('servicos_cta_title')}</p>
           <Link href={`/${locale}/contato`} className={buttonVariants({ size: 'lg' })} data-slot="button">

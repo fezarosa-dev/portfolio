@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { countRecentMessagesFromIp, insertMessage } from '@/lib/supabase/queries'
 import { notifyNewMessage } from '@/lib/notify'
 
+const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro']
+const MAX_SUBJECT = 120
+const MAX_MESSAGE = 4000
 const RATE_LIMIT_MAX = 3
 const RATE_LIMIT_WINDOW_MINUTES = 15
 
@@ -31,10 +34,18 @@ export async function POST(request: Request) {
   const body = await request.json()
   const name = String(body.name ?? '').trim()
   const email = String(body.email ?? '').trim()
+  const subject = String(body.subject ?? '').trim()
+  const category = String(body.category ?? '')
   const message = String(body.message ?? '').trim()
 
-  if (!name || !email || !message) {
+  if (!name || !email || !subject || !message) {
     return NextResponse.json({ error: 'Preencha todos os campos.' }, { status: 400 })
+  }
+  if (!CATEGORIES.includes(category)) {
+    return NextResponse.json({ error: 'Escolha o assunto da mensagem.' }, { status: 400 })
+  }
+  if (subject.length > MAX_SUBJECT || message.length > MAX_MESSAGE) {
+    return NextResponse.json({ error: 'Mensagem ou assunto muito longo.' }, { status: 400 })
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     return NextResponse.json({ error: 'E-mail inválido.' }, { status: 400 })
@@ -59,7 +70,7 @@ export async function POST(request: Request) {
     }
   }
 
-  await insertMessage({ name, email, message, ip })
-  await notifyNewMessage(name, email, message)
+  await insertMessage({ name, email, subject, category, message, ip })
+  await notifyNewMessage(name, email, subject, category, message)
   return NextResponse.json({ ok: true })
 }
