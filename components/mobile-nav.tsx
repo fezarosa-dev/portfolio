@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
+import { isActiveLink } from '@/components/nav-links'
 import { NavSettings } from '@/components/nav-settings'
 import { SearchTrigger } from '@/components/search/search-trigger'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
@@ -29,20 +31,25 @@ export function MobileNav({
 }) {
   const [open, setOpen] = useState(false)
   const { enabled: reduceMotion } = useReduceMotion()
+  const pathname = usePathname()
 
   const items = (
     <>
-      {links.map((link) => (
-        <li key={link.href} className="border-b border-hairline">
-          <Link
-            href={link.href}
-            onClick={() => setOpen(false)}
-            className="block py-3 text-foreground/80 hover:text-signal"
-          >
-            {link.label}
-          </Link>
-        </li>
-      ))}
+      {links.map((link, i) => {
+        const active = isActiveLink(pathname, link.href, i === 0)
+        return (
+          <li key={link.href} className={`border-b ${active ? 'border-signal' : 'border-hairline'}`}>
+            <Link
+              href={link.href}
+              onClick={() => setOpen(false)}
+              aria-current={active ? 'page' : undefined}
+              className={`block py-3 hover:text-signal ${active ? 'font-medium text-signal' : 'text-foreground/80'}`}
+            >
+              {link.label}
+            </Link>
+          </li>
+        )
+      })}
       <li className="flex justify-end gap-2 py-3">
         <span onClick={() => setOpen(false)}>
           <SearchTrigger label={searchLabel} />

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
+import { NavLinks } from '@/components/nav-links'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavSettings } from '@/components/nav-settings'
 import { SearchPill } from '@/components/search/search-trigger'
@@ -67,18 +68,7 @@ export async function Nav() {
           </span>
         </Link>
         <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
-        <ul className="hidden gap-5 text-sm md:flex md:gap-7">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="relative text-foreground/80 transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-signal after:transition-transform after:duration-200 after:ease-out hover:text-signal hover:after:scale-x-100 motion-reduce:after:transition-none"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <NavLinks links={navLinks} />
         <MobileNav
           links={navLinks}
           openLabel={dict.nav.menuOpen}
