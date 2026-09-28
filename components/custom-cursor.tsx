@@ -14,7 +14,7 @@ const INTERACTIVE = 'a, button, [role="button"], summary, label, select, [data-c
 const TEXT_FIELD = 'input, textarea, [contenteditable="true"]'
 type Ripple = { id: number; x: number; y: number }
 
-// Seta laranja no lugar do cursor nativo, com:
+// Seta clássica (preenchida com a cor de fundo, contorno na cor do texto: inverte no tema escuro) no lugar do cursor nativo, com:
 //  - brilho que chega atrasado (spring) e a seta inclinando com a velocidade;
 //  - brilho que se expande sobre elementos clicáveis;
 //  - onda que se expande a cada clique.
@@ -107,24 +107,17 @@ export function CustomCursor() {
           width="30"
           height="30"
           viewBox="0 0 24 24"
-          style={{ rotate: tilt, transformOrigin: '4px 2.5px' }}
+          style={{ rotate: tilt, transformOrigin: '5px 3px' }}
           animate={{ scale: pressed ? 0.82 : hovering ? 1.25 : 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 18 }}
         >
-          <defs>
-            <linearGradient id="cursor-fill" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#ff9a55" />
-              <stop offset="1" stopColor="#f2661d" />
-            </linearGradient>
-          </defs>
           <path
-            d="M4 2.5 L4 19 L8.6 14.9 L11.6 21.5 L14.4 20.3 L11.5 13.8 L17.8 13.4 Z"
-            fill="url(#cursor-fill)"
-            stroke="#12151c"
-            strokeWidth="1.5"
+            d="M5 3 L5 19.5 L9.3 15.6 L12 21.5 L14.6 20.3 L12 14.6 L17.8 14.6 Z"
+            fill="var(--background)"
+            stroke="var(--foreground)"
+            strokeWidth="1.7"
             strokeLinejoin="round"
           />
-          <path d="M5.6 6.2 L5.6 15.4 L8 13.4" fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
         </motion.svg>
       </motion.div>
     </div>
