@@ -66,6 +66,7 @@ export async function Nav() {
             .dev.br
           </span>
         </Link>
+        <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
         <ul className="hidden gap-5 text-sm md:flex md:gap-7">
           {navLinks.map((link) => (
             <li key={link.href}>
@@ -78,7 +79,6 @@ export async function Nav() {
             </li>
           ))}
         </ul>
-        <SearchPill label={dict.busca.title} className="hidden md:flex" />
         <MobileNav
           links={navLinks}
           openLabel={dict.nav.menuOpen}
