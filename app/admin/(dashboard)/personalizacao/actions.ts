@@ -12,6 +12,7 @@ import {
 } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
 import { SEO_PAGE_KEYS } from '@/lib/seo'
+import { PAGE_TEXTS } from '@/lib/page-texts'
 
 const SEO_PAGES = ['home', ...SEO_PAGE_KEYS]
 
@@ -32,6 +33,7 @@ const KEYS = [
   'easter_eggs_ativo',
   'rickroll_video_filename',
   'rickroll_clicks',
+  'servicos_stack',
 ] as const
 
 const BILINGUAL_KEYS = [
@@ -44,6 +46,7 @@ const BILINGUAL_KEYS = [
   'privacidade_texto',
   'termos_texto',
   'cookies_texto',
+  ...PAGE_TEXTS.map((t) => t.key),
   ...SEO_PAGES.flatMap((page) => [`seo_${page}_title`, `seo_${page}_description`]),
   'seo_home_keywords',
 ]

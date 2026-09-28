@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { ArrowUpRight, ExternalLink, Mail, MessageCircle, Phone } from 'lucide-react'
-import { getContactLinks } from '@/lib/supabase/queries-cached'
+import { getContactLinks, getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
 import { ContactForm } from './contact-form'
+import { pageText } from '@/lib/page-texts'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 
@@ -23,13 +24,17 @@ function iconFor(url: string) {
 }
 
 export default async function ContatoPage() {
-  const [links, { dict, locale }] = await Promise.all([getContactLinks(), getDictionary()])
+  const [links, content, { dict, locale }] = await Promise.all([
+    getContactLinks(),
+    getSiteContent(),
+    getDictionary(),
+  ])
   return (
     <main className="mx-auto max-w-5xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.contato.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.contato.title}</h1>
-        <p className="mt-4 max-w-xl text-lg text-steel">{dict.contato.lead}</p>
+        <p className="mt-4 max-w-xl text-lg text-steel">{pageText(content, locale, 'contato_lead')}</p>
       </FadeIn>
 
       <div className="mt-12 grid gap-8 md:grid-cols-[1fr_1.1fr]">
@@ -65,7 +70,7 @@ export default async function ContatoPage() {
 
         <FadeIn delay={0.1}>
           <div className="rounded-lg border border-hairline bg-card p-6 sm:p-8">
-            <h2 className="mb-5 font-display text-xl font-medium tracking-tight">{dict.contato.formTitle}</h2>
+            <h2 className="mb-5 font-display text-xl font-medium tracking-tight">{pageText(content, locale, 'contato_form_title')}</h2>
             <ContactForm dict={dict.contato} />
           </div>
         </FadeIn>

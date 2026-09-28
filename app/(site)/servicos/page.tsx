@@ -6,6 +6,7 @@ import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
+import { pageText, STACK_DEFAULT } from '@/lib/page-texts'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 import { buttonVariants } from '@/components/ui/button'
@@ -16,7 +17,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata(locale, '/servicos', seo.title, seo.description)
 }
 
-const STACK = ['Python', 'Linux', 'Docker', 'ROS', 'Supabase', 'Next.js']
 const ICONS = [Globe, Workflow, Server, Code2, Boxes, Terminal]
 
 // servicos_texto: blocos separados por linha em branco; 1ª linha = título (com ou sem **), resto = descrição.
@@ -32,6 +32,8 @@ function parseServices(text: string) {
 
 export default async function ServicosPage() {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
+  const t = (key: Parameters<typeof pageText>[2]) => pageText(content, locale, key)
+  const stack = (content.servicos_stack ?? STACK_DEFAULT).split(',').map((x) => x.trim()).filter(Boolean)
   const services = parseServices(resolveText(content.servicos_texto ?? '', content.servicos_texto_en, locale))
 
   return (
@@ -39,7 +41,7 @@ export default async function ServicosPage() {
       <FadeIn>
         <Eyebrow>{dict.servicos.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.servicos.title}</h1>
-        <p className="mt-4 max-w-xl text-lg text-steel">{dict.servicos.lead}</p>
+        <p className="mt-4 max-w-xl text-lg text-steel">{t('servicos_lead')}</p>
       </FadeIn>
 
       <FadeIn delay={0.05} className="mt-12">
@@ -48,11 +50,11 @@ export default async function ServicosPage() {
             <span className="grid h-11 w-11 place-items-center rounded-lg bg-signal text-primary-foreground">
               <Briefcase className="h-5 w-5" />
             </span>
-            <h2 className="font-display text-2xl font-medium tracking-tight">{dict.servicos.hireTitle}</h2>
+            <h2 className="font-display text-2xl font-medium tracking-tight">{t('servicos_hire_title')}</h2>
           </div>
-          <p className="mt-4 max-w-2xl leading-relaxed text-foreground/90">{dict.servicos.hireText}</p>
+          <p className="mt-4 max-w-2xl leading-relaxed text-foreground/90">{t('servicos_hire_text')}</p>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {STACK.map((tech) => (
+            {stack.map((tech) => (
               <li key={tech} className="rounded-full border border-hairline bg-card px-2.5 py-1 font-mono text-[11px] text-steel">
                 {tech}
               </li>
@@ -60,17 +62,17 @@ export default async function ServicosPage() {
           </ul>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={`/${locale}/curriculo`} className={buttonVariants({ size: 'lg' })} data-slot="button">
-              {dict.servicos.hireResume}
+              {t('servicos_hire_resume')}
             </Link>
             <Link href={`/${locale}/contato`} className={buttonVariants({ size: 'lg', variant: 'outline' })} data-slot="button">
-              {dict.servicos.hireContact}
+              {t('servicos_hire_contact')}
               <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
         </section>
       </FadeIn>
 
-      <h2 className="mt-16 font-display text-2xl font-medium tracking-tight">{dict.servicos.projectsTitle}</h2>
+      <h2 className="mt-16 font-display text-2xl font-medium tracking-tight">{t('servicos_projects_title')}</h2>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {services.map((service, i) => {
           const Icon = ICONS[i % ICONS.length]
@@ -96,9 +98,9 @@ export default async function ServicosPage() {
 
       <FadeIn className="mt-12">
         <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-signal/40 bg-signal/5 p-6 sm:flex-row sm:items-center">
-          <p className="font-display text-xl font-medium tracking-tight">{dict.servicos.ctaTitle}</p>
+          <p className="font-display text-xl font-medium tracking-tight">{t('servicos_cta_title')}</p>
           <Link href={`/${locale}/contato`} className={buttonVariants({ size: 'lg' })} data-slot="button">
-            {dict.servicos.ctaButton}
+            {t('servicos_cta_button')}
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </div>

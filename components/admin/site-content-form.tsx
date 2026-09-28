@@ -11,6 +11,7 @@ import { DriveImagePicker } from '@/components/drive-image-picker'
 import { IconUpload } from '@/components/admin/icon-upload'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { PAGE_TEXTS, STACK_DEFAULT, defaultPageText } from '@/lib/page-texts'
 import { MascoteAtivoToggle } from '@/components/admin/mascote-ativo-toggle'
 
 const NAV_ITEMS: { href: string; label: string }[] = [
@@ -191,6 +192,22 @@ export function SiteContentForm({
               multiline
               rows={6}
             />
+            <div>
+              <Label htmlFor="servicos_stack">Tecnologias do destaque de vagas (separadas por vírgula)</Label>
+              <Input id="servicos_stack" name="servicos_stack" defaultValue={content.servicos_stack ?? STACK_DEFAULT} />
+            </div>
+            {PAGE_TEXTS.filter((t) => t.page === 'servicos').map((t) => (
+              <BilingualField
+                key={t.key}
+                name={t.key}
+                label={t.label}
+                language={language}
+                defaultValuePt={lookup(t.key) ?? defaultPageText(t, 'pt')}
+                defaultValueEn={lookup(`${t.key}_en`) ?? defaultPageText(t, 'en')}
+                multiline={'multiline' in t}
+                rows={'multiline' in t ? 3 : undefined}
+              />
+            ))}
           </Section>
         </TabsContent>
 
@@ -254,6 +271,18 @@ export function SiteContentForm({
                 defaultValue={content.contato_telefone}
               />
             </div>
+            {PAGE_TEXTS.filter((t) => t.page === 'contato').map((t) => (
+              <BilingualField
+                key={t.key}
+                name={t.key}
+                label={t.label}
+                language={language}
+                defaultValuePt={lookup(t.key) ?? defaultPageText(t, 'pt')}
+                defaultValueEn={lookup(`${t.key}_en`) ?? defaultPageText(t, 'en')}
+                multiline={'multiline' in t}
+                rows={'multiline' in t ? 3 : undefined}
+              />
+            ))}
           </Section>
 
           <Section title="redes">
