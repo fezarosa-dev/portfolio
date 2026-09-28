@@ -603,13 +603,6 @@ html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
 .cursor-arrow svg {
   display: block;
 }
-.cursor-glow {
-  width: 32px;
-  height: 32px;
-  margin: -16px 0 0 -16px;
-  border-radius: 9999px;
-  background: radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%);
-}
 .cursor-ripple {
   width: 70px;
   height: 70px;

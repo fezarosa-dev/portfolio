@@ -15,8 +15,7 @@ const TEXT_FIELD = 'input, textarea, [contenteditable="true"]'
 type Ripple = { id: number; x: number; y: number }
 
 // Seta arredondada (formato de public/img/cursor.png; preenchida com a cor do texto e contorno na cor de fundo, inverte no tema escuro) no lugar do cursor nativo, com:
-//  - brilho que chega atrasado (spring) e a seta inclinando com a velocidade;
-//  - brilho que se expande sobre elementos clicáveis;
+//  - a seta inclinando com a velocidade;
 //  - onda que se expande a cada clique.
 // Só em ponteiro fino (mouse) e sem "reduzir movimento"; senão fica o cursor nativo.
 export function CustomCursor() {
@@ -28,8 +27,6 @@ export function CustomCursor() {
 
   const x = useMotionValue(-100)
   const y = useMotionValue(-100)
-  const glowX = useSpring(x, { stiffness: 140, damping: 16, mass: 0.6 })
-  const glowY = useSpring(y, { stiffness: 140, damping: 16, mass: 0.6 })
   const tilt = useSpring(useTransform(useVelocity(x), [-2500, 2500], [18, -18], { clamp: true }), {
     stiffness: 200,
     damping: 14,
@@ -80,14 +77,6 @@ export function CustomCursor() {
 
   return (
     <div aria-hidden className="cursor-layer" style={{ opacity: hidden ? 0 : 1 }}>
-      {/* brilho atrasado */}
-      <motion.div
-        className="cursor-glow"
-        style={{ x: glowX, y: glowY }}
-        animate={{ scale: hovering ? 1.9 : 1, opacity: hovering ? 0.9 : 0.8 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-      />
-
       {/* ondas de clique */}
       <AnimatePresence>
         {ripples.map((r) => (
