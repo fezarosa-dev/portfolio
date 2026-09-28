@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
@@ -8,6 +7,7 @@ import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
+import { LoadingPhoto } from '@/components/loading-photo'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
 
@@ -28,16 +28,7 @@ export default async function SobrePage() {
       <FadeIn>
         <Eyebrow>{dict.sobre.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.sobre.title}</h1>
-        {photoUrl && (
-          <Image
-            src={photoUrl}
-            alt="Felipe Zanoni da Rosa"
-            width={256}
-            height={256}
-            priority
-            className="mx-auto mt-8 block h-64 w-64 rounded-full border border-hairline object-cover sm:mx-0"
-          />
-        )}
+        {photoUrl && <LoadingPhoto src={photoUrl} alt="Felipe Zanoni da Rosa" />}
       </FadeIn>
       <FadeIn delay={0.1}>
         <div className="prose dark:prose-invert mt-8 max-w-none text-lg leading-relaxed text-foreground/90 prose-a:text-signal prose-a:no-underline hover:prose-a:underline">

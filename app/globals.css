@@ -683,3 +683,58 @@ html:not(.reduce-motion) [data-tilt] {
 html:not(.reduce-motion) [data-slot="button"] {
   transform: translate(var(--px, 0px), var(--py, 0px));
 }
+
+/* Loader de imagem: bolinha quicando numa gangorra (components/image-loader.tsx) */
+.loader-ball {
+  height: 60px;
+  aspect-ratio: 2;
+  position: relative;
+}
+.loader-ball::before {
+  content: "";
+  position: absolute;
+  inset: 100% 75% -3px 0;
+  background: var(--muted-foreground);
+  animation: loader-ball-plank 1s linear infinite alternate;
+}
+.loader-ball::after {
+  content: "";
+  position: absolute;
+  inset: auto 42.5% 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--primary);
+  animation:
+    loader-ball-bounce 1s cubic-bezier(0, 700, 1, 700) infinite alternate,
+    loader-ball-move 1s linear infinite alternate;
+}
+@keyframes loader-ball-plank {
+  0%,
+  30% {
+    translate: 0% -2px;
+    rotate: 20deg;
+  }
+  70%,
+  to {
+    translate: 300% -2px;
+    rotate: -20deg;
+  }
+}
+@keyframes loader-ball-bounce {
+  0%,
+  2% {
+    bottom: 0%;
+  }
+  98%,
+  to {
+    bottom: 0.1%;
+  }
+}
+@keyframes loader-ball-move {
+  0% {
+    translate: -220%;
+  }
+  to {
+    translate: 220%;
+  }
+}
