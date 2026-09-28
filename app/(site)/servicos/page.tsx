@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Boxes, Code2, Globe, Server, Terminal, Workflow } from 'lucide-react'
+import { ArrowRight, Briefcase, Boxes, Code2, Globe, Server, Terminal, Workflow } from 'lucide-react'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata(locale, '/servicos', seo.title, seo.description)
 }
 
+const STACK = ['Python', 'Linux', 'Docker', 'ROS', 'Supabase', 'Next.js']
 const ICONS = [Globe, Workflow, Server, Code2, Boxes, Terminal]
 
 // servicos_texto: blocos separados por linha em branco; 1ª linha = título (com ou sem **), resto = descrição.
@@ -41,7 +42,36 @@ export default async function ServicosPage() {
         <p className="mt-4 max-w-xl text-lg text-steel">{dict.servicos.lead}</p>
       </FadeIn>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2">
+      <FadeIn delay={0.05} className="mt-12">
+        <section className="rounded-lg border border-signal/40 bg-signal/5 p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-lg bg-signal text-primary-foreground">
+              <Briefcase className="h-5 w-5" />
+            </span>
+            <h2 className="font-display text-2xl font-medium tracking-tight">{dict.servicos.hireTitle}</h2>
+          </div>
+          <p className="mt-4 max-w-2xl leading-relaxed text-foreground/90">{dict.servicos.hireText}</p>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {STACK.map((tech) => (
+              <li key={tech} className="rounded-full border border-hairline bg-card px-2.5 py-1 font-mono text-[11px] text-steel">
+                {tech}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href={`/${locale}/curriculo`} className={buttonVariants({ size: 'lg' })} data-slot="button">
+              {dict.servicos.hireResume}
+            </Link>
+            <Link href={`/${locale}/contato`} className={buttonVariants({ size: 'lg', variant: 'outline' })} data-slot="button">
+              {dict.servicos.hireContact}
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      </FadeIn>
+
+      <h2 className="mt-16 font-display text-2xl font-medium tracking-tight">{dict.servicos.projectsTitle}</h2>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {services.map((service, i) => {
           const Icon = ICONS[i % ICONS.length]
           return (

@@ -28,7 +28,18 @@ export type Dictionary = {
     seeAll: string
   }
   sobre: { eyebrow: string; title: string }
-  servicos: { eyebrow: string; title: string; lead: string; ctaTitle: string; ctaButton: string }
+  servicos: {
+    eyebrow: string
+    title: string
+    lead: string
+    hireTitle: string
+    hireText: string
+    hireResume: string
+    hireContact: string
+    projectsTitle: string
+    ctaTitle: string
+    ctaButton: string
+  }
   busca: {
     eyebrow: string
     title: string
@@ -144,7 +155,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     servicos: {
       eyebrow: 'serviços',
       title: 'Serviços',
-      lead: 'Do planejamento ao deploy: o que eu posso construir com você.',
+      lead: 'Trabalhando com você, em um time ou em projetos sob medida.',
+      hireTitle: 'Aberto a oportunidades',
+      hireText:
+        'Recrutando? Busco oportunidades como engenheiro de software: backend, automação, sistemas embarcados e full stack. Veja meu currículo ou me chame direto.',
+      hireResume: 'Ver currículo',
+      hireContact: 'Me chamar',
+      projectsTitle: 'Projetos sob demanda',
       ctaTitle: 'Tem um projeto em mente?',
       ctaButton: 'Vamos conversar',
     },
@@ -266,7 +283,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     servicos: {
       eyebrow: 'services',
       title: 'Services',
-      lead: 'From planning to deployment: what I can build with you.',
+      lead: 'Working with you, on a team or on custom projects.',
+      hireTitle: 'Open to opportunities',
+      hireText:
+        "Hiring? I'm looking for software engineering roles: backend, automation, embedded systems and full stack. Check my resume or reach out directly.",
+      hireResume: 'View resume',
+      hireContact: 'Get in touch',
+      projectsTitle: 'Projects on demand',
       ctaTitle: 'Have a project in mind?',
       ctaButton: "Let's talk",
     },
