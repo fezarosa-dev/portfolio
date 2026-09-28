@@ -617,18 +617,36 @@ html:has(.site-warm) {
   scrollbar-color: #c14e15 transparent;
 }
 html:has(.site-warm)::-webkit-scrollbar {
-  width: 10px;
+  width: 12px;
 }
 html:has(.site-warm)::-webkit-scrollbar-track {
   background: transparent;
 }
 html:has(.site-warm)::-webkit-scrollbar-thumb {
-  background: #c14e15;
+  background: linear-gradient(180deg, #e0722f, #c14e15 55%, #8f3a10);
   border-radius: 9999px;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
   background-clip: padding-box;
 }
 html:has(.site-warm)::-webkit-scrollbar-thumb:hover {
-  background: #e0722f;
+  background: linear-gradient(180deg, #ff9a55, #e0722f 55%, #c14e15);
   background-clip: padding-box;
+}
+html:has(.site-warm)::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+  background-clip: padding-box;
+}
+
+/* Barra de progresso de leitura no topo (components/scroll-progress.tsx) */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, #ff9a55, #c14e15);
+  box-shadow: 0 0 10px rgb(193 78 21 / 0.6);
+  pointer-events: none;
 }
