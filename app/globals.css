@@ -299,7 +299,7 @@
   .theme-switch {
     position: relative;
     display: inline-flex;
-    width: 44px;
+    width: 32px;
     height: 24px;
     cursor: pointer;
     flex-shrink: 0;
@@ -505,7 +505,7 @@
   .motion-switch {
     position: relative;
     display: inline-flex;
-    width: 44px;
+    width: 32px;
     height: 24px;
     cursor: pointer;
     flex-shrink: 0;
@@ -597,16 +597,16 @@ html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
   left: 0;
 }
 .cursor-arrow {
-  margin: -4px 0 0 -8px;
+  margin: -2.5px 0 0 -5px;
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
 }
 .cursor-arrow svg {
   display: block;
 }
 .cursor-glow {
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
   border-radius: 9999px;
   background: radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%);
 }

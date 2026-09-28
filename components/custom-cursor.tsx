@@ -106,10 +106,10 @@ export function CustomCursor() {
       {/* seta */}
       <motion.div className="cursor-arrow" style={{ x, y }}>
         <motion.svg
-          width="32"
-          height="32"
+          width="20"
+          height="20"
           viewBox="0 0 512 512"
-          style={{ rotate: tilt, transformOrigin: '8px 4px' }}
+          style={{ rotate: tilt, transformOrigin: '5px 2.5px' }}
           animate={{ scale: pressed ? 0.82 : hovering ? 1.25 : 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 18 }}
         >
