@@ -51,7 +51,7 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="contact-name">{dict.nameLabel}</Label>
         <Input id="contact-name" name="name" placeholder={dict.namePlaceholder} required />

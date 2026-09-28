@@ -28,7 +28,7 @@ export type Dictionary = {
     seeAll: string
   }
   sobre: { eyebrow: string; title: string }
-  servicos: { eyebrow: string; title: string }
+  servicos: { eyebrow: string; title: string; lead: string; ctaTitle: string; ctaButton: string }
   busca: {
     eyebrow: string
     title: string
@@ -52,6 +52,8 @@ export type Dictionary = {
   contato: {
     eyebrow: string
     title: string
+    lead: string
+    formTitle: string
     nameLabel: string
     namePlaceholder: string
     emailLabel: string
@@ -139,7 +141,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
       seeAll: 'ver todos os projetos →',
     },
     sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
-    servicos: { eyebrow: 'serviços', title: 'Serviços' },
+    servicos: {
+      eyebrow: 'serviços',
+      title: 'Serviços',
+      lead: 'Do planejamento ao deploy: o que eu posso construir com você.',
+      ctaTitle: 'Tem um projeto em mente?',
+      ctaButton: 'Vamos conversar',
+    },
     busca: {
       eyebrow: 'busca',
       title: 'Busca',
@@ -163,6 +171,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     contato: {
       eyebrow: 'contato',
       title: 'Vamos conversar',
+      lead: 'Escolha o canal que preferir ou mande uma mensagem pelo formulário — respondo o quanto antes.',
+      formTitle: 'Mande uma mensagem',
       nameLabel: 'Nome',
       namePlaceholder: 'Seu nome',
       emailLabel: 'E-mail',
@@ -253,7 +263,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
       seeAll: 'see all projects →',
     },
     sobre: { eyebrow: 'about-me', title: 'About me' },
-    servicos: { eyebrow: 'services', title: 'Services' },
+    servicos: {
+      eyebrow: 'services',
+      title: 'Services',
+      lead: 'From planning to deployment: what I can build with you.',
+      ctaTitle: 'Have a project in mind?',
+      ctaButton: "Let's talk",
+    },
     busca: {
       eyebrow: 'search',
       title: 'Search',
@@ -277,6 +293,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     contato: {
       eyebrow: 'contact',
       title: "Let's talk",
+      lead: "Pick the channel you prefer or send a message through the form — I'll reply as soon as I can.",
+      formTitle: 'Send a message',
       nameLabel: 'Name',
       namePlaceholder: 'Your name',
       emailLabel: 'Email',
