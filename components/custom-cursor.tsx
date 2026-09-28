@@ -14,7 +14,7 @@ const INTERACTIVE = 'a, button, [role="button"], summary, label, select, [data-c
 const TEXT_FIELD = 'input, textarea, [contenteditable="true"]'
 type Ripple = { id: number; x: number; y: number }
 
-// Seta clássica (preenchida com a cor de fundo, contorno na cor do texto: inverte no tema escuro) no lugar do cursor nativo, com:
+// Seta arredondada (formato de public/img/cursor.png; preenchida com a cor do texto e contorno na cor de fundo, inverte no tema escuro) no lugar do cursor nativo, com:
 //  - brilho que chega atrasado (spring) e a seta inclinando com a velocidade;
 //  - brilho que se expande sobre elementos clicáveis;
 //  - onda que se expande a cada clique.
@@ -58,19 +58,21 @@ export function CustomCursor() {
       setRipples((r) => [...r, { id: rid++, x: e.clientX, y: e.clientY }])
     }
     const up = () => setPressed(false)
-    const leave = () => setHidden(true)
+    const leave = (e: MouseEvent) => {
+      if (!e.relatedTarget) setHidden(true)
+    }
 
     window.addEventListener('pointermove', move, { passive: true })
     window.addEventListener('pointerdown', down)
     window.addEventListener('pointerup', up)
-    document.addEventListener('pointerleave', leave)
+    document.addEventListener('mouseout', leave)
 
     return () => {
       root.classList.remove('cursor-custom')
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointerup', up)
-      document.removeEventListener('pointerleave', leave)
+      document.removeEventListener('mouseout', leave)
     }
   }, [x, y])
 
@@ -104,18 +106,19 @@ export function CustomCursor() {
       {/* seta */}
       <motion.div className="cursor-arrow" style={{ x, y }}>
         <motion.svg
-          width="30"
-          height="30"
-          viewBox="0 0 24 24"
-          style={{ rotate: tilt, transformOrigin: '5px 3px' }}
+          width="32"
+          height="32"
+          viewBox="0 0 512 512"
+          style={{ rotate: tilt, transformOrigin: '8px 4px' }}
           animate={{ scale: pressed ? 0.82 : hovering ? 1.25 : 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 18 }}
         >
           <path
-            d="M5 3 L5 19.5 L9.3 15.6 L12 21.5 L14.6 20.3 L12 14.6 L17.8 14.6 Z"
-            fill="var(--background)"
-            stroke="var(--foreground)"
-            strokeWidth="1.7"
+            d="M130 105 Q130 65 172 65 Q188 65 202 76 L432 262 Q448 276 446 296 Q440 334 410 334 L322 334 Q290 334 268 362 L212 428 Q195 448 172 447 Q140 445 140 405 Z"
+            fill="var(--foreground)"
+            stroke="var(--background)"
+            strokeWidth="26"
+            paintOrder="stroke"
             strokeLinejoin="round"
           />
         </motion.svg>

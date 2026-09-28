@@ -597,6 +597,7 @@ html.cursor-custom :is(input, textarea, [contenteditable="true"]) {
   left: 0;
 }
 .cursor-arrow {
+  margin: -4px 0 0 -8px;
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
 }
 .cursor-arrow svg {
