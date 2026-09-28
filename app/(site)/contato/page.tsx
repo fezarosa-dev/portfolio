@@ -40,17 +40,17 @@ export default async function ContatoPage({
     getDictionary(),
   ])
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+    <main className="mx-auto max-w-4xl px-6 py-16 sm:py-20">
       <FadeIn>
         <Eyebrow>{dict.contato.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.contato.title}</h1>
         <p className="mt-4 max-w-xl text-lg text-steel">{pageText(content, locale, 'contato_lead')}</p>
       </FadeIn>
 
-      <div className="mt-10 grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-8">
+      <div className="mt-10 flex flex-col gap-8">
         {links.length > 0 && (
           <FadeIn delay={0.05}>
-            <ul className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1">
+            <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {links.map((link) => {
                 const Icon = iconFor(link.url)
                 const external = link.url.startsWith('http')
