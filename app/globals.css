@@ -649,3 +649,10 @@ html.custom-scrollbar::-webkit-scrollbar {
   margin-right: 2px;
   background: var(--primary);
 }
+
+/* Seleção de texto no site público: laranja da marca em vez do marrom do accent */
+.site-warm ::selection {
+  background: color-mix(in oklab, var(--primary) 85%, transparent);
+  color: var(--primary-foreground);
+  text-shadow: none;
+}
