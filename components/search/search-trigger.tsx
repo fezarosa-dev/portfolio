@@ -16,7 +16,7 @@ export function SearchTrigger({ label }: { label: string }) {
       onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))}
       aria-label={label}
       title={label}
-      className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-[border-color,color] duration-150 ease-out hover:border-signal hover:text-signal active:scale-90 motion-reduce:transition-none"
+      className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-[border-color,color] duration-150 ease-out hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
     >
       <motion.span
         className="flex"
@@ -49,7 +49,7 @@ export function SearchPill({ label, className = '' }: { label: string; className
       type="button"
       onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))}
       aria-label={label}
-      className={`group h-9 min-w-48 items-center gap-2 rounded-full border border-hairline bg-card/70 px-3 text-sm text-steel shadow-sm transition-[border-color,color,box-shadow] duration-150 ease-out hover:border-signal hover:text-signal hover:shadow-md active:scale-[0.98] motion-reduce:transition-none ${className}`}
+      className={`group h-9 min-w-48 items-center gap-2 rounded-full border border-hairline bg-card/70 px-3 text-sm text-steel shadow-sm transition-[border-color,color,box-shadow] duration-150 ease-out hover:border-signal hover:text-signal hover:shadow-md active:translate-y-0 motion-reduce:transition-none ${className}`}
     >
       <motion.span
         className="flex"

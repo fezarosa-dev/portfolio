@@ -35,7 +35,7 @@ export function HeroSection({
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 12, rotate: -4 }}
         animate={{ opacity: 1, y: 0, rotate: -3 }}
-        whileHover={reduceMotion ? undefined : { rotate: 0, scale: 1.05 }}
+        whileHover={reduceMotion ? undefined : { rotate: 0, y: -2 }}
         transition={noAnim ?? { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative inline-block"
       >
@@ -85,7 +85,7 @@ export function HeroSection({
               key={lang.id}
               className="backface-hidden"
               style={{ rotate: i % 2 === 0 ? -2 : 2 }}
-              whileHover={reduceMotion ? undefined : { rotate: 0, scale: 1.08 }}
+              whileHover={reduceMotion ? undefined : { rotate: 0, y: -2 }}
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
             >
               <Link
