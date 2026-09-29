@@ -17,6 +17,7 @@ import { findDriveFile, listDriveMedia, parseDriveFolderId, resolveDriveImageUrl
 import { getDictionary, getLocale } from '@/lib/i18n'
 
 const RICKROLL_FILENAME_DEFAULT = 'never_gonna_give-you_up.mp4'
+const RICKROLL_FALLBACK_FILENAME = 'rickroll.webm' // cópia VP9/Opus pra navegadores sem H.264 (ver components/rickroll-player.tsx)
 const RICKROLL_CLICKS_DEFAULT = 3
 
 const SITE_NAME = 'Felipe Zanoni da Rosa'
@@ -91,7 +92,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const rickrollFilename = content.rickroll_video_filename?.trim() || RICKROLL_FILENAME_DEFAULT
-  const rickrollVideo = folderId ? await findDriveFile(folderId, rickrollFilename).catch(() => null) : null
+  const [rickrollVideo, rickrollFallback] = folderId
+    ? await Promise.all([
+        findDriveFile(folderId, rickrollFilename).catch(() => null),
+        findDriveFile(folderId, RICKROLL_FALLBACK_FILENAME).catch(() => null),
+      ])
+    : [null, null]
   const rickrollClicks = Number(content.rickroll_clicks) || RICKROLL_CLICKS_DEFAULT
   // imagens que o visitante provavelmente vai abrir a seguir (foto do Sobre + imagens dos projetos e do currículo)
   const media = folderId ? await listDriveMedia(folderId).catch(() => []) : []
@@ -116,6 +122,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Mascote
         ativo={content.mascote_ativo === 'true'}
         rickrollVideoId={rickrollVideo?.id ?? null}
+        rickrollFallbackId={rickrollFallback?.id ?? null}
         rickrollClicks={rickrollClicks}
       />
       {easterEggsAtivo && (

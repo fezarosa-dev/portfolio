@@ -14,10 +14,12 @@ const RICKROLL_WINDOW_MS = 900
 export function Mascote({
   ativo,
   rickrollVideoId,
+  rickrollFallbackId = null,
   rickrollClicks = 3,
 }: {
   ativo: boolean
   rickrollVideoId: string | null
+  rickrollFallbackId?: string | null
   rickrollClicks?: number
 }) {
   const [acordado, setAcordado] = useState(false)
@@ -148,7 +150,7 @@ export function Mascote({
         <RickrollPlayer
           ref={rickrollVideoRef}
           videoUrl={`/api/drive-video/${rickrollVideoId}`}
-          fallbackUrl="/video/rickroll.webm"
+          fallbackUrl={rickrollFallbackId ? `/api/drive-video/${rickrollFallbackId}` : null}
           open={rickrollOpen}
           onClose={fecharRickroll}
         />
