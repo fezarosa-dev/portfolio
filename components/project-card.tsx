@@ -32,7 +32,7 @@ export function ProjectCard({
   const summary = resolveText(project.summary, project.summary_en, locale)
 
   return (
-    <div className="group rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <div data-tilt className="group rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <Link
         href={href}
         target={isExternal ? '_blank' : undefined}
@@ -84,7 +84,7 @@ export function ProjectCard({
         <div className="mt-4 flex flex-wrap gap-2 border-t border-hairline pt-4">
           {project.languages.map((lang) => {
             const pillClassName =
-              'flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel transition-transform duration-150 ease-out hover:scale-105 hover:border-signal hover:text-signal active:scale-95 motion-reduce:transition-none'
+              'flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel backface-hidden transition-[transform,border-color,color] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal hover:will-change-transform active:translate-y-0 motion-reduce:transition-none'
             const pillContent = (
               <>
                 {lang.devicon_slug && (

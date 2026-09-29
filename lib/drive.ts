@@ -52,9 +52,29 @@ export async function listDriveMedia(folderId: string): Promise<DriveMedia[]> {
   return data.files ?? []
 }
 
+const DRIVE_ID_RE = /^[A-Za-z0-9_-]{10,128}$/
+
+export function isValidDriveId(id: string): boolean {
+  return DRIVE_ID_RE.test(id)
+}
+
+/**
+ * As rotas de proxy (/api/drive-image, /api/drive-video) usam a nossa chave da API do Google, então só
+ * servem arquivos que estão de fato na pasta configurada -- senão viram proxy aberto de qualquer arquivo
+ * público do Drive. Falha fechado: sem pasta, id inválido ou erro na listagem => não permitido.
+ */
+export async function isAllowedDriveFile(fileId: string, folderId: string | null): Promise<boolean> {
+  if (!folderId || !isValidDriveId(fileId)) return false
+  try {
+    return (await listDriveMedia(folderId)).some((file) => file.id === fileId)
+  } catch {
+    return false
+  }
+}
+
 export async function fetchDriveImage(fileId: string): Promise<Response> {
   const apiKey = requireApiKey()
-  const url = `${DRIVE_API_BASE}/files/${fileId}?alt=media&key=${apiKey}`
+  const url = `${DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}?alt=media&key=${apiKey}`
   return fetch(url)
 }
 
@@ -82,6 +102,6 @@ export async function findDriveFile(folderId: string, name: string): Promise<Dri
 
 export async function fetchDriveFile(fileId: string, range?: string | null): Promise<Response> {
   const apiKey = requireApiKey()
-  const url = `${DRIVE_API_BASE}/files/${fileId}?alt=media&key=${apiKey}`
+  const url = `${DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}?alt=media&key=${apiKey}`
   return fetch(url, range ? { headers: { Range: range } } : undefined)
 }

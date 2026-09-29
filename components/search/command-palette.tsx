@@ -11,11 +11,13 @@ export function CommandPalette({
   placeholder,
   noResultsLabel,
   title,
+  quickLinks,
 }: {
   locale: Locale
   placeholder: string
   noResultsLabel: string
   title: string
+  quickLinks?: { href: string; label: string }[]
 }) {
   const [open, setOpen] = useState(false)
 
@@ -44,13 +46,15 @@ export function CommandPalette({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-h-[80vh] overflow-x-hidden overflow-y-auto pt-10 sm:max-w-lg">
+      <DialogContent showCloseButton={false} className="thin-scroll max-h-[85vh] overflow-x-hidden overflow-y-auto p-4 sm:max-w-xl">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <SearchPanel
           locale={locale}
           placeholder={placeholder}
           noResultsLabel={noResultsLabel}
           autoFocus
+          showHints
+          quickLinks={quickLinks}
           onNavigate={() => setOpen(false)}
         />
       </DialogContent>

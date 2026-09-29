@@ -299,7 +299,7 @@
   .theme-switch {
     position: relative;
     display: inline-flex;
-    width: 44px;
+    width: 32px;
     height: 24px;
     cursor: pointer;
     flex-shrink: 0;
@@ -505,7 +505,7 @@
   .motion-switch {
     position: relative;
     display: inline-flex;
-    width: 44px;
+    width: 32px;
     height: 24px;
     cursor: pointer;
     flex-shrink: 0;
@@ -574,5 +574,297 @@
     .theme-switch-cloud {
       animation: none;
     }
+  }
+}
+/* Cursor customizado (components/custom-cursor.tsx) */
+html.cursor-custom,
+html.cursor-custom * {
+  cursor: none !important;
+}
+/* Piscar do texto na cor da marca (o "I" do mouse é desenhado em components/custom-cursor.tsx) */
+.site-warm :is(input, textarea, [contenteditable="true"]) {
+  caret-color: var(--primary);
+}
+.cursor-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.cursor-layer > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.cursor-arrow {
+  margin: -2.5px 0 0 -5px;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
+}
+.cursor-arrow svg {
+  display: block;
+}
+.cursor-ripple {
+  width: 70px;
+  height: 70px;
+  margin: -35px 0 0 -35px;
+  border-radius: 9999px;
+  border: 2px solid var(--primary);
+}
+
+/* Barra de rolagem própria (components/custom-scrollbar.tsx): esconde a nativa */
+html.custom-scrollbar {
+  scrollbar-width: none;
+}
+html.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-track {
+  position: fixed;
+  top: 10px;
+  right: 3px;
+  bottom: 10px;
+  width: 18px;
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.scrollbar-track[data-visible="true"] {
+  opacity: 1;
+}
+.scrollbar-thumb {
+  width: 6px;
+  margin-right: 4px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 35%, transparent);
+  cursor: none;
+  touch-action: none;
+  transition: width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), margin 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s;
+}
+.scrollbar-track:hover .scrollbar-thumb,
+.scrollbar-track[data-dragging="true"] .scrollbar-thumb {
+  width: 10px;
+  margin-right: 2px;
+  background: var(--primary);
+}
+
+/* Seleção de texto no site público: laranja da marca em vez do marrom do accent */
+.site-warm ::selection {
+  background: color-mix(in oklab, var(--primary) 85%, transparent);
+  color: var(--primary-foreground);
+  text-shadow: none;
+}
+
+/* Sublinhado que se desenha da esquerda pra direita no hover (links do footer e do markdown) */
+.link-underline,
+.site-warm .prose a {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0% 1px no-repeat;
+  transition: background-size 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.15s;
+}
+.link-underline:hover,
+.site-warm .prose a:hover {
+  background-size: 100% 1px;
+}
+
+/* Cards inclinando em 3D com brilho seguindo o mouse (components/hover-effects.tsx) */
+html:not(.reduce-motion) [data-tilt] {
+  backface-visibility: hidden;
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  background-image: radial-gradient(
+    260px circle at var(--mx, -999px) var(--my, -999px),
+    color-mix(in oklab, var(--primary) 14%, transparent),
+    transparent 70%
+  );
+}
+/* Botões puxados de leve na direção do mouse */
+html:not(.reduce-motion) [data-slot="button"] {
+  transform: translate(var(--px, 0px), var(--py, 0px));
+}
+
+/* Loader de imagem: bolinha quicando numa gangorra (components/image-loader.tsx) */
+.loader-ball {
+  height: 60px;
+  aspect-ratio: 2;
+  position: relative;
+}
+.loader-ball::before {
+  content: "";
+  position: absolute;
+  inset: 100% 75% -3px 0;
+  background: var(--muted-foreground);
+  animation: loader-ball-plank 1s linear infinite alternate;
+}
+.loader-ball::after {
+  content: "";
+  position: absolute;
+  inset: auto 42.5% 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--primary);
+  animation:
+    loader-ball-bounce 1s cubic-bezier(0, 700, 1, 700) infinite alternate,
+    loader-ball-move 1s linear infinite alternate;
+}
+@keyframes loader-ball-plank {
+  0%,
+  30% {
+    translate: 0% -2px;
+    rotate: 20deg;
+  }
+  70%,
+  to {
+    translate: 300% -2px;
+    rotate: -20deg;
+  }
+}
+@keyframes loader-ball-bounce {
+  0%,
+  2% {
+    bottom: 0%;
+  }
+  98%,
+  to {
+    bottom: 0.1%;
+  }
+}
+@keyframes loader-ball-move {
+  0% {
+    translate: -220%;
+  }
+  to {
+    translate: 220%;
+  }
+}
+
+/* Zs do cachorro dormindo (components/mascote.tsx): sobem pra direita balançando e somem */
+.dog-z {
+  position: absolute;
+  font-size: 15px;
+  opacity: 0;
+  animation: dog-z-float 2.4s ease-out infinite;
+}
+@keyframes dog-z-float {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.7);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(26px, -46px) rotate(28deg) scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Barra de rolagem de áreas internas (lista da busca, campo de mensagem, modal): mesma pílula fina da
+   barra do site (components/custom-scrollbar.tsx) — cinza discreto, laranja no hover. O Chromium ignora
+   ::-webkit-scrollbar quando scrollbar-color/width estão definidos, então o Firefox fica num @supports à parte. */
+.thin-scroll {
+  scrollbar-gutter: stable;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 35%, transparent);
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  transition: background-color 0.2s;
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+  background-clip: padding-box;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent;
+  }
+}
+
+/* Área com rolagem própria (components/scroll-area.tsx) */
+.hide-native-scroll {
+  scrollbar-width: none;
+}
+.hide-native-scroll::-webkit-scrollbar {
+  display: none;
+}
+.area-track {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  bottom: 2px;
+  width: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+.area-thumb {
+  width: 6px;
+  margin-right: 3px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 35%, transparent);
+  cursor: none;
+  touch-action: none;
+  transition: width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), margin 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s;
+}
+.area-track:hover .area-thumb,
+.area-track[data-dragging="true"] .area-thumb {
+  width: 10px;
+  margin-right: 1px;
+  background: var(--primary);
+}
+
+/* Logo zanoni.dev.br no menu (components/nav.tsx): enquanto o mouse está em cima uma onda percorre todas as
+   letras ("zanoni.dev.br") da esquerda pra direita, sem parar, e um cursor de terminal pisca no final */
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+}
+.logo-letter {
+  display: inline-block;
+}
+.logo-caret {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  border-radius: 1px;
+  background: var(--signal);
+  opacity: 0;
+}
+.logo-link:hover .logo-letter {
+  animation: logo-wave 1.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 55ms);
+}
+.logo-link:hover .logo-caret {
+  opacity: 1;
+  animation: logo-caret-blink 1s steps(1) infinite;
+}
+@keyframes logo-wave {
+  0% {
+    transform: translateY(0);
+  }
+  12% {
+    transform: translateY(-5px);
+  }
+  24% {
+    transform: translateY(1px);
+  }
+  32%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes logo-caret-blink {
+  50% {
+    opacity: 0;
   }
 }

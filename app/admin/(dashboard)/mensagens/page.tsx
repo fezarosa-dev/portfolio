@@ -2,6 +2,13 @@ import { listMessages } from '@/lib/supabase/admin-queries'
 import { ToastForm } from '@/components/admin/toast-form'
 import { toggleRead, removeMessage } from './actions'
 
+const CATEGORY_LABELS: Record<string, string> = {
+  vaga: 'Vaga / oportunidade',
+  projeto: 'Projeto / freela',
+  duvida: 'Dúvida',
+  outro: 'Outro',
+}
+
 export default async function MensagensPage() {
   const messages = await listMessages()
 
@@ -25,10 +32,20 @@ export default async function MensagensPage() {
                   {new Date(msg.created_at).toLocaleString('pt-BR')}
                 </p>
               </div>
-              <p className="mt-2 text-sm text-foreground/90">{msg.message}</p>
+              {(msg.category || msg.subject) && (
+                <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium">
+                  {msg.category && (
+                    <span className="rounded-full bg-signal/10 px-2 py-0.5 font-mono text-xs text-signal">
+                      {CATEGORY_LABELS[msg.category] ?? msg.category}
+                    </span>
+                  )}
+                  {msg.subject}
+                </p>
+              )}
+              <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/90">{msg.message}</p>
               <div className="mt-3 flex gap-4 font-mono text-xs">
                 <a
-                  href={`mailto:${msg.email}?subject=${encodeURIComponent('Re: sua mensagem em zanoni.dev.br')}&body=${encodeURIComponent(`Oi ${msg.name},\n\n\n\n---\nVocê escreveu:\n${msg.message}`)}`}
+                  href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject || 'sua mensagem em zanoni.dev.br'}`)}&body=${encodeURIComponent(`Oi ${msg.name},\n\n\n\n---\nVocê escreveu:\n${msg.message}`)}`}
                   className="text-signal hover:underline"
                 >
                   responder

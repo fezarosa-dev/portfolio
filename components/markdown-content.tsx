@@ -5,11 +5,12 @@ import { motion } from 'framer-motion'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { remarkDriveImages } from '@/lib/markdown/remark-drive-images'
+import { ImageLoader, useImageLoaded } from '@/components/image-loader'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { DriveMedia } from '@/lib/drive'
 
 const CLASS_NAME =
-  'prose dark:prose-invert max-w-none break-words prose-headings:font-display prose-headings:tracking-tight prose-a:text-signal prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-hr:border-hairline prose-blockquote:border-signal prose-pre:overflow-x-auto prose-img:mx-auto'
+  'prose dark:prose-invert max-w-none break-words prose-headings:font-display prose-headings:tracking-tight prose-a:text-signal prose-a:no-underline prose-strong:text-foreground prose-hr:border-hairline prose-blockquote:border-signal prose-pre:overflow-x-auto prose-img:mx-auto'
 
 const VIDEO_EXTENSION_RE = /\.(mp4|webm|mov|ogv)(\?|#|$)/i
 
@@ -20,8 +21,23 @@ const MarkdownImage: Components['img'] = ({ src, alt }) => {
     // eslint-disable-next-line jsx-a11y/media-has-caption
     return <video src={src} controls playsInline className="mx-auto max-w-full rounded-lg" />
   }
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} />
+  return <LoadingMarkdownImage src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} />
+}
+
+function LoadingMarkdownImage({ src, alt }: { src?: string; alt: string }) {
+  const { loaded, ...handlers } = useImageLoaded()
+  return (
+    <span className={`relative block ${loaded ? '' : 'min-h-40'}`}>
+      {!loaded && <ImageLoader className="absolute inset-0 m-auto" />}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        className={`transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        {...handlers}
+      />
+    </span>
+  )
 }
 
 // revela cada bloco (parágrafo, item de lista, título, citação) sozinho

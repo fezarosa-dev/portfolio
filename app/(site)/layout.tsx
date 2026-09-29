@@ -4,13 +4,20 @@ import { Footer } from '@/components/footer'
 import { Mascote } from '@/components/mascote'
 import { SudoEasterEgg } from '@/components/sudo-easter-egg'
 import { SpinEasterEgg } from '@/components/spin-easter-egg'
+import { CustomScrollbar } from '@/components/custom-scrollbar'
+import { HoverEffects } from '@/components/hover-effects'
+import { CustomCursor } from '@/components/custom-cursor'
 import { CookieConsent } from '@/components/cookie-consent'
 import { CommandPalette } from '@/components/search/command-palette'
-import { getSiteContent } from '@/lib/supabase/queries-cached'
-import { findDriveFile, parseDriveFolderId } from '@/lib/drive'
+import { getSiteContent, getVisibleProjects, getResume } from '@/lib/supabase/queries-cached'
+import { ImagePreloader } from '@/components/image-preloader'
+import { extractDriveImageUrls } from '@/lib/markdown/preload-images'
+import { resolveText } from '@/lib/bilingual'
+import { findDriveFile, listDriveMedia, parseDriveFolderId, resolveDriveImageUrl } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 
 const RICKROLL_FILENAME_DEFAULT = 'never_gonna_give-you_up.mp4'
+const RICKROLL_FALLBACK_FILENAME = 'rickroll.webm' // cópia VP9/Opus pra navegadores sem H.264 (ver components/rickroll-player.tsx)
 const RICKROLL_CLICKS_DEFAULT = 3
 
 const SITE_NAME = 'Felipe Zanoni da Rosa'
@@ -85,8 +92,26 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const rickrollFilename = content.rickroll_video_filename?.trim() || RICKROLL_FILENAME_DEFAULT
-  const rickrollVideo = folderId ? await findDriveFile(folderId, rickrollFilename).catch(() => null) : null
+  const [rickrollVideo, rickrollFallback] = folderId
+    ? await Promise.all([
+        findDriveFile(folderId, rickrollFilename).catch(() => null),
+        findDriveFile(folderId, RICKROLL_FALLBACK_FILENAME).catch(() => null),
+      ])
+    : [null, null]
   const rickrollClicks = Number(content.rickroll_clicks) || RICKROLL_CLICKS_DEFAULT
+  // imagens que o visitante provavelmente vai abrir a seguir (foto do Sobre + imagens dos projetos e do currículo)
+  const media = folderId ? await listDriveMedia(folderId).catch(() => []) : []
+  const photoUrl = content.sobre_foto ? resolveDriveImageUrl(content.sobre_foto, media) : null
+  const [projects, resume] = media.length
+    ? await Promise.all([getVisibleProjects().catch(() => []), getResume().catch(() => null)])
+    : [[], null]
+  const preloadUrls = extractDriveImageUrls(
+    [
+      ...projects.map((p) => resolveText(p.content_md, p.content_md_en, locale)),
+      resume && resolveText(resume.content_md, resume.content_md_en, locale),
+    ],
+    media
+  )
   const easterEggsAtivo = content.easter_eggs_ativo !== 'false'
 
   return (
@@ -97,6 +122,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Mascote
         ativo={content.mascote_ativo === 'true'}
         rickrollVideoId={rickrollVideo?.id ?? null}
+        rickrollFallbackId={rickrollFallback?.id ?? null}
         rickrollClicks={rickrollClicks}
       />
       {easterEggsAtivo && (
@@ -105,12 +131,22 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           <SpinEasterEgg />
         </>
       )}
+      <CustomScrollbar />
+      <HoverEffects />
+      <CustomCursor />
+      <ImagePreloader photoUrl={photoUrl} urls={preloadUrls} />
       <CookieConsent />
       <CommandPalette
         locale={locale}
         title={dict.busca.title}
         placeholder={dict.busca.placeholder}
         noResultsLabel={dict.busca.noResults}
+        quickLinks={dict.nav.links
+          .filter((link) => !(content.nav_hidden_links ?? '').split(',').map((h) => h.trim()).includes(link.href))
+          .map((link) => ({
+            label: link.label,
+            href: `/${locale}${link.href === '/' ? '' : link.href}`,
+          }))}
       />
     </div>
   )

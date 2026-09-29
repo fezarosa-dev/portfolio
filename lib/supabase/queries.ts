@@ -243,6 +243,8 @@ export async function getArticleById(id: string, client?: SupabaseClient): Promi
 export async function insertMessage(input: {
   name: string
   email: string
+  subject: string
+  category: string
   message: string
   ip: string | null
 }): Promise<void> {

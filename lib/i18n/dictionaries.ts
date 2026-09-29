@@ -20,15 +20,37 @@ export type Dictionary = {
     termos: string
     cookies: string
   }
+  errors: {
+    notFoundTitle: string
+    notFoundText: string
+    serverTitle: string
+    serverText: string
+    retry: string
+    home: string
+    search: string
+    contact: string
+  }
   home: {
     whoami: string
     aboutEyebrow: string
     projectsEyebrow: string
     projectsHeading: string
     seeAll: string
+    tagline: string
   }
   sobre: { eyebrow: string; title: string }
-  servicos: { eyebrow: string; title: string }
+  servicos: {
+    eyebrow: string
+    title: string
+    lead: string
+    hireTitle: string
+    hireText: string
+    hireResume: string
+    hireContact: string
+    projectsTitle: string
+    ctaTitle: string
+    ctaButton: string
+  }
   busca: {
     eyebrow: string
     title: string
@@ -52,6 +74,13 @@ export type Dictionary = {
   contato: {
     eyebrow: string
     title: string
+    lead: string
+    formTitle: string
+    categoryLabel: string
+    categories: { vaga: string; projeto: string; duvida: string; outro: string }
+    subjectLabel: string
+    subjectPlaceholder: string
+    sendAnother: string
     nameLabel: string
     namePlaceholder: string
     emailLabel: string
@@ -131,15 +160,38 @@ export const dictionaries: Record<Locale, Dictionary> = {
       termos: 'termos de uso',
       cookies: 'cookies',
     },
+    errors: {
+      notFoundTitle: 'Página não encontrada',
+      notFoundText: 'Farejei o site inteiro e não achei essa página. Ela pode ter mudado de lugar ou nunca ter existido.',
+      serverTitle: 'Algo quebrou por aqui',
+      serverText: 'O cachorro dormiu em cima do teclado e deu erro. Tenta de novo; se continuar, me avisa pelo contato.',
+      retry: 'Tentar de novo',
+      home: 'Voltar pro início',
+      search: 'Buscar no site',
+      contact: 'Avisar o Felipe',
+    },
     home: {
       whoami: '$ whoami',
       aboutEyebrow: 'sobre',
       projectsEyebrow: 'projetos',
       projectsHeading: 'Coisas que construí',
       seeAll: 'ver todos os projetos →',
+      tagline: 'Eu resolvo problemas. O código é só a ferramenta.',
     },
     sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
-    servicos: { eyebrow: 'serviços', title: 'Serviços' },
+    servicos: {
+      eyebrow: 'serviços',
+      title: 'Serviços',
+      lead: 'Trabalhando com você, em um time ou em projetos sob medida.',
+      hireTitle: 'Aberto a oportunidades',
+      hireText:
+        'Recrutando? Busco oportunidades como engenheiro de software: backend, automação e full stack. Veja meu currículo ou me chame direto.',
+      hireResume: 'Ver currículo',
+      hireContact: 'Me chamar',
+      projectsTitle: 'Projetos sob demanda',
+      ctaTitle: 'Tem um projeto em mente?',
+      ctaButton: 'Vamos conversar',
+    },
     busca: {
       eyebrow: 'busca',
       title: 'Busca',
@@ -163,6 +215,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     contato: {
       eyebrow: 'contato',
       title: 'Vamos conversar',
+      lead: 'Escolha o canal que preferir ou mande uma mensagem pelo formulário — respondo o quanto antes.',
+      formTitle: 'Mande uma mensagem',
+      categoryLabel: 'Sobre o quê?',
+      categories: { vaga: 'Vaga / oportunidade', projeto: 'Projeto / freela', duvida: 'Dúvida', outro: 'Outro' },
+      subjectLabel: 'Assunto',
+      subjectPlaceholder: 'Ex.: Vaga de desenvolvedor backend',
+      sendAnother: 'Enviar outra mensagem',
       nameLabel: 'Nome',
       namePlaceholder: 'Seu nome',
       emailLabel: 'E-mail',
@@ -245,15 +304,38 @@ export const dictionaries: Record<Locale, Dictionary> = {
       termos: 'terms of use',
       cookies: 'cookies',
     },
+    errors: {
+      notFoundTitle: 'Page not found',
+      notFoundText: "I sniffed all over the site and couldn't find this page. It may have moved, or never existed.",
+      serverTitle: 'Something broke here',
+      serverText: 'The dog fell asleep on the keyboard and caused an error. Try again; if it keeps happening, let me know through the contact page.',
+      retry: 'Try again',
+      home: 'Back to home',
+      search: 'Search the site',
+      contact: 'Tell Felipe',
+    },
     home: {
       whoami: '$ whoami',
       aboutEyebrow: 'about',
       projectsEyebrow: 'projects',
       projectsHeading: 'Things I built',
       seeAll: 'see all projects →',
+      tagline: 'I solve problems. Code is just the tool.',
     },
     sobre: { eyebrow: 'about-me', title: 'About me' },
-    servicos: { eyebrow: 'services', title: 'Services' },
+    servicos: {
+      eyebrow: 'services',
+      title: 'Services',
+      lead: 'Working with you, on a team or on custom projects.',
+      hireTitle: 'Open to opportunities',
+      hireText:
+        "Hiring? I'm looking for software engineering roles: backend, automation and full stack. Check my resume or reach out directly.",
+      hireResume: 'View resume',
+      hireContact: 'Get in touch',
+      projectsTitle: 'Projects on demand',
+      ctaTitle: 'Have a project in mind?',
+      ctaButton: "Let's talk",
+    },
     busca: {
       eyebrow: 'search',
       title: 'Search',
@@ -277,6 +359,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     contato: {
       eyebrow: 'contact',
       title: "Let's talk",
+      lead: "Pick the channel you prefer or send a message through the form — I'll reply as soon as I can.",
+      formTitle: 'Send a message',
+      categoryLabel: 'What is it about?',
+      categories: { vaga: 'Job / opportunity', projeto: 'Project / freelance', duvida: 'Question', outro: 'Other' },
+      subjectLabel: 'Subject',
+      subjectPlaceholder: 'E.g.: Backend developer position',
+      sendAnother: 'Send another message',
       nameLabel: 'Name',
       namePlaceholder: 'Your name',
       emailLabel: 'Email',

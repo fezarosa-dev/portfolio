@@ -25,28 +25,28 @@ export async function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             title="JSON com projetos, currículo e contato — pra colar num modelo de IA"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:scale-105 hover:border-signal hover:text-signal active:scale-95 motion-reduce:transition-none"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.exportAi}
           </a>
           <a
             href={`/${locale}/status`}
             title="Métricas técnicas reais deste site, ao vivo"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:scale-105 hover:border-signal hover:text-signal active:scale-95 motion-reduce:transition-none"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.status}
           </a>
           <a
             href={`/${locale}/busca`}
             title="Busca em linguagem natural pelo conteúdo do site"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:scale-105 hover:border-signal hover:text-signal active:scale-95 motion-reduce:transition-none"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.busca}
           </a>
           <a
             href={`/${locale}/como-funciona`}
             title="Mapa da arquitetura deste site"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:scale-105 hover:border-signal hover:text-signal active:scale-95 motion-reduce:transition-none"
+            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.comoFunciona}
           </a>
@@ -68,7 +68,7 @@ export async function Footer() {
       <div className="mx-auto mt-4 flex max-w-4xl flex-col items-center justify-between gap-2 font-mono text-[11px] text-steel/70 sm:flex-row">
         <div className="flex gap-4">
           {legalLinks.map((link) => (
-            <a key={link.href} href={link.href} className="transition-colors hover:text-signal">
+            <a key={link.href} href={link.href} className="link-underline transition-colors hover:text-signal">
               {link.label}
             </a>
           ))}

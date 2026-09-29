@@ -14,10 +14,12 @@ const RICKROLL_WINDOW_MS = 900
 export function Mascote({
   ativo,
   rickrollVideoId,
+  rickrollFallbackId = null,
   rickrollClicks = 3,
 }: {
   ativo: boolean
   rickrollVideoId: string | null
+  rickrollFallbackId?: string | null
   rickrollClicks?: number
 }) {
   const [acordado, setAcordado] = useState(false)
@@ -90,36 +92,34 @@ export function Mascote({
         type="button"
         onClick={handleClick}
         aria-label="Cutucar o mascote"
-        animate={
-          reduceMotion
-            ? { rotate: 0, y: 0 }
-            : acordado
-              ? { rotate: [0, -8, 8, -5, 5, 0], y: 0 }
-              : { y: [0, -4, 0], rotate: 0 }
-        }
-        transition={
-          reduceMotion
-            ? undefined
-            : acordado
-              ? { duration: 0.5, ease: 'easeInOut' }
-              : { duration: 2.2, ease: 'easeInOut', repeat: Infinity }
-        }
-        className="block cursor-pointer"
+        className="relative block h-[116px] w-16 cursor-pointer"
       >
-        <Image
-          src={acordado ? '/img/mascote-cachorro-acordado.svg' : '/img/mascote-cachorro.svg'}
-          alt=""
-          aria-hidden
-          width={64}
-          height={116}
-          priority
-          className="!h-[116px] !w-16"
-        />
+        {/* troca simples entre as duas ilustrações (dormindo / acordado) */}
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={acordado ? 'acordado' : 'dormindo'}
+            className="absolute inset-0"
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeInOut' }}
+          >
+            <Image
+              src={acordado ? '/img/mascote-cachorro-acordado.svg' : '/img/mascote-cachorro.svg'}
+              alt=""
+              aria-hidden
+              width={64}
+              height={116}
+              priority
+              className="!h-[116px] !w-16"
+            />
+          </motion.div>
+        </AnimatePresence>
       </motion.button>
 
-      <div className="pointer-events-none absolute right-8 bottom-[108px] w-max max-w-[220px] rounded-2xl border border-hairline bg-card px-2 py-1 font-mono text-[10px] leading-snug break-words text-foreground/80 shadow-sm">
-        <AnimatePresence mode="wait">
-          {acordado ? (
+      {acordado ? (
+        <div className="pointer-events-none absolute right-8 bottom-[108px] w-max max-w-[220px] rounded-2xl border border-hairline bg-card px-2 py-1 font-mono text-[10px] leading-snug break-words text-foreground/80 shadow-sm">
+          <AnimatePresence mode="wait">
             <motion.span
               key={frase}
               initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
@@ -129,53 +129,28 @@ export function Mascote({
             >
               {frase}
             </motion.span>
+          </AnimatePresence>
+        </div>
+      ) : (
+        // Zs subindo em zigue-zague da cabeça do cachorro dormindo (CSS: .dog-z em globals.css)
+        <div aria-hidden className="pointer-events-none absolute top-[50px] left-4 font-mono font-semibold text-signal">
+          {reduceMotion ? (
+            <span className="absolute text-base opacity-60">Z</span>
           ) : (
-            <motion.span key="zzz" className="inline-flex gap-0.5" aria-hidden>
-              {['Z', 'z', 'z'].map((letra, i) => (
-                <motion.span
-                  key={i}
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : { y: [0, -4, 0], opacity: [0.4, 1, 0.4] }
-                  }
-                  transition={
-                    reduceMotion
-                      ? undefined
-                      : { duration: 1.4, ease: 'easeInOut', repeat: Infinity, delay: i * 0.25 }
-                  }
-                >
-                  {letra}
-                </motion.span>
-              ))}
-            </motion.span>
+            [0, 1, 2, 3].map((i) => (
+              <span key={i} className="dog-z" style={{ animationDelay: `${i * 0.6}s` }}>
+                Z
+              </span>
+            ))
           )}
-        </AnimatePresence>
-      </div>
-
-      {!acordado && (
-        <>
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute top-6 right-9 h-2 w-2 rounded-full border border-hairline bg-card"
-            animate={reduceMotion ? undefined : { scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
-            transition={reduceMotion ? undefined : { duration: 1.8, ease: 'easeInOut', repeat: Infinity }}
-          />
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute top-4 right-7 h-1.5 w-1.5 rounded-full border border-hairline bg-card"
-            animate={reduceMotion ? undefined : { scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
-            transition={
-              reduceMotion ? undefined : { duration: 1.8, ease: 'easeInOut', repeat: Infinity, delay: 0.3 }
-            }
-          />
-        </>
+        </div>
       )}
 
       {rickrollVideoId && rickrollPreload && (
         <RickrollPlayer
           ref={rickrollVideoRef}
           videoUrl={`/api/drive-video/${rickrollVideoId}`}
+          fallbackUrl={rickrollFallbackId ? `/api/drive-video/${rickrollFallbackId}` : null}
           open={rickrollOpen}
           onClose={fecharRickroll}
         />

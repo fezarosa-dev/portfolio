@@ -3,9 +3,10 @@ import { cookies } from 'next/headers'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
+import { NavLinks } from '@/components/nav-links'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavSettings } from '@/components/nav-settings'
-import { SearchTrigger } from '@/components/search/search-trigger'
+import { SearchPill } from '@/components/search/search-trigger'
 import { CollapsibleOnScroll } from '@/components/collapsible-on-scroll'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -50,7 +51,6 @@ export async function Nav() {
           />
           <span className="truncate">{statusText}</span>
           <span className="ml-auto flex items-center gap-2">
-            <SearchTrigger label={dict.busca.title} />
             <NavSettings
               initialDark={isDark}
               locale={locale}
@@ -61,24 +61,26 @@ export async function Nav() {
         </div>
       </CollapsibleOnScroll>
       <nav className="relative flex items-center justify-between px-6 py-4">
-        <Link href={`/${locale}`} className="group font-mono text-sm font-medium tracking-tight">
-          zanoni
-          <span className="inline-block text-signal transition-transform duration-200 ease-out group-hover:-rotate-6 motion-reduce:transition-none">
-            .dev.br
+        <Link
+          href={`/${locale}`}
+          aria-label="zanoni.dev.br"
+          className="logo-link font-mono text-sm font-medium tracking-tight"
+        >
+          <span aria-hidden>
+            {[...'zanoni.dev.br'].map((letter, i) => (
+              <span
+                key={i}
+                className={`logo-letter${i >= 6 ? ' text-signal' : ''}`}
+                style={{ '--i': i } as React.CSSProperties}
+              >
+                {letter}
+              </span>
+            ))}
+            <span className="logo-caret" />
           </span>
         </Link>
-        <ul className="hidden gap-5 text-sm md:flex md:gap-7">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="relative text-foreground/80 transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-signal after:transition-transform after:duration-200 after:ease-out hover:text-signal hover:after:scale-x-100 motion-reduce:after:transition-none"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
+        <NavLinks links={navLinks} />
         <MobileNav
           links={navLinks}
           openLabel={dict.nav.menuOpen}

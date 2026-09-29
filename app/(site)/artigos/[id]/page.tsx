@@ -9,6 +9,7 @@ import { pageMetadata, breadcrumbJsonLd } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
+import { jsonLd } from '@/lib/json-ld'
 
 export async function generateMetadata({
   params,
@@ -70,12 +71,12 @@ export default async function ArtigoDetailPage({
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(articleJsonLd) }}
       />
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJson) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbJson) }}
       />
       <FadeIn>
         <Link href={`/${locale}/artigos`} className="font-mono text-xs text-steel hover:text-signal">
