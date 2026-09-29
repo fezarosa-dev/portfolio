@@ -46,7 +46,7 @@ export function CommandPalette({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent showCloseButton={false} className="max-h-[85vh] overflow-x-hidden overflow-y-auto p-4 sm:max-w-xl">
+      <DialogContent showCloseButton={false} className="thin-scroll max-h-[85vh] overflow-x-hidden overflow-y-auto p-4 sm:max-w-xl">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <SearchPanel
           locale={locale}

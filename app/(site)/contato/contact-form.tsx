@@ -163,7 +163,7 @@ export function ContactForm({
             maxLength={MAX_MESSAGE}
             onChange={(e) => setLength(e.target.value.length)}
             style={{ height: 256, minHeight: MIN_HEIGHT, maxHeight: MAX_HEIGHT, fieldSizing: 'fixed', scrollbarGutter: 'stable' }}
-            className="resize-none overflow-y-auto overscroll-contain px-3 py-2.5 pb-7 leading-relaxed"
+            className="thin-scroll resize-none overflow-y-auto overscroll-contain px-3 py-2.5 pb-7 leading-relaxed"
           />
           <div
             data-cursor="hover"

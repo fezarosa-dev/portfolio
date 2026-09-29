@@ -221,7 +221,7 @@ export function SearchPanel({
           <div className={showTechStats ? '' : 'invisible'} aria-hidden={!showTechStats}>
             <p className="mb-2 font-mono text-[11px] text-steel">{t.techs}</p>
             <TooltipProvider>
-              <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto pr-3 [scrollbar-color:var(--hairline)_transparent] [scrollbar-gutter:stable] [scrollbar-width:thin]">
+              <ul className="thin-scroll flex max-h-72 flex-col gap-2 overflow-y-auto pr-2">
                 {techStats.map((stat) => {
                   const projectLinks = stat.projects
                     .map((project) => ({
@@ -282,7 +282,7 @@ export function SearchPanel({
             </TooltipProvider>
           </div>
           {!showTechStats && (
-            <div className="absolute inset-0 overflow-y-auto [scrollbar-color:var(--hairline)_transparent] [scrollbar-gutter:stable] [scrollbar-width:thin]">
+            <div className="thin-scroll absolute inset-0 overflow-y-auto">
               {showError && <p className="font-mono text-xs text-steel">{error}</p>}
               {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
               {showResults && (
