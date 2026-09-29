@@ -61,10 +61,19 @@ export async function Nav() {
         </div>
       </CollapsibleOnScroll>
       <nav className="relative flex items-center justify-between px-6 py-4">
-        <Link href={`/${locale}`} className="group font-mono text-sm font-medium tracking-tight">
-          zanoni
-          <span className="inline-block text-signal transition-transform duration-200 ease-out group-hover:-rotate-6 motion-reduce:transition-none">
-            .dev.br
+        <Link
+          href={`/${locale}`}
+          aria-label="zanoni.dev.br"
+          className="logo-link font-mono text-sm font-medium tracking-tight"
+        >
+          <span aria-hidden>
+            {[...'zanoni'].map((letter, i) => (
+              <span key={i} className="logo-letter" style={{ '--i': i } as React.CSSProperties}>
+                {letter}
+              </span>
+            ))}
+            <span className="logo-tld text-signal">.dev.br</span>
+            <span className="logo-caret" />
           </span>
         </Link>
         <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />

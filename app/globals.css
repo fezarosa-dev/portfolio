@@ -819,3 +819,55 @@ html:not(.reduce-motion) [data-slot="button"] {
   margin-right: 1px;
   background: var(--primary);
 }
+
+/* Logo zanoni.dev.br no menu (components/nav.tsx): ao passar o mouse as letras fazem uma onda, o
+   ".dev.br" dá uma balançada e um cursor de terminal pisca no final */
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+}
+.logo-letter {
+  display: inline-block;
+}
+.logo-tld {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.logo-caret {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  border-radius: 1px;
+  background: var(--signal);
+  opacity: 0;
+}
+.logo-link:hover .logo-letter {
+  animation: logo-wave 0.55s ease-in-out both;
+  animation-delay: calc(var(--i) * 45ms);
+}
+.logo-link:hover .logo-tld {
+  transform: translateX(2px) rotate(-3deg);
+}
+.logo-link:hover .logo-caret {
+  opacity: 1;
+  animation: logo-caret-blink 1s steps(1) infinite;
+}
+@keyframes logo-wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  70% {
+    transform: translateY(1px);
+  }
+}
+@keyframes logo-caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
