@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { ScrollArea } from '@/components/scroll-area'
 import { ArrowUpRight, FileText, FolderGit2, SearchIcon, UserRound, XIcon } from 'lucide-react'
 import type { Locale } from '@/lib/i18n'
 import { iconUrl } from '@/lib/icons'
@@ -26,8 +27,10 @@ type TechStat = {
 }
 
 const TEXTS = {
-  pt: { goTo: 'ir para', techs: 'tecnologias mais usadas', clear: 'Limpar busca', navigate: 'navegar', open: 'abrir', close: 'fechar' },
-  en: { goTo: 'go to', techs: 'most used technologies', clear: 'Clear search', navigate: 'navigate', open: 'open', close: 'close' },
+  pt: { goTo: 'ir para', techs: 'tecnologias mais usadas', clear: 'Limpar busca',
+    found: (n: number) => (n === 1 ? '1 resultado encontrado' : `${n} resultados encontrados`), navigate: 'navegar', open: 'abrir', close: 'fechar' },
+  en: { goTo: 'go to', techs: 'most used technologies', clear: 'Clear search',
+    found: (n: number) => (n === 1 ? '1 result found' : `${n} results found`), navigate: 'navigate', open: 'open', close: 'close' },
 } as const
 
 function resultIcon(url: string) {
@@ -207,7 +210,12 @@ export function SearchPanel({
       )}
       <div className="mt-3">
         {/* altura reservada mesmo sem carregar, pra não empurrar o resto ao aparecer/sumir */}
-        <div className="flex h-8 items-center justify-center gap-1.5" aria-hidden={!loading}>
+        <div className="flex h-8 items-center justify-center gap-1.5" aria-hidden={!loading && !showResults}>
+          {showResults && (
+            <p className="font-mono text-[11px] text-steel animate-in fade-in-0 duration-200" aria-live="polite">
+              {t.found(results.length)}
+            </p>
+          )}
           {loading && (
             <>
               <span className="h-2 w-2 animate-bounce-dot rounded-full bg-signal" />
@@ -221,7 +229,8 @@ export function SearchPanel({
           <div className={showTechStats ? '' : 'invisible'} aria-hidden={!showTechStats}>
             <p className="mb-2 font-mono text-[11px] text-steel">{t.techs}</p>
             <TooltipProvider>
-              <ul className="thin-scroll flex max-h-72 flex-col gap-2 overflow-y-auto pr-2">
+              <ScrollArea scrollerClassName="max-h-72">
+              <ul className="flex flex-col gap-2">
                 {techStats.map((stat) => {
                   const projectLinks = stat.projects
                     .map((project) => ({
@@ -279,10 +288,11 @@ export function SearchPanel({
                   )
                 })}
               </ul>
+              </ScrollArea>
             </TooltipProvider>
           </div>
           {!showTechStats && (
-            <div className="thin-scroll absolute inset-0 overflow-y-auto">
+            <ScrollArea className="absolute inset-0" scrollerClassName="h-full">
               {showError && <p className="font-mono text-xs text-steel">{error}</p>}
               {showNoResults && <p className="font-mono text-xs text-steel">{noResultsLabel}</p>}
               {showResults && (
@@ -332,7 +342,7 @@ export function SearchPanel({
                   })}
                 </ul>
               )}
-            </div>
+            </ScrollArea>
           )}
         </div>
       </div>
