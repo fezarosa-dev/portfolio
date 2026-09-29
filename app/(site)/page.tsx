@@ -8,6 +8,7 @@ import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
 import { SearchTeaser } from '@/components/home/search-teaser'
+import { jsonLd } from '@/lib/json-ld'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: localizedAlternates(await getLocale(), '') }
@@ -36,7 +37,7 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(personJsonLd) }}
       />
       <HeroSection
         title={resolveText(content.hero_title ?? '', content.hero_title_en, locale)}

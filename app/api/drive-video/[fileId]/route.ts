@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
-import { fetchDriveFile } from '@/lib/drive'
+import { fetchDriveFile, isAllowedDriveFile, parseDriveFolderId } from '@/lib/drive'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ fileId: string }> }
 ) {
   const { fileId } = await params
+  const content = await getSiteContent()
+  const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
+  if (!(await isAllowedDriveFile(fileId, folderId))) {
+    return NextResponse.json({ error: 'Vídeo não encontrado' }, { status: 404 })
+  }
   const range = request.headers.get('range')
   const res = await fetchDriveFile(fileId, range)
 

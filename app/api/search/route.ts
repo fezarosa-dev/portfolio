@@ -3,6 +3,7 @@ import { countRecentSearchesFromIp, logSearchRequest } from '@/lib/supabase/quer
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { searchFullText, searchSemantic } from '@/lib/supabase/search-queries'
 import { reciprocalRankFusion } from '@/lib/search/rank'
+import { clientIp, isSameOriginJson } from '@/lib/request-guard'
 
 const DEFAULTS = {
   rateLimitMax: 20,
@@ -25,6 +26,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginJson(request)) {
+    return NextResponse.json({ error: 'Pedido inválido.' }, { status: 403 })
+  }
   const [body, content] = await Promise.all([
     request.json().catch(() => ({})),
     getSiteContent(),
@@ -46,20 +50,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Busca muito longa.' }, { status: 400 })
   }
 
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
-  // ponytail: sem x-forwarded-for o rate limit é pulado (confiamos que o proxy
-  // de deploy sempre define esse header). Upgrade se precisar de robustez: usar
-  // algum identificador de fallback (ex. fingerprint de request) quando ausente.
-  if (ip) {
-    const recentCount = await countRecentSearchesFromIp(ip, RATE_LIMIT_WINDOW_MINUTES)
-    if (recentCount >= RATE_LIMIT_MAX) {
-      return NextResponse.json(
-        { error: 'Muitas buscas em pouco tempo. Tente de novo em instantes.' },
-        { status: 429 }
-      )
-    }
-    await logSearchRequest(ip)
+  const ip = clientIp(request)
+  const recentCount = await countRecentSearchesFromIp(ip, RATE_LIMIT_WINDOW_MINUTES)
+  if (recentCount >= RATE_LIMIT_MAX) {
+    return NextResponse.json(
+      { error: 'Muitas buscas em pouco tempo. Tente de novo em instantes.' },
+      { status: 429 }
+    )
   }
+  await logSearchRequest(ip)
 
   let fullTextResults, semanticResults
   try {

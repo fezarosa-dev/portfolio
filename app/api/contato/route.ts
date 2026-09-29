@@ -2,6 +2,7 @@ import { resolve4, resolve6, resolveMx } from 'node:dns/promises'
 import { NextResponse } from 'next/server'
 import { countRecentMessagesFromIp, insertMessage } from '@/lib/supabase/queries'
 import { notifyNewMessage } from '@/lib/notify'
+import { clientIp, isSameOriginJson } from '@/lib/request-guard'
 
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro']
 const MAX_SUBJECT = 120
@@ -31,7 +32,15 @@ async function domainAcceptsEmail(domain: string): Promise<boolean> {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json()
+  if (!isSameOriginJson(request)) {
+    return NextResponse.json({ error: 'Pedido inválido.' }, { status: 403 })
+  }
+  const body = await request.json().catch(() => null)
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Pedido inválido.' }, { status: 400 })
+  }
+  // campo-armadilha (invisível pra pessoas): robôs preenchem, aí fingimos sucesso e descartamos
+  if (String(body.website ?? '').trim()) return NextResponse.json({ ok: true })
   const name = String(body.name ?? '').trim()
   const email = String(body.email ?? '').trim()
   const subject = String(body.subject ?? '').trim()
@@ -59,15 +68,13 @@ export async function POST(request: Request) {
     )
   }
 
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
-  if (ip) {
-    const recentCount = await countRecentMessagesFromIp(ip, RATE_LIMIT_WINDOW_MINUTES)
-    if (recentCount >= RATE_LIMIT_MAX) {
-      return NextResponse.json(
-        { error: 'Muitas mensagens em pouco tempo. Tente de novo mais tarde.' },
-        { status: 429 }
-      )
-    }
+  const ip = clientIp(request)
+  const recentCount = await countRecentMessagesFromIp(ip, RATE_LIMIT_WINDOW_MINUTES)
+  if (recentCount >= RATE_LIMIT_MAX) {
+    return NextResponse.json(
+      { error: 'Muitas mensagens em pouco tempo. Tente de novo mais tarde.' },
+      { status: 429 }
+    )
   }
 
   await insertMessage({ name, email, subject, category, message, ip })

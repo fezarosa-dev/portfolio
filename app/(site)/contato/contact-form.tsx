@@ -67,6 +67,7 @@ export function ContactForm({
         category: formData.get('category'),
         subject: formData.get('subject'),
         message: formData.get('message'),
+        website: formData.get('website'),
       }),
     })
     if (res.ok) {
@@ -99,6 +100,15 @@ export function ContactForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {/* campo-armadilha anti-robô: escondido de pessoas e de leitores de tela, o servidor descarta quem preencher */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 opacity-0"
+      />
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-sm font-medium">{dict.categoryLabel}</legend>
         <div className="flex flex-wrap gap-2">
