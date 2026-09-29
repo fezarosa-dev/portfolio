@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { ChevronDownIcon } from 'lucide-react'
 import { iconUrl } from '@/lib/icons'
@@ -26,6 +26,9 @@ export function HeroSection({
 }) {
   const { enabled: reduceMotion } = useReduceMotion()
   const noAnim = reduceMotion ? { duration: 0 } : undefined
+  // a seta de "role pra baixo" some conforme a pessoa rola (some por completo com ~40% da altura da tela)
+  const { scrollY } = useScroll()
+  const arrowOpacity = useTransform(scrollY, (y) => 1 - Math.min(1, y / (window.innerHeight * 0.4)))
 
   return (
     <section className="relative flex min-h-[calc(100svh-9rem)] flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-8 text-center">
@@ -104,17 +107,21 @@ export function HeroSection({
         </motion.ul>
       )}
       <motion.div
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={noAnim ?? { duration: 0.4, delay: 1.3 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
         aria-hidden
+        className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2"
+        style={{ opacity: arrowOpacity }}
       >
         <motion.div
-          animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
-          transition={reduceMotion ? undefined : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={noAnim ?? { duration: 0.4, delay: 1.3 }}
         >
-          <ChevronDownIcon className="h-6 w-6 text-steel" />
+          <motion.div
+            animate={reduceMotion ? undefined : { y: [0, 10, 0] }}
+            transition={reduceMotion ? undefined : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <ChevronDownIcon className="h-10 w-10 text-steel" strokeWidth={1.75} />
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>
