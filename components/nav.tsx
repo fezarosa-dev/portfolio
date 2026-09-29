@@ -67,12 +67,15 @@ export async function Nav() {
           className="logo-link font-mono text-sm font-medium tracking-tight"
         >
           <span aria-hidden>
-            {[...'zanoni'].map((letter, i) => (
-              <span key={i} className="logo-letter" style={{ '--i': i } as React.CSSProperties}>
+            {[...'zanoni.dev.br'].map((letter, i) => (
+              <span
+                key={i}
+                className={`logo-letter${i >= 6 ? ' text-signal' : ''}`}
+                style={{ '--i': i } as React.CSSProperties}
+              >
                 {letter}
               </span>
             ))}
-            <span className="logo-tld text-signal">.dev.br</span>
             <span className="logo-caret" />
           </span>
         </Link>
