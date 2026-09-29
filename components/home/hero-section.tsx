@@ -83,6 +83,7 @@ export function HeroSection({
           {languages.map((lang, i) => (
             <motion.li
               key={lang.id}
+              className="backface-hidden"
               style={{ rotate: i % 2 === 0 ? -2 : 2 }}
               whileHover={reduceMotion ? undefined : { rotate: 0, scale: 1.08 }}
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
@@ -90,7 +91,7 @@ export function HeroSection({
               <Link
                 href={`/${locale}/projetos?tech=${lang.id}`}
                 title={`Ver projetos com ${lang.name}`}
-                className="flex items-center gap-1.5 rounded-full border border-hairline bg-card/70 px-3 py-1 font-mono text-xs text-steel shadow-sm transition-colors hover:border-signal hover:text-signal"
+                className="flex items-center gap-1.5 rounded-full border border-hairline bg-card/70 px-3 py-1 font-mono text-xs text-steel shadow-sm backface-hidden transition-colors hover:border-signal hover:text-signal"
               >
                 {lang.devicon_slug && (
                   // eslint-disable-next-line @next/next/no-img-element
