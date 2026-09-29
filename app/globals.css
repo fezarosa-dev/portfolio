@@ -821,7 +821,7 @@ html:not(.reduce-motion) [data-slot="button"] {
 }
 
 /* Logo zanoni.dev.br no menu (components/nav.tsx): ao passar o mouse uma onda percorre todas as letras
-   ("zanoni.dev.br") da esquerda pra direita */
+   ("zanoni.dev.br") da esquerda pra direita e um cursor de terminal pisca no final */
 .logo-link {
   display: inline-flex;
   align-items: center;
@@ -829,9 +829,23 @@ html:not(.reduce-motion) [data-slot="button"] {
 .logo-letter {
   display: inline-block;
 }
+.logo-caret {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  border-radius: 1px;
+  background: var(--signal);
+  opacity: 0;
+}
 .logo-link:hover .logo-letter {
   animation: logo-wave 0.55s ease-in-out both;
   animation-delay: calc(var(--i) * 55ms);
+}
+.logo-link:hover .logo-caret {
+  opacity: 1;
+  animation: logo-caret-blink 1s steps(1) infinite;
 }
 @keyframes logo-wave {
   0%,
@@ -843,5 +857,10 @@ html:not(.reduce-motion) [data-slot="button"] {
   }
   70% {
     transform: translateY(1px);
+  }
+}
+@keyframes logo-caret-blink {
+  50% {
+    opacity: 0;
   }
 }
