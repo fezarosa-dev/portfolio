@@ -148,6 +148,7 @@ export function Mascote({
         <RickrollPlayer
           ref={rickrollVideoRef}
           videoUrl={`/api/drive-video/${rickrollVideoId}`}
+          fallbackUrl="/video/rickroll.webm"
           open={rickrollOpen}
           onClose={fecharRickroll}
         />
