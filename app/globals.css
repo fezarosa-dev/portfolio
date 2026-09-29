@@ -670,8 +670,10 @@ html.custom-scrollbar::-webkit-scrollbar {
   background-size: 100% 1px;
 }
 
-/* Cards com brilho seguindo o mouse (components/hover-effects.tsx) */
+/* Cards inclinando em 3D com brilho seguindo o mouse (components/hover-effects.tsx) */
 html:not(.reduce-motion) [data-tilt] {
+  backface-visibility: hidden;
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   background-image: radial-gradient(
     260px circle at var(--mx, -999px) var(--my, -999px),
     color-mix(in oklab, var(--primary) 14%, transparent),
