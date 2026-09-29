@@ -76,7 +76,6 @@ export async function Nav() {
                 {letter}
               </span>
             ))}
-            <span className="logo-caret" />
           </span>
         </Link>
         <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
