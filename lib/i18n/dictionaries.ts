@@ -20,6 +20,16 @@ export type Dictionary = {
     termos: string
     cookies: string
   }
+  errors: {
+    notFoundTitle: string
+    notFoundText: string
+    serverTitle: string
+    serverText: string
+    retry: string
+    home: string
+    search: string
+    contact: string
+  }
   home: {
     whoami: string
     aboutEyebrow: string
@@ -149,6 +159,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
       privacidade: 'privacidade',
       termos: 'termos de uso',
       cookies: 'cookies',
+    },
+    errors: {
+      notFoundTitle: 'Página não encontrada',
+      notFoundText: 'Farejei o site inteiro e não achei essa página. Ela pode ter mudado de lugar ou nunca ter existido.',
+      serverTitle: 'Algo quebrou por aqui',
+      serverText: 'O cachorro dormiu em cima do teclado e deu erro. Tenta de novo; se continuar, me avisa pelo contato.',
+      retry: 'Tentar de novo',
+      home: 'Voltar pro início',
+      search: 'Buscar no site',
+      contact: 'Avisar o Felipe',
     },
     home: {
       whoami: '$ whoami',
@@ -283,6 +303,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
       privacidade: 'privacy',
       termos: 'terms of use',
       cookies: 'cookies',
+    },
+    errors: {
+      notFoundTitle: 'Page not found',
+      notFoundText: "I sniffed all over the site and couldn't find this page. It may have moved, or never existed.",
+      serverTitle: 'Something broke here',
+      serverText: 'The dog fell asleep on the keyboard and caused an error. Try again; if it keeps happening, let me know through the contact page.',
+      retry: 'Try again',
+      home: 'Back to home',
+      search: 'Search the site',
+      contact: 'Tell Felipe',
     },
     home: {
       whoami: '$ whoami',
