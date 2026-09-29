@@ -28,7 +28,11 @@ export function HeroSection({
   const noAnim = reduceMotion ? { duration: 0 } : undefined
   // a seta de "role pra baixo" some conforme a pessoa rola (some por completo com ~40% da altura da tela)
   const { scrollY } = useScroll()
-  const arrowOpacity = useTransform(scrollY, (y) => 1 - Math.min(1, y / (window.innerHeight * 0.4)))
+  // `window` não existe na renderização no servidor: lá usa uma altura de tela qualquer (scrollY é 0, o resultado é 1 de qualquer jeito)
+  const arrowOpacity = useTransform(scrollY, (y) => {
+    const viewport = typeof window === 'undefined' ? 800 : window.innerHeight
+    return 1 - Math.min(1, y / (viewport * 0.4))
+  })
 
   return (
     <section className="relative flex min-h-[calc(100svh-9rem)] flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-8 text-center">
