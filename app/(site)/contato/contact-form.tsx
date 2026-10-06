@@ -179,7 +179,7 @@ export function ContactForm({
             data-cursor="hover"
             onPointerDown={startResize}
             title="Arraste para ajustar a altura"
-            className="group absolute bottom-1.5 right-1.5 grid h-6 w-8 cursor-none touch-none place-items-center"
+            className="group absolute bottom-1.5 right-1.5 grid h-6 w-8 touch-none place-items-center"
           >
             <span
               className={`h-1.5 w-6 rounded-full transition-[background-color,width] duration-200 ${
