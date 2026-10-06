@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { setHandoff } from '@/lib/handoff'
 import { iconUrl } from '@/lib/icons'
 import { resolveText } from '@/lib/bilingual'
 import { AuthorNames } from '@/components/author-names'
@@ -112,7 +113,8 @@ export function ProjectCard({
             ) : (
               <Link
                 key={lang.id}
-                href={`/${locale}/projetos?tech=${lang.id}`}
+                href={`/${locale}/projetos`}
+                onClick={() => setHandoff('tech', [lang.id])}
                 title={`Ver projetos com ${lang.name}`}
                 className={pillClassName}
               >

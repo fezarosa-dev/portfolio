@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Send } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
+import { takeHandoff } from '@/lib/handoff'
 import type { Dictionary } from '@/lib/i18n'
 
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
@@ -15,21 +16,26 @@ const MAX_MESSAGE = 4000
 const MIN_HEIGHT = 176
 const MAX_HEIGHT = 720
 
-export function ContactForm({
-  dict,
-  defaultCategory,
-  defaultSubject,
-}: {
-  dict: Dictionary['contato']
-  defaultCategory?: (typeof CATEGORIES)[number]
-  defaultSubject?: string
-}) {
+export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
+  const [category, setCategory] = useState<string>()
+  const [subject, setSubject] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [length, setLength] = useState(0)
   const { enabled: reduceMotion } = useReduceMotion()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [dragging, setDragging] = useState(false)
+
+  // categoria/assunto vindos dos botões de Serviços (sem passar pela URL)
+  useEffect(() => {
+    const h = takeHandoff<{ categoria?: string; assunto?: string }>('contato')
+    if (!h) return
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setCategory(h.categoria)
+    setSubject((h.assunto ?? '').slice(0, 120))
+    /* eslint-enable react-hooks/set-state-in-effect */
+    document.getElementById('formulario')?.scrollIntoView()
+  }, [])
 
   // alça própria de redimensionar (a nativa do navegador não dá pra estilizar): arrasta pra mudar a altura
   function startResize(e: React.PointerEvent<HTMLDivElement>) {
@@ -74,6 +80,8 @@ export function ContactForm({
       setStatus('sent')
       setLength(0)
       form.reset()
+      setCategory(undefined)
+      setSubject('')
       return
     }
     const data = await res.json().catch(() => null)
@@ -119,7 +127,8 @@ export function ContactForm({
                 name="category"
                 value={key}
                 required={i === 0}
-                defaultChecked={key === defaultCategory}
+                checked={category === key}
+                onChange={() => setCategory(key)}
                 className="peer sr-only"
               />
               <span className="inline-block rounded-full border border-input px-3.5 py-1.5 text-sm transition-colors hover:border-signal peer-checked:border-signal peer-checked:bg-signal peer-checked:text-primary-foreground peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50">
@@ -153,7 +162,8 @@ export function ContactForm({
         <Input
           id="contact-subject"
           name="subject"
-          defaultValue={defaultSubject}
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
           placeholder={dict.subjectPlaceholder}
           required
           maxLength={120}

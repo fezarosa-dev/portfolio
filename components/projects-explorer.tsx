@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { takeHandoff } from '@/lib/handoff'
 import { ProjectCard } from '@/components/project-card'
 import { TechCombobox } from '@/components/tech-combobox'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
@@ -19,16 +19,17 @@ export function ProjectsExplorer({
   dict: Dictionary['projetos']
   locale: Locale
 }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const { enabled: reduceMotion } = useReduceMotion()
 
   const [query, setQuery] = useState('')
-  const [techFilters, setTechFilters] = useState<string[]>(() => {
-    const tech = searchParams.get('tech')
-    return tech ? tech.split(',').filter(Boolean) : []
-  })
+  const [techFilters, setTechFilters] = useState<string[]>([])
+
+  // filtro vindo de outro link (pílula de tecnologia), sem passar pela URL
+  useEffect(() => {
+    const tech = takeHandoff<string[]>('tech')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (tech) setTechFilters(tech)
+  }, [])
 
   const allLanguages = useMemo(() => {
     const byId = new Map<string, Language>()
@@ -38,30 +39,12 @@ export function ProjectsExplorer({
     return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name))
   }, [projects])
 
-  function syncUrl(ids: string[]) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (ids.length > 0) params.set('tech', ids.join(','))
-    else params.delete('tech')
-    router.replace(params.size > 0 ? `${pathname}?${params.toString()}` : pathname, {
-      scroll: false,
-    })
-  }
-
   function addTechFilter(id: string) {
-    setTechFilters((prev) => {
-      if (prev.includes(id)) return prev
-      const next = [...prev, id]
-      syncUrl(next)
-      return next
-    })
+    setTechFilters((prev) => (prev.includes(id) ? prev : [...prev, id]))
   }
 
   function removeTechFilter(id: string) {
-    setTechFilters((prev) => {
-      const next = prev.filter((techId) => techId !== id)
-      syncUrl(next)
-      return next
-    })
+    setTechFilters((prev) => prev.filter((techId) => techId !== id))
   }
 
   const visible = useMemo(() => {

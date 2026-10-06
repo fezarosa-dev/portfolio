@@ -1,5 +1,6 @@
 'use client'
 
+import { setHandoff } from '@/lib/handoff'
 import { useEffect } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { ErrorScreen } from '@/components/error-screen'
@@ -52,7 +53,11 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         <a href={`/${locale}`} className={buttonVariants({ size: 'lg', variant: 'outline' })}>
           {t.home}
         </a>
-        <a href={`/${locale}/contato?categoria=duvida`} className={buttonVariants({ size: 'lg', variant: 'ghost' })}>
+        <a
+          href={`/${locale}/contato`}
+          onClick={() => setHandoff('contato', { categoria: 'duvida' })}
+          className={buttonVariants({ size: 'lg', variant: 'ghost' })}
+        >
           {t.contact}
         </a>
       </ErrorScreen>

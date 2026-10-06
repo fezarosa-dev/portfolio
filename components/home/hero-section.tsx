@@ -1,5 +1,6 @@
 'use client'
 
+import { setHandoff } from '@/lib/handoff'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { ChevronDownIcon } from 'lucide-react'
@@ -93,7 +94,8 @@ export function HeroSection({
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
             >
               <Link
-                href={`/${locale}/projetos?tech=${lang.id}`}
+                href={`/${locale}/projetos`}
+                onClick={() => setHandoff('tech', [lang.id])}
                 title={`Ver projetos com ${lang.name}`}
                 className="flex items-center gap-1.5 rounded-full border border-hairline bg-card/70 px-3 py-1 font-mono text-xs text-steel shadow-sm backface-hidden transition-colors hover:border-signal hover:text-signal"
               >

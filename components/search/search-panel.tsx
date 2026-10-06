@@ -1,5 +1,6 @@
 'use client'
 
+import { setHandoff } from '@/lib/handoff'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ScrollArea } from '@/components/scroll-area'
@@ -241,9 +242,12 @@ export function SearchPanel({
                   return (
                     <li key={stat.id} className="flex items-center gap-2">
                       <Link
-                        href={`/${locale}/projetos?tech=${stat.id}`}
+                        href={`/${locale}/projetos`}
                         title={`Ver projetos com ${stat.name}`}
-                        onClick={onNavigate}
+                        onClick={() => {
+                          setHandoff('tech', [stat.id])
+                          onNavigate?.()
+                        }}
                         className="flex w-24 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
                       >
                         {stat.devicon_slug && (
@@ -311,10 +315,14 @@ export function SearchPanel({
                           ref={(el) => {
                             linkRefs.current[index] = el
                           }}
-                          href={isExternal ? result.url : `/${locale}${result.url}`}
+                          href={isExternal ? result.url : `/${locale}${result.url.split('?')[0]}`}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
-                          onClick={onNavigate}
+                          onClick={() => {
+                            const tech = new URLSearchParams(result.url.split('?')[1]).get('tech')
+                            if (tech) setHandoff('tech', [tech])
+                            onNavigate?.()
+                          }}
                           onMouseEnter={() => setActiveIndex(index)}
                           className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
                             active ? 'border-signal/50 bg-signal/5' : 'border-transparent'
