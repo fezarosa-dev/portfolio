@@ -23,17 +23,7 @@ function iconFor(url: string) {
   return ExternalLink
 }
 
-const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
-type Category = (typeof CATEGORIES)[number]
-
-export default async function ContatoPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ categoria?: string; assunto?: string }>
-}) {
-  const { categoria, assunto } = await searchParams
-  const defaultCategory = CATEGORIES.find((c) => c === categoria) as Category | undefined
-  const defaultSubject = assunto?.slice(0, 120)
+export default async function ContatoPage() {
   const [links, content, { dict, locale }] = await Promise.all([
     getContactLinks(),
     getSiteContent(),
@@ -81,7 +71,7 @@ export default async function ContatoPage({
         <FadeIn delay={0.1}>
           <div id="formulario" className="scroll-mt-24 rounded-lg border border-hairline bg-card p-6 sm:p-8 lg:p-10">
             <h2 className="mb-5 font-display text-xl font-medium tracking-tight">{pageText(content, locale, 'contato_form_title')}</h2>
-            <ContactForm dict={dict.contato} defaultCategory={defaultCategory} defaultSubject={defaultSubject} />
+            <ContactForm dict={dict.contato} />
           </div>
         </FadeIn>
       </div>

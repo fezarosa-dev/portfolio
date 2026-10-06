@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { HandoffLink } from '@/components/handoff-link'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getProjectById, getSiteContent } from '@/lib/supabase/queries-cached'
@@ -128,9 +129,10 @@ export default async function ProjetoDetailPage({
         {project.languages.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {project.languages.map((lang) => (
-              <Link
+              <HandoffLink
                 key={lang.id}
-                href={`/${locale}/projetos?tech=${lang.id}`}
+                href={`/${locale}/projetos`}
+                handoff={['tech', [lang.id]]}
                 title={`Ver projetos com ${lang.name}`}
                 className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-mono text-xs text-steel hover:border-signal hover:text-signal"
               >
@@ -143,7 +145,7 @@ export default async function ProjetoDetailPage({
                   />
                 )}
                 {lang.name}
-              </Link>
+              </HandoffLink>
             ))}
           </div>
         )}

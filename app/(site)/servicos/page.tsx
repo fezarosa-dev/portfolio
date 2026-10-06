@@ -8,6 +8,7 @@ import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
 import { pageText } from '@/lib/page-texts'
 import { Eyebrow } from '@/components/eyebrow'
+import { HandoffLink } from '@/components/handoff-link'
 import { FadeIn } from '@/components/fade-in'
 import { buttonVariants } from '@/components/ui/button'
 
@@ -32,8 +33,10 @@ function parseServices(text: string) {
 
 export default async function ServicosPage() {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
-  const contactHref = (categoria: 'vaga' | 'projeto', assunto?: string) =>
-    `/${locale}/contato?categoria=${categoria}${assunto ? `&assunto=${encodeURIComponent(assunto)}` : ''}#formulario`
+  const contactLink = (categoria: 'vaga' | 'projeto', assunto?: string) => ({
+    href: `/${locale}/contato`,
+    handoff: ['contato', { categoria, assunto }] as [string, unknown],
+  })
   const t = (key: Parameters<typeof pageText>[2]) => pageText(content, locale, key)
   const services = parseServices(resolveText(content.servicos_texto ?? '', content.servicos_texto_en, locale))
 
@@ -58,10 +61,10 @@ export default async function ServicosPage() {
             <Link href={`/${locale}/curriculo`} className={buttonVariants({ size: 'lg' })} data-slot="button">
               {t('servicos_hire_resume')}
             </Link>
-            <Link href={contactHref('vaga')} className={buttonVariants({ size: 'lg', variant: 'outline' })} data-slot="button">
+            <HandoffLink {...contactLink('vaga')} className={buttonVariants({ size: 'lg', variant: 'outline' })} data-slot="button">
               {t('servicos_hire_contact')}
               <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+            </HandoffLink>
           </div>
         </section>
       </FadeIn>
@@ -72,8 +75,8 @@ export default async function ServicosPage() {
           const Icon = ICONS[i % ICONS.length]
           return (
             <FadeIn immediate key={service.title} delay={0.05 * i}>
-              <Link
-                href={contactHref('projeto', service.title)}
+              <HandoffLink
+                {...contactLink('projeto', service.title)}
                 data-tilt
                 className="group block h-full rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
@@ -91,7 +94,7 @@ export default async function ServicosPage() {
                 </div>
                 <h2 className="mt-5 font-display text-xl font-medium tracking-tight">{service.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-steel">{service.description}</p>
-              </Link>
+              </HandoffLink>
             </FadeIn>
           )
         })}
@@ -100,10 +103,10 @@ export default async function ServicosPage() {
       <FadeIn immediate className="mt-12">
         <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-signal/40 bg-signal/5 p-6 sm:flex-row sm:items-center">
           <p className="font-display text-xl font-medium tracking-tight">{t('servicos_cta_title')}</p>
-          <Link href={contactHref('projeto')} className={buttonVariants({ size: 'lg' })} data-slot="button">
+          <HandoffLink {...contactLink('projeto')} className={buttonVariants({ size: 'lg' })} data-slot="button">
             {t('servicos_cta_button')}
             <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
+          </HandoffLink>
         </div>
       </FadeIn>
     </main>
