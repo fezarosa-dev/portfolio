@@ -59,7 +59,7 @@ export function SearchPill({ label, className = '' }: { label: string; className
         <SearchIcon className="h-4 w-4" aria-hidden />
       </motion.span>
       <span className="flex-1 text-left">{label}</span>
-      <kbd className="rounded-md border border-hairline bg-background px-1.5 py-0.5 font-mono text-[10px] text-steel transition-colors group-hover:border-signal group-hover:text-signal">
+      <kbd className="[@media(pointer:coarse)]:hidden rounded-md border border-hairline bg-background px-1.5 py-0.5 font-mono text-[10px] text-steel transition-colors group-hover:border-signal group-hover:text-signal">
         {shortcut}
       </kbd>
     </button>

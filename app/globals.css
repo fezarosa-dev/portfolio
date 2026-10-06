@@ -647,10 +647,6 @@ html:not(.reduce-motion) [data-tilt] {
     transparent 70%
   );
 }
-/* Botões puxados de leve na direção do mouse */
-html:not(.reduce-motion) [data-slot="button"] {
-  transform: translate(var(--px, 0px), var(--py, 0px));
-}
 
 /* Loader de imagem: bolinha quicando numa gangorra (components/image-loader.tsx) */
 .loader-ball {

@@ -355,7 +355,7 @@ export function SearchPanel({
         </div>
       </div>
       {showHints && (
-        <div className="mt-4 flex items-center justify-center gap-4 border-t border-hairline pt-3 font-mono text-[11px] text-steel">
+        <div className="mt-4 flex items-center justify-center gap-4 border-t [@media(pointer:coarse)]:hidden border-hairline pt-3 font-mono text-[11px] text-steel">
           <span className="flex items-center gap-1.5">
             <kbd className="rounded border border-hairline bg-background px-1.5 py-0.5">↑</kbd>
             <kbd className="rounded border border-hairline bg-background px-1.5 py-0.5">↓</kbd>
