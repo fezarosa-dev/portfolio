@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SplitTitle } from '@/components/split-title'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
@@ -19,7 +20,7 @@ export default async function BuscaPage() {
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.busca.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.busca.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.busca.title} /></h1>
         <p className="mt-3 max-w-lg text-steel">{dict.busca.subtitle}</p>
       </FadeIn>
       <FadeIn delay={0.1} className="mt-10">
