@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
-import { CheckCircle2, Send } from 'lucide-react'
+import { motion, useAnimationControls } from 'framer-motion'
+import { Send } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,73 @@ const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
 const MAX_MESSAGE = 4000
 const MIN_HEIGHT = 176
 const MAX_HEIGHT = 720
+const EASE = [0.22, 1, 0.36, 1] as const
+const FLIGHT_MS = 1000 // tempo mínimo do avião sair voando antes de mostrar a confirmação
+const FLIGHT = { x: 150, y: -95 }
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// Confirmação de envio: círculo e check se desenham, um anel estoura e o texto sobe.
+function SentConfirmation({
+  dict,
+  onAgain,
+  reduce,
+}: {
+  dict: Dictionary['contato']
+  onAgain: () => void
+  reduce: boolean
+}) {
+  const draw = (delay: number, duration: number) =>
+    reduce
+      ? { initial: false as const }
+      : { initial: { pathLength: 0 }, animate: { pathLength: 1 }, transition: { duration, delay, ease: EASE } }
+  return (
+    <div role="status" className="flex flex-col items-start gap-4 py-4">
+      <div className="relative h-16 w-16">
+        {!reduce && (
+          <motion.span
+            aria-hidden
+            className="absolute inset-0 rounded-full border-2 border-status"
+            initial={{ scale: 1, opacity: 0.6 }}
+            animate={{ scale: 2, opacity: 0 }}
+            transition={{ duration: 0.9, delay: 0.55, ease: 'easeOut' }}
+          />
+        )}
+        <svg
+          viewBox="0 0 64 64"
+          className="h-16 w-16 text-status"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <motion.circle cx="32" cy="32" r="28" {...draw(0, 0.6)} />
+          <motion.path d="M19 33 l9 9 l17 -19" {...draw(0.45, 0.45)} />
+        </svg>
+      </div>
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: reduce ? 0 : 0.7, ease: EASE }}
+        className="flex flex-col gap-1"
+      >
+        <p className="text-xl font-medium text-status">{dict.sentTitle}</p>
+        <p className="text-sm text-steel">{dict.sentText}</p>
+      </motion.div>
+      <motion.div
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: reduce ? 0 : 1 }}
+      >
+        <Button type="button" variant="outline" onClick={onAgain}>
+          {dict.sendAnother}
+        </Button>
+      </motion.div>
+    </div>
+  )
+}
 
 export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
   const [category, setCategory] = useState<string>()
@@ -25,6 +92,8 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
   const { enabled: reduceMotion } = useReduceMotion()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [dragging, setDragging] = useState(false)
+  const plane = useAnimationControls()
+  const trail = useAnimationControls()
 
   // categoria/assunto vindos dos botões de Serviços (sem passar pela URL)
   useEffect(() => {
@@ -64,18 +133,40 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
     setStatus('sending')
     const form = e.currentTarget
     const formData = new FormData(form)
-    const res = await fetch('/api/contato', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: formData.get('name'),
-        email: formData.get('email'),
-        category: formData.get('category'),
-        subject: formData.get('subject'),
-        message: formData.get('message'),
-        website: formData.get('website'),
+    // o avião de papel pega impulso, sai voando do botão deixando um rastro; o envio acontece em paralelo
+    const flight = reduceMotion
+      ? Promise.resolve()
+      : (async () => {
+          trail.start({
+            scaleX: [0, 1],
+            opacity: [0, 0.9, 0],
+            transition: { duration: 0.9, delay: 0.18, ease: 'easeOut', times: [0, 0.35, 1] },
+          })
+          await plane.start({
+            x: [0, -7, FLIGHT.x],
+            y: [0, 5, FLIGHT.y],
+            scale: [1, 0.9, 0.35],
+            rotate: [0, 0, -12],
+            opacity: [1, 1, 0],
+            transition: { duration: 0.85, times: [0, 0.22, 1], ease: ['easeOut', 'easeIn'] },
+          })
+          await wait(FLIGHT_MS - 850)
+        })()
+    const [res] = await Promise.all([
+      fetch('/api/contato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.get('name'),
+          email: formData.get('email'),
+          category: formData.get('category'),
+          subject: formData.get('subject'),
+          message: formData.get('message'),
+          website: formData.get('website'),
+        }),
       }),
-    })
+      flight,
+    ])
     if (res.ok) {
       setStatus('sent')
       setLength(0)
@@ -87,23 +178,15 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
     const data = await res.json().catch(() => null)
     setErrorMessage(data?.error || dict.error)
     setStatus('error')
+    // deu erro: o avião volta voando pro botão
+    if (!reduceMotion) {
+      plane.set({ x: -FLIGHT.x / 2, y: -FLIGHT.y / 2, scale: 0.5, rotate: 0, opacity: 0 })
+      plane.start({ x: 0, y: 0, scale: 1, opacity: 1, transition: { type: 'spring', stiffness: 200, damping: 14 } })
+    }
   }
 
   if (status === 'sent') {
-    return (
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 12, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-col items-start gap-4 py-4"
-      >
-        <CheckCircle2 className="h-10 w-10 text-status" />
-        <p className="text-base text-status">{dict.sent}</p>
-        <Button type="button" variant="outline" onClick={() => setStatus('idle')}>
-          {dict.sendAnother}
-        </Button>
-      </motion.div>
-    )
+    return <SentConfirmation dict={dict} reduce={reduceMotion} onAgain={() => setStatus('idle')} />
   }
 
   return (
@@ -182,7 +265,13 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
             required
             maxLength={MAX_MESSAGE}
             onChange={(e) => setLength(e.target.value.length)}
-            style={{ height: 256, minHeight: MIN_HEIGHT, maxHeight: MAX_HEIGHT, fieldSizing: 'fixed', scrollbarGutter: 'stable' }}
+            style={{
+              height: 256,
+              minHeight: MIN_HEIGHT,
+              maxHeight: MAX_HEIGHT,
+              fieldSizing: 'fixed',
+              scrollbarGutter: 'stable',
+            }}
             className="thin-scroll resize-none overflow-y-auto overscroll-contain px-3 py-2.5 pb-7 leading-relaxed"
           />
           <div
@@ -203,9 +292,25 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
         </p>
       </div>
 
-      <Button type="submit" size="lg" disabled={status === 'sending'} className="h-11 w-fit px-5 text-base">
+      <Button type="submit" size="lg" disabled={status === 'sending'} className="relative h-11 w-fit px-5 text-base disabled:cursor-wait disabled:opacity-100">
         {status === 'sending' ? dict.sending : dict.send}
-        <Send className="ml-1.5 h-4 w-4" />
+        <span className="relative ml-1.5 inline-flex">
+          {/* rastro do voo: linha que acompanha a trajetória do avião */}
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-px origin-left bg-gradient-to-r from-signal to-transparent"
+            style={{
+              width: Math.hypot(FLIGHT.x, FLIGHT.y),
+              rotate: (Math.atan2(FLIGHT.y, FLIGHT.x) * 180) / Math.PI,
+              opacity: 0,
+              scaleX: 0,
+            }}
+            animate={trail}
+          />
+          <motion.span className="inline-flex" animate={plane}>
+            <Send className="h-4 w-4" />
+          </motion.span>
+        </span>
       </Button>
       {status === 'error' && <p className="font-mono text-sm text-destructive">{errorMessage}</p>}
     </form>
