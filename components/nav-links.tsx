@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { RollText } from '@/components/roll-text'
 
 // a home é `/pt`, então só ela casa por igualdade; as demais casam por prefixo (ex.: /pt/projetos/abc → Projetos)
 export function isActiveLink(pathname: string, href: string, isHome: boolean) {
@@ -76,7 +75,7 @@ export function NavLinks({ links }: { links: { href: string; label: string }[] }
                 active ? 'font-medium text-signal' : 'text-foreground/80'
               }`}
             >
-              <RollText>{link.label}</RollText>
+              {link.label}
             </Link>
           </li>
         )

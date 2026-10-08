@@ -86,7 +86,6 @@ export function TechCard({
 
   return (
     <motion.article
-      whileHover={reduce ? undefined : { y: -4 }}
       className="flex h-full flex-col rounded-xl border border-hairline bg-card p-5 transition-colors hover:border-signal/60"
     >
       <HandoffLink href={`/${locale}/projetos`} handoff={['tech', [tech.id]]} className="group flex items-center gap-3">
@@ -95,7 +94,7 @@ export function TechCard({
           <img
             src={tech.icon}
             alt=""
-            className="h-12 w-12 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+            className="h-12 w-12 shrink-0"
           />
         ) : (
           <span className="h-12 w-12 shrink-0 rounded-lg bg-hairline" />
