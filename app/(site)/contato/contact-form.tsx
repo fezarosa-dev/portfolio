@@ -16,8 +16,48 @@ const MAX_MESSAGE = 4000
 const MIN_HEIGHT = 176
 const MAX_HEIGHT = 720
 const EASE = [0.22, 1, 0.36, 1] as const
-const FLIGHT_MS = 1000 // tempo mínimo do avião sair voando antes de mostrar a confirmação
-const FLIGHT = { x: 150, y: -95 }
+const FLIGHT_MS = 1150 // tempo mínimo do avião sair voando antes de mostrar a confirmação
+const FLIGHT_S = 1.0 // duração do voo (s)
+
+// Trajetória do voo: bézier cúbica (em px, relativa ao ícone) que mergulha um pouco, sobe em curva e
+// se estabiliza rumo ao horizonte. O avião acompanha a tangente (inclina nas curvas), cresce no meio do
+// caminho (vindo na direção de quem olha) e encolhe até sumir; começa devagar e acelera.
+const BEZIER = [
+  [0, 0],
+  [70, 18],
+  [60, -125],
+  [250, -140],
+] as const
+const at = (s: number) => {
+  const u = 1 - s
+  const w = [u * u * u, 3 * u * u * s, 3 * u * s * s, s * s * s]
+  return [0, 1].map((k) => w.reduce((sum, wi, i) => sum + wi * BEZIER[i][k], 0))
+}
+const tangentDeg = (s: number) => {
+  const [x0, y0] = at(Math.max(0, s - 0.01))
+  const [x1, y1] = at(Math.min(1, s + 0.01))
+  return (Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI
+}
+const STEPS = 16
+const samples = Array.from({ length: STEPS + 1 }, (_, i) => i / STEPS)
+const WINDUP = 0.1 // fração do tempo gasta pegando impulso (recuo)
+const FLIGHT_KEYS = {
+  x: [0, -9, ...samples.slice(1).map((s) => at(s)[0])],
+  y: [0, 7, ...samples.slice(1).map((s) => at(s)[1])],
+  rotate: [0, 0, ...samples.slice(1).map((s) => tangentDeg(s) + 45)],
+  scale: [1, 0.9, ...samples.slice(1).map((s) => 0.9 + 0.45 * Math.sin(Math.PI * Math.min(1, s * 1.15)) - 0.6 * s * s)],
+  opacity: [1, 1, ...samples.slice(1).map((s) => (s < 0.75 ? 1 : Math.max(0, 1 - (s - 0.75) / 0.25)))],
+  times: [0, WINDUP, ...samples.slice(1).map((s) => WINDUP + (1 - WINDUP) * Math.sqrt(s))],
+}
+const TRAIL_PATH = `M0 0 C${BEZIER[1][0]} ${BEZIER[1][1]} ${BEZIER[2][0]} ${BEZIER[2][1]} ${BEZIER[3][0]} ${BEZIER[3][1]}`
+// pedacinhos de papel que se soltam pra trás na decolagem
+const BITS = [
+  { x: -22, y: 12, d: 0 },
+  { x: -30, y: -2, d: 0.04 },
+  { x: -18, y: 22, d: 0.08 },
+  { x: -34, y: 14, d: 0.02 },
+  { x: -26, y: 28, d: 0.1 },
+]
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -138,19 +178,19 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
       ? Promise.resolve()
       : (async () => {
           trail.start({
-            scaleX: [0, 1],
-            opacity: [0, 0.9, 0],
-            transition: { duration: 0.9, delay: 0.18, ease: 'easeOut', times: [0, 0.35, 1] },
+            pathLength: [0, 1],
+            opacity: [0.9, 0.9, 0],
+            transition: { duration: FLIGHT_S, delay: 0.1, ease: 'easeIn', times: [0, 0.7, 1] },
           })
           await plane.start({
-            x: [0, -7, FLIGHT.x],
-            y: [0, 5, FLIGHT.y],
-            scale: [1, 0.9, 0.35],
-            rotate: [0, 0, -12],
-            opacity: [1, 1, 0],
-            transition: { duration: 0.85, times: [0, 0.22, 1], ease: ['easeOut', 'easeIn'] },
+            x: FLIGHT_KEYS.x,
+            y: FLIGHT_KEYS.y,
+            rotate: FLIGHT_KEYS.rotate,
+            scale: FLIGHT_KEYS.scale,
+            opacity: FLIGHT_KEYS.opacity,
+            transition: { duration: FLIGHT_S, times: FLIGHT_KEYS.times, ease: 'linear' },
           })
-          await wait(FLIGHT_MS - 850)
+          await wait(FLIGHT_MS - FLIGHT_S * 1000)
         })()
     const [res] = await Promise.all([
       fetch('/api/contato', {
@@ -180,7 +220,7 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
     setStatus('error')
     // deu erro: o avião volta voando pro botão
     if (!reduceMotion) {
-      plane.set({ x: -FLIGHT.x / 2, y: -FLIGHT.y / 2, scale: 0.5, rotate: 0, opacity: 0 })
+      plane.set({ x: 60, y: -50, scale: 0.5, rotate: 0, opacity: 0 })
       plane.start({ x: 0, y: 0, scale: 1, opacity: 1, transition: { type: 'spring', stiffness: 200, damping: 14 } })
     }
   }
@@ -292,21 +332,39 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
         </p>
       </div>
 
-      <Button type="submit" size="lg" disabled={status === 'sending'} className="relative h-11 w-fit px-5 text-base disabled:cursor-wait disabled:opacity-100">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={status === 'sending'}
+        className="relative h-11 w-fit px-5 text-base disabled:cursor-wait disabled:opacity-100"
+      >
         {status === 'sending' ? dict.sending : dict.send}
         <span className="relative ml-1.5 inline-flex">
-          {/* rastro do voo: linha que acompanha a trajetória do avião */}
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 h-px origin-left bg-gradient-to-r from-signal to-transparent"
-            style={{
-              width: Math.hypot(FLIGHT.x, FLIGHT.y),
-              rotate: (Math.atan2(FLIGHT.y, FLIGHT.x) * 180) / Math.PI,
-              opacity: 0,
-              scaleX: 0,
-            }}
-            animate={trail}
-          />
+          {/* rastro do voo: o traço se desenha seguindo a trajetória e some */}
+          <svg aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-px w-px overflow-visible">
+            <motion.path
+              d={TRAIL_PATH}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              className="text-signal"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={trail}
+            />
+          </svg>
+          {status === 'sending' &&
+            !reduceMotion &&
+            BITS.map((bit, i) => (
+              <motion.span
+                key={i}
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-1/2 h-1 w-1 rounded-[1px] bg-primary-foreground/80"
+                initial={{ x: 0, y: 0, opacity: 0.9, rotate: 0 }}
+                animate={{ x: bit.x, y: bit.y, opacity: 0, rotate: 140 }}
+                transition={{ duration: 0.6, delay: 0.1 + bit.d, ease: 'easeOut' }}
+              />
+            ))}
           <motion.span className="inline-flex" animate={plane}>
             <Send className="h-4 w-4" />
           </motion.span>
