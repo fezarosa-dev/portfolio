@@ -33,7 +33,7 @@ export function ProjectCard({
   const summary = resolveText(project.summary, project.summary_en, locale)
 
   return (
-    <div data-tilt className="project-card group rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <div data-tilt className="group rounded-lg border border-hairline bg-card p-6 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-signal hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <Link
         href={href}
         target={isExternal ? '_blank' : undefined}
@@ -42,7 +42,7 @@ export function ProjectCard({
       >
         <h3 className="font-display text-lg font-medium tracking-tight">
           {title}
-          <span className="ml-1 inline-block -translate-x-1 translate-y-1 text-signal opacity-0 transition-[opacity,transform] duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
+          <span className="ml-1 text-signal opacity-0 transition-opacity group-hover:opacity-100">
             ↗
           </span>
         </h3>
@@ -83,9 +83,9 @@ export function ProjectCard({
       )}
       {project.languages.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2 border-t border-hairline pt-4">
-          {project.languages.map((lang, index) => {
+          {project.languages.map((lang) => {
             const pillClassName =
-              'tech-pill flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel backface-hidden transition-[transform,border-color,color] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal hover:will-change-transform active:translate-y-0 motion-reduce:transition-none'
+              'flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel backface-hidden transition-[transform,border-color,color] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal hover:will-change-transform active:translate-y-0 motion-reduce:transition-none'
             const pillContent = (
               <>
                 {lang.devicon_slug && (
@@ -107,7 +107,6 @@ export function ProjectCard({
                 onClick={() => onTechClick(lang.id)}
                 title={`Filtrar por ${lang.name}`}
                 className={pillClassName}
-                style={{ '--i': index } as React.CSSProperties}
               >
                 {pillContent}
               </button>
@@ -118,7 +117,6 @@ export function ProjectCard({
                 onClick={() => setHandoff('tech', [lang.id])}
                 title={`Ver projetos com ${lang.name}`}
                 className={pillClassName}
-                style={{ '--i': index } as React.CSSProperties}
               >
                 {pillContent}
               </Link>

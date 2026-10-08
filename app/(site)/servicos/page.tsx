@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { SplitTitle } from '@/components/split-title'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight, Briefcase, Boxes, Code2, Globe, Server, Terminal, Workflow } from 'lucide-react'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
@@ -45,7 +44,7 @@ export default async function ServicosPage() {
     <main className="mx-auto max-w-4xl px-6 py-20">
       <FadeIn immediate>
         <Eyebrow>{dict.servicos.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl"><SplitTitle text={dict.servicos.title} /></h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.servicos.title}</h1>
         <p className="mt-4 max-w-xl text-lg text-steel">{t('servicos_lead')}</p>
       </FadeIn>
 

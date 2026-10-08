@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import { SplitTitle } from '@/components/split-title'
 import { HandoffLink } from '@/components/handoff-link'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -80,7 +79,7 @@ export default async function ProjetoDetailPage({
           {dict.projetos.back}
         </Link>
         <Eyebrow>{dict.projetos.detailEyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={title} /></h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">{title}</h1>
         {project.authors.length > 0 && (
           <p className="mt-2 font-mono text-sm font-medium text-foreground/80">
             {dict.projetos.with} <AuthorNames authors={project.authors} />

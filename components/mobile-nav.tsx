@@ -38,13 +38,7 @@ export function MobileNav({
       {links.map((link, i) => {
         const active = isActiveLink(pathname, link.href, i === 0)
         return (
-          <motion.li
-            key={link.href}
-            initial={reduceMotion ? false : { opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.35, delay: reduceMotion ? 0 : 0.05 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-            className={`border-b ${active ? 'border-signal' : 'border-hairline'}`}
-          >
+          <li key={link.href} className={`border-b ${active ? 'border-signal' : 'border-hairline'}`}>
             <Link
               href={link.href}
               onClick={() => setOpen(false)}
@@ -53,7 +47,7 @@ export function MobileNav({
             >
               {link.label}
             </Link>
-          </motion.li>
+          </li>
         )
       })}
       <li className="flex justify-end gap-2 py-3">

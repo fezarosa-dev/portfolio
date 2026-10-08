@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { SplitTitle } from '@/components/split-title'
 import { ArrowUpRight, ExternalLink, Mail, MessageCircle, Phone } from 'lucide-react'
 import { getContactLinks, getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
@@ -34,7 +33,7 @@ export default async function ContatoPage() {
     <main className="mx-auto max-w-4xl px-6 py-16 sm:py-20">
       <FadeIn>
         <Eyebrow>{dict.contato.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl"><SplitTitle text={dict.contato.title} /></h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">{dict.contato.title}</h1>
         <p className="mt-4 max-w-xl text-lg text-steel">{pageText(content, locale, 'contato_lead')}</p>
       </FadeIn>
 

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { SplitTitle } from '@/components/split-title'
 import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/queries-cached'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
@@ -31,7 +30,7 @@ export default async function CurriculoPage() {
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.curriculo.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.curriculo.title} /></h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.curriculo.title}</h1>
       </FadeIn>
       {links.length > 0 && (
         <FadeIn delay={0.1}>
