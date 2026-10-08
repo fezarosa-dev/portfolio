@@ -2,12 +2,11 @@
 
 import { useRef, useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
-import { AnimatePresence, motion, useAnimationFrame, useMotionValue } from 'framer-motion'
-import { SettingsIcon } from 'lucide-react'
+import { useAnimationFrame, useMotionValue } from 'framer-motion'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitch } from '@/components/language-switch'
 import { ReduceMotionToggle } from '@/components/reduce-motion-toggle'
-import { GearTrain } from '@/components/gear-train'
+import { GearIcon } from '@/components/gear-train'
 import { KonamiAdmin } from '@/components/konami-admin'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { Locale } from '@/lib/i18n/dictionaries'
@@ -49,17 +48,9 @@ export function NavSettings({
         title={label}
         onMouseEnter={() => (hovered.current = true)}
         onMouseLeave={() => (hovered.current = false)}
-        className="group relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
+        className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
       >
-        <motion.span
-          className="flex"
-          style={{ rotate: angle }}
-          animate={{ opacity: open && !reduceMotion ? 0 : 1 }}
-          transition={{ duration: 0.15 }}
-        >
-          <SettingsIcon className="h-3.5 w-3.5" aria-hidden />
-        </motion.span>
-        <AnimatePresence>{open && !reduceMotion && <GearTrain angle={angle} anchor={14} />}</AnimatePresence>
+        <GearIcon angle={angle} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-50">

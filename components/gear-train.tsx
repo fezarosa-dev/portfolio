@@ -3,79 +3,58 @@
 import { motion, useTransform, type MotionValue } from 'framer-motion'
 import { gearPath, meshedAngle, meshedPhase, pitchRadius } from '@/lib/gears'
 
-const MODULE = 1.6
-const MEDIUM = 10 // mesma engrenagem do botão: gira junto com ele
-const BIG = 16
-const SMALL = 6
-const PAD = 0
+const MODULE = 1.45
+const BIG = 8
+const SMALL = 5
+const THETA = 45 // direção do centro da grande pro centro da pequena (diagonal, aproveita o círculo do botão)
+const BOX = 22
 
 const rBig = pitchRadius(BIG, MODULE)
-const rMed = pitchRadius(MEDIUM, MODULE)
 const rSmall = pitchRadius(SMALL, MODULE)
-// centros em linha: grande — média — pequena, cada par a uma distância = soma dos raios primitivos
-const xBig = PAD + rBig + MODULE
-const xMed = xBig + rBig + rMed
-const xSmall = xMed + rMed + rSmall
-const width = xSmall + rSmall + MODULE + PAD
-const height = (rBig + MODULE + PAD) * 2
+const tipBig = rBig + 0.8 * MODULE
+const tipSmall = rSmall + 0.8 * MODULE
+const dist = rBig + rSmall
+// posição ao longo da diagonal, centrando o conjunto no ícone
+const sBig = -(dist + tipSmall - tipBig) / 2
+const rad = (THETA * Math.PI) / 180
+const at = (s: number) => ({ x: BOX / 2 + Math.cos(rad) * s, y: BOX / 2 + Math.sin(rad) * s })
 
 function Gear({
   teeth,
-  cx,
+  center,
   rotation,
-  delay,
-  fromX,
-  tone,
+  className,
 }: {
   teeth: number
-  cx: number
+  center: { x: number; y: number }
   rotation: MotionValue<number>
-  delay: number
-  fromX: number
-  tone: string
+  className: string
 }) {
-  const size = (pitchRadius(teeth, MODULE) + MODULE) * 2
+  const size = (pitchRadius(teeth, MODULE) + 0.8 * MODULE + 1) * 2
   return (
-    <motion.div
-      className="absolute"
-      style={{ left: cx - size / 2, top: height / 2 - size / 2, width: size, height: size }}
-      initial={{ scale: 0, opacity: 0, x: fromX }}
-      animate={{ scale: 1, opacity: 1, x: 0 }}
-      exit={{ scale: 0, opacity: 0, x: fromX, transition: { duration: 0.2 } }}
-      transition={{ type: 'spring', stiffness: 260, damping: 14, delay }}
+    <motion.svg
+      viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`}
+      width={size}
+      height={size}
+      style={{ rotate: rotation, left: center.x - size / 2, top: center.y - size / 2 }}
+      className={`absolute ${className}`}
+      aria-hidden
     >
-      <motion.svg
-        viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`}
-        width={size}
-        height={size}
-        style={{ rotate: rotation }}
-        className={tone}
-        aria-hidden
-      >
-        <path d={gearPath(teeth, MODULE)} fill="currentColor" fillRule="evenodd" />
-      </motion.svg>
-    </motion.div>
+      <path d={gearPath(teeth, MODULE)} fill="none" stroke="currentColor" strokeWidth={1.1} strokeLinejoin="round" />
+    </motion.svg>
   )
 }
 
-// Três engrenagens engatadas de verdade: as vizinhas giram em sentidos opostos e a velocidade é
-// inversamente proporcional ao número de dentes (a pequena é a mais rápida, a grande a mais lenta).
-// `angle` é o giro (graus) da engrenagem do meio, o mesmo do botão. Fica posicionada sobre o botão:
-// `anchor` é o x (px) do centro do botão, onde a engrenagem do meio se encaixa.
-export function GearTrain({ angle, anchor }: { angle: MotionValue<number>; anchor: number }) {
-  const med = useTransform(angle, (a) => meshedPhase(MEDIUM, 0) + a)
-  const big = useTransform(angle, (a) => meshedAngle(a, MEDIUM, BIG))
-  const small = useTransform(angle, (a) => meshedAngle(a, MEDIUM, SMALL))
+// Ícone do botão: duas engrenagens engatadas de verdade (sentidos opostos, velocidade inversamente
+// proporcional ao número de dentes). `angle` é o giro (graus) da grande; a pequena sai dele.
+export function GearIcon({ angle }: { angle: MotionValue<number> }) {
+  const big = useTransform(angle, (a) => THETA + a)
+  const small = useTransform(angle, (a) => meshedPhase(SMALL, THETA) + meshedAngle(a, BIG, SMALL))
 
   return (
-    <div
-      className="pointer-events-none absolute z-10"
-      style={{ width, height, left: anchor - xMed, top: '50%', marginTop: -height / 2 }}
-      aria-hidden
-    >
-      <Gear teeth={BIG} cx={xBig} rotation={big} delay={0.12} fromX={rMed + rBig} tone="text-steel" />
-      <Gear teeth={MEDIUM} cx={xMed} rotation={med} delay={0} fromX={0} tone="text-signal" />
-      <Gear teeth={SMALL} cx={xSmall} rotation={small} delay={0.22} fromX={-(rMed + rSmall)} tone="text-foreground/70" />
-    </div>
+    <span className="relative block" style={{ width: BOX, height: BOX }} aria-hidden>
+      <Gear teeth={BIG} center={at(sBig)} rotation={big} className="text-current" />
+      <Gear teeth={SMALL} center={at(sBig + dist)} rotation={small} className="text-signal" />
+    </span>
   )
 }
