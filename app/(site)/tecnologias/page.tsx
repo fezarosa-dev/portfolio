@@ -7,7 +7,6 @@ import { resolveText } from '@/lib/bilingual'
 import { iconUrl } from '@/lib/icons'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
-import { ScrollFly } from '@/components/scroll-fly'
 import { TechCard } from '@/components/tech-card'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -65,9 +64,7 @@ export default async function TecnologiasPage() {
     <main className="mx-auto max-w-5xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.tecnologias.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">
-          <SplitTitle text={dict.tecnologias.title} />
-        </h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.tecnologias.title} /></h1>
         <p className="mt-4 max-w-2xl text-lg text-steel">{dict.tecnologias.lead}</p>
         <p className="mt-2 font-mono text-xs text-steel">{t.total(stats.length)}</p>
       </FadeIn>
@@ -82,30 +79,28 @@ export default async function TecnologiasPage() {
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {section.items.map((stat, i) => (
               <li key={stat.id}>
-                <ScrollFly from={(['left', 'up', 'right'] as const)[i % 3]} className="h-full">
-                  <TechCard
-                    index={i}
-                    locale={locale}
-                    labels={{
-                      projects: t.projects(stat.projects.length),
-                      none: t.none,
-                      prev: t.prev,
-                      next: t.next,
-                    }}
-                    tech={{
-                      id: stat.id,
-                      name: stat.name,
-                      icon: stat.devicon_slug
-                        ? iconUrl(stat.devicon_slug, stat.devicon_variant ?? 'plain', stat.icon_source)
-                        : null,
-                      percentage: stat.percentage,
-                      projects: stat.projects.map((p) => ({
-                        id: p.id,
-                        title: resolveText(p.title, p.title_en, locale),
-                      })),
-                    }}
-                  />
-                </ScrollFly>
+                <TechCard
+                  index={i}
+                  locale={locale}
+                  labels={{
+                    projects: t.projects(stat.projects.length),
+                    none: t.none,
+                    prev: t.prev,
+                    next: t.next,
+                  }}
+                  tech={{
+                    id: stat.id,
+                    name: stat.name,
+                    icon: stat.devicon_slug
+                      ? iconUrl(stat.devicon_slug, stat.devicon_variant ?? 'plain', stat.icon_source)
+                      : null,
+                    percentage: stat.percentage,
+                    projects: stat.projects.map((p) => ({
+                      id: p.id,
+                      title: resolveText(p.title, p.title_en, locale),
+                    })),
+                  }}
+                />
               </li>
             ))}
           </ul>

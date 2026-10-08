@@ -4,7 +4,6 @@ import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
 import { pageText } from '@/lib/page-texts'
-import { ScrollExit } from '@/components/scroll-fly'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
@@ -40,16 +39,14 @@ export default async function HomePage() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: jsonLd(personJsonLd) }}
       />
-      <ScrollExit>
-        <HeroSection
-          title={resolveText(content.hero_title ?? '', content.hero_title_en, locale)}
-          subtitle={heroSubtitle}
-          tagline={pageText(content, locale, 'hero_tagline')}
-          languages={languages.filter((lang) => lang.show_on_home)}
-          whoamiLabel={dict.home.whoami}
-          locale={locale}
-        />
-      </ScrollExit>
+      <HeroSection
+        title={resolveText(content.hero_title ?? '', content.hero_title_en, locale)}
+        subtitle={heroSubtitle}
+        tagline={pageText(content, locale, 'hero_tagline')}
+        languages={languages.filter((lang) => lang.show_on_home)}
+        whoamiLabel={dict.home.whoami}
+        locale={locale}
+      />
       <AboutTeaser
         text={resolveText(content.sobre_texto ?? '', content.sobre_texto_en, locale)}
         eyebrow={dict.home.aboutEyebrow}
