@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { SplitTitle } from '@/components/split-title'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getArticleById, getSiteContent } from '@/lib/supabase/queries-cached'
@@ -83,7 +84,7 @@ export default async function ArtigoDetailPage({
           {dict.artigos.back}
         </Link>
         <Eyebrow>{dict.artigos.detailEyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={title} /></h1>
       </FadeIn>
       <div className="mt-10">
         <MarkdownContent content={contentMd} driveImages={driveImages} />

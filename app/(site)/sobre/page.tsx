@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SplitTitle } from '@/components/split-title'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
@@ -27,7 +28,7 @@ export default async function SobrePage() {
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.sobre.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.sobre.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.sobre.title} /></h1>
         {photoUrl && <LoadingPhoto src={photoUrl} alt="Felipe Zanoni da Rosa" />}
       </FadeIn>
       <FadeIn delay={0.1}>

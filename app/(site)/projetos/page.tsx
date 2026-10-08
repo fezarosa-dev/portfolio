@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { SplitTitle } from '@/components/split-title'
 import type { Metadata } from 'next'
 import { getVisibleProjects } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
@@ -20,7 +21,7 @@ export default async function ProjetosPage() {
     <main className="mx-auto max-w-4xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.projetos.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.projetos.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.projetos.title} /></h1>
       </FadeIn>
       <div className="mt-10">
         <Suspense>
