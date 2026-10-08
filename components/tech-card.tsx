@@ -56,12 +56,8 @@ function PageButton({
       whileHover={reduce || disabled ? undefined : { scale: 1.12 }}
       whileTap={reduce || disabled ? undefined : { scale: 0.82 }}
       transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-      className={`group/btn relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-hairline text-steel transition-colors ${disabled ? 'cursor-not-allowed opacity-30' : 'hover:border-signal hover:text-white'}`}
+      className={`relative flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${disabled ? 'cursor-not-allowed border-dashed border-hairline bg-transparent text-steel/30' : 'border-signal bg-signal text-white shadow-sm shadow-signal/30 hover:brightness-110'}`}
     >
-      <span
-        className={`absolute inset-0 origin-center scale-0 rounded-full bg-signal transition-transform duration-300 ease-out ${disabled ? '' : 'group-hover/btn:scale-100'}`}
-        aria-hidden
-      />
       <motion.span animate={arrow} className="relative flex">
         <Icon className="h-4 w-4" />
       </motion.span>
