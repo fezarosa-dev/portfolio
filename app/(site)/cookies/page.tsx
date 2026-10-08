@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SplitTitle } from '@/components/split-title'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
@@ -22,7 +23,7 @@ export default async function CookiesPage() {
     <main className="mx-auto max-w-2xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.cookiesPage.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.cookiesPage.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.cookiesPage.title} /></h1>
       </FadeIn>
       <FadeIn delay={0.1}>
         <div className="prose dark:prose-invert mt-8 max-w-none text-foreground/90 prose-a:text-signal prose-a:no-underline hover:prose-a:underline">

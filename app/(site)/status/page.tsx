@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SplitTitle } from '@/components/split-title'
 import { version as nextVersion } from 'next/package.json'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { pageMetadata } from '@/lib/seo'
@@ -86,7 +87,7 @@ export default async function StatusPage() {
     <main className="mx-auto max-w-3xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.status.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.status.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.status.title} /></h1>
         <p className="mt-3 max-w-lg text-steel">{dict.status.subtitle}</p>
       </FadeIn>
 

@@ -1,5 +1,6 @@
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
+import { RollText } from '@/components/roll-text'
 
 export async function Footer() {
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
@@ -60,7 +61,7 @@ export async function Footer() {
               rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               className="transition-colors hover:text-signal"
             >
-              {link.label}
+              <RollText>{link.label}</RollText>
             </a>
           ))}
         </div>
