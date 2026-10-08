@@ -38,7 +38,7 @@ export type Dictionary = {
     seeAll: string
     tagline: string
   }
-  sobre: { eyebrow: string; title: string }
+  sobre: { eyebrow: string; title: string; techsTitle: string }
   servicos: {
     eyebrow: string
     title: string
@@ -178,7 +178,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       seeAll: 'ver todos os projetos →',
       tagline: 'Eu resolvo problemas. O código é só a ferramenta.',
     },
-    sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
+    sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim', techsTitle: 'Tecnologias' },
     servicos: {
       eyebrow: 'serviços',
       title: 'Serviços',
@@ -322,7 +322,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       seeAll: 'see all projects →',
       tagline: 'I solve problems. Code is just the tool.',
     },
-    sobre: { eyebrow: 'about-me', title: 'About me' },
+    sobre: { eyebrow: 'about-me', title: 'About me', techsTitle: 'Technologies' },
     servicos: {
       eyebrow: 'services',
       title: 'Services',
