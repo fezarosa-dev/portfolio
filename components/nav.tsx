@@ -7,7 +7,7 @@ import { resolveText } from '@/lib/bilingual'
 import { NavLinks } from '@/components/nav-links'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavSettings } from '@/components/nav-settings'
-import { SearchPill } from '@/components/search/search-trigger'
+import { SearchTrigger } from '@/components/search/search-trigger'
 import { CollapsibleOnScroll } from '@/components/collapsible-on-scroll'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -75,8 +75,10 @@ export async function Nav() {
             <span className="logo-caret" />
           </span>
         </Link>
-        <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
-        <NavLinks links={navLinks} />
+        <div className="hidden items-center gap-3 md:flex">
+          <NavLinks links={navLinks} />
+          <SearchTrigger label={dict.busca.title} />
+        </div>
         <MobileNav
           links={navLinks}
           openLabel={dict.nav.menuOpen}

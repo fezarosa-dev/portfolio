@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { countRecentSearchesFromIp, logSearchRequest } from '@/lib/supabase/queries'
-import { getSiteContent } from '@/lib/supabase/queries-cached'
-import { searchFullText, searchSemantic } from '@/lib/supabase/search-queries'
+import { getLanguages, getSiteContent, getVisibleProjects } from '@/lib/supabase/queries-cached'
+import { searchFullText, searchSemantic, type SearchResult } from '@/lib/supabase/search-queries'
 import { reciprocalRankFusion } from '@/lib/search/rank'
+import { cleanQuery, matchTechs, wantsProjects } from '@/lib/search/intent'
 import { clientIp, isSameOriginJson } from '@/lib/request-guard'
 
 const DEFAULTS = {
@@ -60,19 +61,56 @@ export async function POST(request: Request) {
   }
   await logSearchRequest(ip)
 
+  // "projetos com python": se a busca cita tecnologias cadastradas, os projetos que realmente usam
+  // elas vêm primeiro (vínculo do admin), antes de qualquer correspondência por texto
+  const searchQuery = cleanQuery(query)
+  const [languages, projects] = await Promise.all([getLanguages(), getVisibleProjects()]).catch(() => [[], []])
+  const techs = matchTechs(query, languages)
+  const techHits: SearchResult[] = []
+  const techEntries: SearchResult[] = techs.map((tech) => ({
+    id: `language-${tech.id}`,
+    sourceTable: 'languages',
+    sourceId: tech.id,
+    title: tech.name,
+    excerpt: '',
+    url: `/projetos?tech=${tech.id}`,
+  }))
+  if (techs.length) {
+    const ids = new Set(techs.map((tech) => tech.id))
+    const score = (project: (typeof projects)[number]) => project.languages.filter((l) => ids.has(l.id)).length
+    const matched = projects.filter((project) => score(project) > 0)
+    const best = Math.max(0, ...matched.map(score))
+    for (const project of matched.filter((p) => score(p) === best)) {
+      techHits.push({
+        id: `project-${project.id}`,
+        sourceTable: 'projects',
+        sourceId: project.id,
+        title: project.title ?? project.title_en ?? 'Projeto',
+        excerpt: project.summary ?? project.summary_en ?? '',
+        url: project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.id}`,
+      })
+    }
+    if (techHits.length && wantsProjects(query)) {
+      return NextResponse.json({ results: techHits.slice(0, RESULTS_LIMIT) })
+    }
+  }
+
   let fullTextResults, semanticResults
   try {
     ;[fullTextResults, semanticResults] = await Promise.all([
-      searchFullText(query),
-      withTimeout(searchSemantic(query).catch(() => null), SEMANTIC_TIMEOUT_MS),
+      searchFullText(searchQuery),
+      withTimeout(searchSemantic(searchQuery).catch(() => null), SEMANTIC_TIMEOUT_MS),
     ])
   } catch {
     return NextResponse.json({ error: 'Erro ao buscar.' }, { status: 500 })
   }
 
-  const results = semanticResults
-    ? reciprocalRankFusion(fullTextResults, semanticResults)
-    : fullTextResults
+  // tecnologia por similaridade semântica só traz ruído (VBA em "simulador"); por nome o full-text já acha
+  const semantic = semanticResults?.filter((hit) => hit.sourceTable !== 'languages')
+  const fused = semantic ? reciprocalRankFusion(fullTextResults, semantic) : fullTextResults
+  const pinned = [...techEntries, ...techHits]
+  const seen = new Set(pinned.map((hit) => hit.sourceId))
+  const results = [...pinned, ...fused.filter((hit) => !seen.has(hit.sourceId))]
 
   return NextResponse.json({ results: results.slice(0, RESULTS_LIMIT) })
 }
