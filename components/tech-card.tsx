@@ -86,14 +86,6 @@ export function TechCard({
 
   return (
     <motion.article
-      initial={reduce ? false : { opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{
-        duration: 0.6,
-        delay: Math.min(index * 0.04, 0.3),
-        ease: EASE,
-      }}
       whileHover={reduce ? undefined : { y: -4 }}
       className="flex h-full flex-col rounded-xl border border-hairline bg-card p-5 transition-colors hover:border-signal/60"
     >

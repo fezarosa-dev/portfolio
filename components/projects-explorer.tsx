@@ -1,11 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import { takeHandoff } from '@/lib/handoff'
 import { ProjectCard } from '@/components/project-card'
 import { TechCombobox } from '@/components/tech-combobox'
-import { useReduceMotion } from '@/components/reduce-motion-provider'
+import { ScrollFly } from '@/components/scroll-fly'
 import { resolveText } from '@/lib/bilingual'
 import type { Project, Language } from '@/lib/supabase/queries'
 import type { Dictionary, Locale } from '@/lib/i18n'
@@ -19,8 +18,6 @@ export function ProjectsExplorer({
   dict: Dictionary['projetos']
   locale: Locale
 }) {
-  const { enabled: reduceMotion } = useReduceMotion()
-
   const [query, setQuery] = useState('')
   const [techFilters, setTechFilters] = useState<string[]>([])
 
@@ -119,13 +116,7 @@ export function ProjectsExplorer({
         ) : (
           <div className="columns-1 gap-6 sm:columns-2">
             {visible.map((project, i) => (
-              <motion.div
-                key={project.id}
-                initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.5, delay: reduceMotion ? 0 : i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                className="mb-6 break-inside-avoid"
-              >
+              <ScrollFly key={project.id} from={i % 2 === 0 ? 'left' : 'right'} className="mb-6 break-inside-avoid">
                 <ProjectCard
                   project={project}
                   withLabel={dict.with}
@@ -133,7 +124,7 @@ export function ProjectsExplorer({
                   onTechClick={addTechFilter}
                   locale={locale}
                 />
-              </motion.div>
+              </ScrollFly>
             ))}
           </div>
         )}
