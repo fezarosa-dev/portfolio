@@ -47,6 +47,7 @@ export async function Nav() {
           />
           <span className="truncate">{statusText}</span>
           <span className="ml-auto flex items-center gap-2">
+            <SearchTrigger label={dict.busca.title} />
             <NavSettings
               initialDark={isDark}
               locale={locale}
@@ -75,10 +76,7 @@ export async function Nav() {
             <span className="logo-caret" />
           </span>
         </Link>
-        <div className="hidden items-center gap-3 md:flex">
-          <NavLinks links={navLinks} />
-          <SearchTrigger label={dict.busca.title} />
-        </div>
+        <NavLinks links={navLinks} />
         <MobileNav
           links={navLinks}
           openLabel={dict.nav.menuOpen}
