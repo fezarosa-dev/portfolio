@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ToastForm } from '@/components/admin/toast-form'
 import { iconUrl } from '@/lib/icons'
-import type { Language } from '@/lib/supabase/queries'
+import type { Language, LanguageCategory } from '@/lib/supabase/queries'
 
 function GripIcon() {
   return (
@@ -24,12 +24,14 @@ function GripIcon() {
 
 function TechnologyRow({
   lang,
+  categories,
   onDragEnd,
   editAction,
   removeAction,
   toggleShowOnHomeAction,
 }: {
   lang: Language
+  categories: LanguageCategory[]
   onDragEnd: () => void
   editAction: (id: string, formData: FormData) => Promise<void>
   removeAction: (id: string) => Promise<void>
@@ -91,6 +93,18 @@ function TechnologyRow({
             Salvar
           </Button>
         </div>
+        <select
+          name="categoryId"
+          defaultValue={lang.category_id ?? ''}
+          className="h-7 rounded-md border bg-background px-2 text-xs"
+        >
+          <option value="">Sem categoria</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
         <Input
           name="iconUrl"
           defaultValue={lang.icon_source === 'custom' ? (lang.devicon_slug ?? '') : ''}
@@ -109,12 +123,14 @@ function TechnologyRow({
 
 export function TechnologyReorderList({
   languages,
+  categories,
   editAction,
   removeAction,
   saveOrderAction,
   toggleShowOnHomeAction,
 }: {
   languages: Language[]
+  categories: LanguageCategory[]
   editAction: (id: string, formData: FormData) => Promise<void>
   removeAction: (id: string) => Promise<void>
   saveOrderAction: (orderedIds: string[]) => Promise<void>
@@ -147,6 +163,7 @@ export function TechnologyReorderList({
         <TechnologyRow
           key={lang.id}
           lang={lang}
+          categories={categories}
           onDragEnd={handleDragEnd}
           editAction={editAction}
           removeAction={removeAction}

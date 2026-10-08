@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getVisibleProjects, getVisibleArticles } from '@/lib/supabase/queries-cached'
+import { getVisibleProjects, getVisibleArticles, getSiteContent } from '@/lib/supabase/queries-cached'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,14 +26,18 @@ function entriesFor(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [projects, articles] = await Promise.all([getVisibleProjects(), getVisibleArticles()])
+  const [projects, articles, content] = await Promise.all([
+    getVisibleProjects(),
+    getVisibleArticles(),
+    getSiteContent(),
+  ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
     ...entriesFor('', 'monthly', 1),
     ...entriesFor('/sobre', 'yearly', 0.6),
     ...entriesFor('/servicos', 'yearly', 0.6),
     ...entriesFor('/projetos', 'weekly', 0.9),
-    ...entriesFor('/tecnologias', 'weekly', 0.7),
+    ...(content.tecnologias_ativo === 'false' ? [] : entriesFor('/tecnologias', 'weekly', 0.7)),
     ...entriesFor('/artigos', 'weekly', 0.8),
     ...entriesFor('/contato', 'yearly', 0.5),
     ...entriesFor('/curriculo', 'monthly', 0.6),

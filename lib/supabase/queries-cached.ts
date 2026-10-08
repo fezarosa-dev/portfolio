@@ -47,6 +47,19 @@ export async function getLanguages() {
   return pickSource(await isPreview(), () => raw.getLanguages(createPublicClient()), cachedLanguages)()
 }
 
+const cachedLanguageCategories = unstable_cache(
+  () => raw.getLanguageCategories(createPublicClient()),
+  ['language-categories'],
+  opts
+)
+export async function getLanguageCategories() {
+  return pickSource(
+    await isPreview(),
+    () => raw.getLanguageCategories(createPublicClient()),
+    cachedLanguageCategories
+  )()
+}
+
 const cachedVisibleArticles = unstable_cache(
   () => raw.getVisibleArticles(createPublicClient()),
   ['visible-articles'],

@@ -31,6 +31,7 @@ const KEYS = [
   'search_semantic_timeout_ms',
   'search_results_limit',
   'easter_eggs_ativo',
+  'tecnologias_ativo',
   'rickroll_video_filename',
   'rickroll_clicks',
 ] as const

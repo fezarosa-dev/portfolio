@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hiddenNavLinks } from '@/lib/nav-hidden'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Mascote } from '@/components/mascote'
@@ -140,7 +141,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         placeholder={dict.busca.placeholder}
         noResultsLabel={dict.busca.noResults}
         quickLinks={dict.nav.links
-          .filter((link) => !(content.nav_hidden_links ?? '').split(',').map((h) => h.trim()).includes(link.href))
+          .filter((link) => !hiddenNavLinks(content).has(link.href))
           .map((link) => ({
             label: link.label,
             href: `/${locale}${link.href === '/' ? '' : link.href}`,

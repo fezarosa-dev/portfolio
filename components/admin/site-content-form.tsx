@@ -19,6 +19,7 @@ const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/sobre', label: 'Sobre mim' },
   { href: '/servicos', label: 'Serviços' },
   { href: '/projetos', label: 'Projetos' },
+  { href: '/tecnologias', label: 'Tecnologias' },
   { href: '/artigos', label: 'Artigos' },
   { href: '/contato', label: 'Contato' },
   { href: '/curriculo', label: 'Currículo' },
@@ -31,6 +32,7 @@ const SEO_PAGES: { key: string; label: string }[] = [
   { key: 'sobre', label: 'Sobre' },
   { key: 'servicos', label: 'Serviços' },
   { key: 'projetos', label: 'Projetos' },
+  { key: 'tecnologias', label: 'Tecnologias' },
   { key: 'artigos', label: 'Artigos' },
   { key: 'contato', label: 'Contato' },
   { key: 'curriculo', label: 'Currículo' },
@@ -98,6 +100,7 @@ export function SiteContentForm({
   const [sobreFoto, setSobreFoto] = useState(content.sobre_foto ?? '')
   const [siteIcon, setSiteIcon] = useState(content.site_icon ?? '')
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
+  const [tecnologiasAtivo, setTecnologiasAtivo] = useState(content.tecnologias_ativo !== 'false')
   const [easterEggsAtivo, setEasterEggsAtivo] = useState(content.easter_eggs_ativo !== 'false')
   const lookup = (key: string): string | null => (key in content ? content[key] : null)
   const hiddenNavLinks = new Set(
@@ -345,6 +348,17 @@ export function SiteContentForm({
                 </label>
               ))}
             </div>
+          </Section>
+          <Section title="página de tecnologias">
+            <div className="flex items-center gap-2">
+              <input type="hidden" name="tecnologias_ativo" value={tecnologiasAtivo ? 'true' : 'false'} />
+              <Switch id="tecnologias_ativo" checked={tecnologiasAtivo} onCheckedChange={setTecnologiasAtivo} />
+              <Label htmlFor="tecnologias_ativo">Ativar a página /tecnologias</Label>
+            </div>
+            <p className="font-mono text-xs text-steel">
+              desligada, a página some do menu e do sitemap e a URL passa a dar 404 (as categorias e tecnologias
+              continuam salvas)
+            </p>
           </Section>
         </TabsContent>
 

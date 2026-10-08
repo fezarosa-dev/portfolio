@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import type {
   Project,
   Language,
+  LanguageCategory,
   Author,
   Company,
   ProjectRow,
@@ -56,6 +57,62 @@ export async function deleteLanguage(id: string, client?: SupabaseClient): Promi
   const supabase = client ?? (await createClient())
   const { error } = await supabase.from('languages').delete().eq('id', id)
   if (error) throw error
+}
+
+export async function setLanguageCategory(id: string, categoryId: string | null, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
+  const { error } = await supabase.from('languages').update({ category_id: categoryId }).eq('id', id)
+  if (error) throw error
+}
+
+export async function addLanguageCategory(name: string, nameEn?: string | null, client?: SupabaseClient): Promise<LanguageCategory> {
+  const supabase = client ?? (await createClient())
+  const { count } = await supabase.from('language_categories').select('*', { count: 'exact', head: true })
+  const { data, error } = await supabase
+    .from('language_categories')
+    .insert({ name: name.trim(), name_en: nameEn?.trim() || null, position: count ?? 0 })
+    .select()
+    .single()
+  if (error) throw error
+  return data as LanguageCategory
+}
+
+export async function updateLanguageCategory(id: string, name: string, nameEn?: string | null, client?: SupabaseClient): Promise<LanguageCategory> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('language_categories')
+    .update({ name: name.trim(), name_en: nameEn?.trim() || null })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data as LanguageCategory
+}
+
+// as tecnologias da categoria ficam sem categoria (FK on delete set null)
+export async function deleteLanguageCategory(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
+  const { error } = await supabase.from('language_categories').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function moveLanguageCategory(id: string, direction: -1 | 1, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('language_categories')
+    .select('id')
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  const ids = (data as { id: string }[]).map((row) => row.id)
+  const from = ids.indexOf(id)
+  const to = from + direction
+  if (from < 0 || to < 0 || to >= ids.length) return
+  ;[ids[from], ids[to]] = [ids[to], ids[from]]
+  const results = await Promise.all(
+    ids.map((categoryId, position) => supabase.from('language_categories').update({ position }).eq('id', categoryId))
+  )
+  for (const result of results) if (result.error) throw result.error
 }
 
 export async function setLanguageShowOnHome(id: string, showOnHome: boolean, client?: SupabaseClient): Promise<void> {

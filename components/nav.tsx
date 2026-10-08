@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { hiddenNavLinks } from '@/lib/nav-hidden'
 import { cookies } from 'next/headers'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
@@ -29,12 +30,7 @@ export async function Nav() {
     locale
   )
   const statusColor = STATUS_COLORS[content.status_color] ?? STATUS_COLORS.green
-  const hiddenLinks = new Set(
-    (content.nav_hidden_links ?? '')
-      .split(',')
-      .map((href) => href.trim())
-      .filter(Boolean)
-  )
+  const hiddenLinks = hiddenNavLinks(content)
   const navLinks = dict.nav.links
     .filter((link) => !hiddenLinks.has(link.href))
     .map((link) => ({ ...link, href: `/${locale}${link.href === '/' ? '' : link.href}` }))
