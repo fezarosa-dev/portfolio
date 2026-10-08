@@ -9,8 +9,8 @@ const OPEN_SEARCH_EVENT = 'zanoni:open-search'
 
 const SPARKS = [0, 60, 120, 180, 240, 300]
 
-// Lupinha animada: sempre balança e solta faíscas (sem anel/pulso chamativo); no hover acelera,
-// cresce e brilha; no clique encolhe e estoura de volta.
+// Lupinha animada: parada fica quieta; só no hover/foco ela pisca (anel laranja), treme e solta
+// faíscas. No clique encolhe e estoura de volta.
 export function SearchTrigger({ label }: { label: string }) {
   const { enabled: reduceMotion } = useReduceMotion()
   const [hovered, setHovered] = useState(false)
@@ -31,35 +31,40 @@ export function SearchTrigger({ label }: { label: string }) {
       transition={{ type: 'spring', stiffness: 500, damping: 12 }}
       className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-[border-color,color,background-color,box-shadow] duration-200 hover:border-signal hover:bg-signal/10 hover:text-signal hover:shadow-[0_0_14px_var(--signal)] focus-visible:border-signal focus-visible:text-signal"
     >
-      {animated &&
-        SPARKS.map((angle) => (
+      {animated && hovered && (
+        <>
           <motion.span
-            key={angle}
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-signal"
-            animate={{
-              x: [0, Math.cos((angle * Math.PI) / 180) * 17],
-              y: [0, Math.sin((angle * Math.PI) / 180) * 17],
-              opacity: [1, 0],
-              scale: [1, 0.2],
-            }}
-            transition={{
-              duration: hovered ? 0.7 : 1.4,
-              repeat: Infinity,
-              repeatDelay: hovered ? 0 : 0.6,
-              ease: 'easeOut',
-              delay: (angle / 360) * 0.25,
-            }}
+            className="pointer-events-none absolute inset-0 rounded-full border border-signal"
+            initial={{ scale: 1, opacity: 0.8 }}
+            animate={{ scale: 1.7, opacity: 0 }}
+            transition={{ duration: 0.9, repeat: Infinity, ease: 'easeOut' }}
           />
-        ))}
+          {SPARKS.map((angle) => (
+            <motion.span
+              key={angle}
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-signal"
+              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+              animate={{
+                x: Math.cos((angle * Math.PI) / 180) * 17,
+                y: Math.sin((angle * Math.PI) / 180) * 17,
+                opacity: 0,
+                scale: 0.2,
+              }}
+              transition={{ duration: 0.7, repeat: Infinity, ease: 'easeOut', delay: (angle / 360) * 0.25 }}
+            />
+          ))}
+        </>
+      )}
       <motion.span
         className="relative flex"
         animate={
-          animated
+          animated && hovered
             ? { rotate: [0, -25, 20, -15, 10, 0], x: [0, 1.5, 0, -1.5, 0], y: [0, -1.5, 0, 1.5, 0] }
-            : undefined
+            : { rotate: 0, x: 0, y: 0 }
         }
-        transition={{ duration: hovered ? 0.6 : 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        transition={hovered ? { duration: 0.6, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
       >
         <SearchIcon className="h-3.5 w-3.5" aria-hidden />
       </motion.span>
