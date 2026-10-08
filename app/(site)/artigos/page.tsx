@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SplitTitle } from '@/components/split-title'
 import { getVisibleArticles } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ArticleCard } from '@/components/article-card'
@@ -20,7 +21,7 @@ export default async function ArtigosPage() {
     <main className="mx-auto max-w-4xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.artigos.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.artigos.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.artigos.title} /></h1>
       </FadeIn>
       <div className="mt-10">
         {articles.length === 0 ? (

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SplitTitle } from '@/components/split-title'
 import { notFound } from 'next/navigation'
 import { getLanguageCategories, getLanguageUsageStats, getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
@@ -63,7 +64,7 @@ export default async function TecnologiasPage() {
     <main className="mx-auto max-w-5xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.tecnologias.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight">{dict.tecnologias.title}</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.tecnologias.title} /></h1>
         <p className="mt-4 max-w-2xl text-lg text-steel">{dict.tecnologias.lead}</p>
         <p className="mt-2 font-mono text-xs text-steel">{t.total(stats.length)}</p>
       </FadeIn>
