@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
-import { motion, useAnimationFrame, useMotionValue } from 'framer-motion'
+import { AnimatePresence, motion, useAnimationFrame, useMotionValue } from 'framer-motion'
 import { SettingsIcon } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitch } from '@/components/language-switch'
@@ -49,16 +49,21 @@ export function NavSettings({
         title={label}
         onMouseEnter={() => (hovered.current = true)}
         onMouseLeave={() => (hovered.current = false)}
-        className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
+        className="group relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
       >
-        <motion.span className="flex" style={{ rotate: angle }}>
+        <motion.span
+          className="flex"
+          style={{ rotate: angle }}
+          animate={{ opacity: open && !reduceMotion ? 0 : 1 }}
+          transition={{ duration: 0.15 }}
+        >
           <SettingsIcon className="h-3.5 w-3.5" aria-hidden />
         </motion.span>
+        <AnimatePresence>{open && !reduceMotion && <GearTrain angle={angle} anchor={14} />}</AnimatePresence>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-50">
           <Popover.Popup className="flex flex-col gap-3 rounded-lg border border-hairline bg-card p-3 shadow-lg outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
-            {!reduceMotion && <GearTrain angle={angle} />}
             <ThemeToggle initialDark={initialDark} locale={locale} />
             <ReduceMotionToggle locale={locale} />
             <div className="h-px bg-hairline" aria-hidden />

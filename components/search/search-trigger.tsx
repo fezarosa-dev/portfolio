@@ -9,8 +9,8 @@ const OPEN_SEARCH_EVENT = 'zanoni:open-search'
 
 const SPARKS = [0, 60, 120, 180, 240, 300]
 
-// Lupinha animada: parada fica quieta; só no hover/foco ela pisca (anel laranja), treme e solta
-// faíscas. No clique encolhe e estoura de volta.
+// Lupinha animada: parada ela balança sozinha (sem nada laranja saindo); só no hover/foco ela pisca
+// (anel laranja), acelera e solta faíscas. No clique encolhe e estoura de volta.
 export function SearchTrigger({ label }: { label: string }) {
   const { enabled: reduceMotion } = useReduceMotion()
   const [hovered, setHovered] = useState(false)
@@ -60,11 +60,11 @@ export function SearchTrigger({ label }: { label: string }) {
       <motion.span
         className="relative flex"
         animate={
-          animated && hovered
+          animated
             ? { rotate: [0, -25, 20, -15, 10, 0], x: [0, 1.5, 0, -1.5, 0], y: [0, -1.5, 0, 1.5, 0] }
-            : { rotate: 0, x: 0, y: 0 }
+            : undefined
         }
-        transition={hovered ? { duration: 0.6, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+        transition={{ duration: hovered ? 0.6 : 1.8, repeat: Infinity, ease: 'easeInOut' }}
       >
         <SearchIcon className="h-3.5 w-3.5" aria-hidden />
       </motion.span>
