@@ -24,11 +24,13 @@ function PageButton({
   label,
   onClick,
   reduce,
+  disabled,
 }: {
   dir: -1 | 1
   label: string
   onClick: () => void
   reduce: boolean
+  disabled: boolean
 }) {
   const arrow = useAnimationControls()
   const Icon = dir === 1 ? ChevronRight : ChevronLeft
@@ -36,6 +38,7 @@ function PageButton({
     <motion.button
       type="button"
       aria-label={label}
+      disabled={disabled}
       onClick={() => {
         onClick()
         if (!reduce) {
@@ -50,13 +53,13 @@ function PageButton({
           })
         }
       }}
-      whileHover={reduce ? undefined : { scale: 1.12 }}
-      whileTap={reduce ? undefined : { scale: 0.82 }}
+      whileHover={reduce || disabled ? undefined : { scale: 1.12 }}
+      whileTap={reduce || disabled ? undefined : { scale: 0.82 }}
       transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-      className="group/btn relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-white"
+      className={`group/btn relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-hairline text-steel transition-colors ${disabled ? 'cursor-not-allowed opacity-30' : 'hover:border-signal hover:text-white'}`}
     >
       <span
-        className="absolute inset-0 origin-center scale-0 rounded-full bg-signal transition-transform duration-300 ease-out group-hover/btn:scale-100"
+        className={`absolute inset-0 origin-center scale-0 rounded-full bg-signal transition-transform duration-300 ease-out ${disabled ? '' : 'group-hover/btn:scale-100'}`}
         aria-hidden
       />
       <motion.span animate={arrow} className="relative flex">
@@ -81,7 +84,7 @@ export function TechCard({
   const pages = Math.max(1, Math.ceil(tech.projects.length / PER_PAGE))
   const [[page, dir], setPage] = useState<[number, -1 | 1]>([0, 1])
 
-  const go = (d: -1 | 1) => setPage(([p]) => [(p + d + pages) % pages, d])
+  const go = (d: -1 | 1) => setPage(([p]) => [Math.min(pages - 1, Math.max(0, p + d)), d])
   const visible = tech.projects.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE)
   const slide = reduce ? 0 : 28
 
@@ -183,21 +186,46 @@ export function TechCard({
 
           {pages > 1 && (
             <div className="flex items-center justify-between">
-              <PageButton dir={-1} label={labels.prev} onClick={() => go(-1)} reduce={reduce} />
-              <div className="flex items-center gap-1.5" aria-live="polite">
-                {Array.from({ length: pages }, (_, i) => (
-                  <motion.span
-                    key={i}
-                    animate={{
-                      width: i === page ? 20 : 6,
-                      opacity: i === page ? 1 : 0.35,
-                    }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-                    className="h-1.5 rounded-full bg-signal"
-                  />
-                ))}
+              <PageButton dir={-1} label={labels.prev} onClick={() => go(-1)} reduce={reduce} disabled={page === 0} />
+              <div className="flex flex-col items-center gap-1.5" aria-live="polite">
+                <div className="flex items-center gap-1 font-mono text-xs text-steel">
+                  <span className="relative inline-flex h-4 w-3 justify-center overflow-hidden">
+                    <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+                      <motion.span
+                        key={page}
+                        initial={reduce ? false : { y: dir * 14, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={reduce ? undefined : { y: -dir * 14, opacity: 0 }}
+                        transition={{ duration: reduce ? 0 : 0.3, ease: EASE }}
+                        className="font-medium text-signal"
+                      >
+                        {page + 1}
+                      </motion.span>
+                    </AnimatePresence>
+                  </span>
+                  <span>/ {pages}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: pages }, (_, i) => (
+                    <motion.span
+                      key={i}
+                      animate={{
+                        width: i === page ? 20 : 6,
+                        opacity: i === page ? 1 : 0.35,
+                      }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                      className="h-1.5 rounded-full bg-signal"
+                    />
+                  ))}
+                </div>
               </div>
-              <PageButton dir={1} label={labels.next} onClick={() => go(1)} reduce={reduce} />
+              <PageButton
+                dir={1}
+                label={labels.next}
+                onClick={() => go(1)}
+                reduce={reduce}
+                disabled={page === pages - 1}
+              />
             </div>
           )}
         </div>
