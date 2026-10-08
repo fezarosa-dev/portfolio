@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { hiddenNavLinks } from '@/lib/nav-hidden'
 import { cookies } from 'next/headers'
 import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary } from '@/lib/i18n'
@@ -6,7 +7,7 @@ import { resolveText } from '@/lib/bilingual'
 import { NavLinks } from '@/components/nav-links'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavSettings } from '@/components/nav-settings'
-import { SearchPill } from '@/components/search/search-trigger'
+import { SearchTrigger } from '@/components/search/search-trigger'
 import { CollapsibleOnScroll } from '@/components/collapsible-on-scroll'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -29,12 +30,7 @@ export async function Nav() {
     locale
   )
   const statusColor = STATUS_COLORS[content.status_color] ?? STATUS_COLORS.green
-  const hiddenLinks = new Set(
-    (content.nav_hidden_links ?? '')
-      .split(',')
-      .map((href) => href.trim())
-      .filter(Boolean)
-  )
+  const hiddenLinks = hiddenNavLinks(content)
   const navLinks = dict.nav.links
     .filter((link) => !hiddenLinks.has(link.href))
     .map((link) => ({ ...link, href: `/${locale}${link.href === '/' ? '' : link.href}` }))
@@ -51,6 +47,7 @@ export async function Nav() {
           />
           <span className="truncate">{statusText}</span>
           <span className="ml-auto flex items-center gap-2">
+            <SearchTrigger label={dict.busca.title} />
             <NavSettings
               initialDark={isDark}
               locale={locale}
@@ -79,7 +76,6 @@ export async function Nav() {
             <span className="logo-caret" />
           </span>
         </Link>
-        <SearchPill label={dict.busca.title} className="hidden md:flex md:min-w-36 lg:min-w-48 xl:absolute xl:left-1/2 xl:-translate-x-1/2" />
         <NavLinks links={navLinks} />
         <MobileNav
           links={navLinks}

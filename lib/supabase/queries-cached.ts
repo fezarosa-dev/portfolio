@@ -47,12 +47,25 @@ export async function getLanguages() {
   return pickSource(await isPreview(), () => raw.getLanguages(createPublicClient()), cachedLanguages)()
 }
 
+const cachedLanguageCategories = unstable_cache(
+  () => raw.getLanguageCategories(createPublicClient()),
+  ['language-categories'],
+  opts
+)
+export async function getLanguageCategories() {
+  return pickSource(
+    await isPreview(),
+    () => raw.getLanguageCategories(createPublicClient()),
+    cachedLanguageCategories
+  )()
+}
+
 const cachedVisibleArticles = unstable_cache(
   () => raw.getVisibleArticles(createPublicClient()),
   ['visible-articles'],
   opts
 )
-export async function getLanguageUsageStats() {
+export async function getLanguageUsageStats({ includeUnused = false } = {}) {
   const [projects, languages] = await Promise.all([getVisibleProjects(), getLanguages()])
   const total = projects.length
   const projectsByLanguage = new Map<string, { id: string; title: string | null; title_en: string | null }[]>()
@@ -72,7 +85,7 @@ export async function getLanguageUsageStats() {
         projects: languageProjects,
       }
     })
-    .filter((stat) => stat.percentage > 0)
+    .filter((stat) => includeUnused || stat.percentage > 0)
     .sort((a, b) => b.percentage - a.percentage)
 }
 

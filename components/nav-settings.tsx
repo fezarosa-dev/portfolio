@@ -1,15 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
-import { motion } from 'framer-motion'
-import { SettingsIcon } from 'lucide-react'
+import { useAnimationFrame, useMotionValue } from 'framer-motion'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitch } from '@/components/language-switch'
 import { ReduceMotionToggle } from '@/components/reduce-motion-toggle'
+import { GearIcon } from '@/components/gear-train'
 import { KonamiAdmin } from '@/components/konami-admin'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { Locale } from '@/lib/i18n/dictionaries'
+
+// graus por segundo
+const IDLE_SPEED = 30
+const HOVER_SPEED = 160
+const OPEN_SPEED = 220
 
 export function NavSettings({
   initialDark,
@@ -24,6 +29,17 @@ export function NavSettings({
 }) {
   const [open, setOpen] = useState(false)
   const { enabled: reduceMotion } = useReduceMotion()
+  // giro da engrenagem (graus), contínuo: a velocidade sobe suavemente no hover e quando o menu está aberto
+  const angle = useMotionValue(0)
+  const speed = useRef(IDLE_SPEED)
+  const hovered = useRef(false)
+  const [hover, setHover] = useState(false)
+  useAnimationFrame((_, delta) => {
+    if (reduceMotion) return
+    const target = open ? OPEN_SPEED : hovered.current ? HOVER_SPEED : IDLE_SPEED
+    speed.current += (target - speed.current) * (1 - Math.exp(-delta / 250))
+    angle.set(angle.get() + (speed.current * delta) / 1000)
+  })
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
@@ -31,22 +47,17 @@ export function NavSettings({
       <Popover.Trigger
         aria-label={label}
         title={label}
+        onMouseEnter={() => {
+          hovered.current = true
+          setHover(true)
+        }}
+        onMouseLeave={() => {
+          hovered.current = false
+          setHover(false)
+        }}
         className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
       >
-        <motion.span
-          className="flex"
-          animate={reduceMotion ? undefined : { rotate: open ? 360 : 0 }}
-          whileHover={reduceMotion || open ? undefined : { rotate: 45 }}
-          transition={
-            reduceMotion
-              ? undefined
-              : open
-                ? { duration: 1.1, repeat: Infinity, ease: 'linear' }
-                : { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
-          }
-        >
-          <SettingsIcon className="h-3.5 w-3.5" aria-hidden />
-        </motion.span>
+        <GearIcon angle={angle} meshed={hover || open} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-50">

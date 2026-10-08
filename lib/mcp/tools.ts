@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { getLanguages, getAuthors, getCompanies, getResume, getResumeLinks, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
+import { getLanguages, getLanguageCategories, getAuthors, getCompanies, getResume, getResumeLinks, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
 import {
   getAllProjects,
   upsertProject,
@@ -17,6 +17,11 @@ import {
   addLanguage,
   updateLanguage,
   deleteLanguage,
+  setLanguageCategory,
+  addLanguageCategory,
+  updateLanguageCategory,
+  deleteLanguageCategory,
+  moveLanguageCategory,
   addAuthor,
   updateAuthor,
   deleteAuthor,
@@ -179,8 +184,16 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
   if (canRead(permissions, 'tecnologias')) {
     server.registerTool(
       'list_tecnologias',
-      { title: 'Listar tecnologias', description: 'Lista as tecnologias cadastradas.' },
+      { title: 'Listar tecnologias', description: 'Lista as tecnologias cadastradas, com o "category_id" de cada uma.' },
       async () => textResult(await getLanguages(client))
+    )
+    server.registerTool(
+      'list_categorias_tecnologia',
+      {
+        title: 'Listar categorias de tecnologia',
+        description: 'Lista as categorias que agrupam as tecnologias na página /tecnologias, na ordem de exibição.',
+      },
+      async () => textResult(await getLanguageCategories(client))
     )
   }
   if (canWrite(permissions, 'tecnologias')) {
@@ -190,10 +203,24 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
         title: 'Criar ou editar tecnologia',
         description:
           'Cria uma tecnologia nova (sem "id") ou renomeia uma existente (com "id"). O ícone é resolvido automaticamente pelo nome (devicon), a menos que "icon_url" seja informado.',
-        inputSchema: { id: z.string().uuid().optional(), name: z.string(), icon_url: z.string().optional() },
+        inputSchema: {
+          id: z.string().uuid().optional(),
+          name: z.string(),
+          icon_url: z.string().optional(),
+          category_id: z
+            .string()
+            .uuid()
+            .nullable()
+            .optional()
+            .describe('Categoria da tecnologia (veja list_categorias_tecnologia); null remove a categoria; omitido não altera'),
+        },
       },
-      async ({ id, name, icon_url }) => {
+      async ({ id, name, icon_url, category_id }) => {
         const saved = id ? await updateLanguage(id, name, icon_url, client) : await addLanguage(name, icon_url, client)
+        if (category_id !== undefined) {
+          await setLanguageCategory(saved.id, category_id, client)
+          saved.category_id = category_id
+        }
         await reindexLanguage(saved, client)
         return textResult(saved)
       }
@@ -203,6 +230,44 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       { title: 'Excluir tecnologia', description: 'Remove uma tecnologia.', inputSchema: { id: z.string().uuid() } },
       async ({ id }) => {
         await deleteLanguage(id, client)
+        return textResult({ deleted: id })
+      }
+    )
+    server.registerTool(
+      'upsert_categoria_tecnologia',
+      {
+        title: 'Criar ou editar categoria de tecnologia',
+        description: 'Cria uma categoria nova (sem "id") ou edita uma existente (com "id"). "name_en" é o nome em inglês.',
+        inputSchema: { id: z.string().uuid().optional(), name: z.string(), name_en: z.string().optional() },
+      },
+      async ({ id, name, name_en }) =>
+        textResult(
+          id
+            ? await updateLanguageCategory(id, name, name_en, client)
+            : await addLanguageCategory(name, name_en, client)
+        )
+    )
+    server.registerTool(
+      'mover_categoria_tecnologia',
+      {
+        title: 'Mover categoria de tecnologia',
+        description: 'Sobe (-1) ou desce (1) uma categoria na ordem de exibição da página /tecnologias.',
+        inputSchema: { id: z.string().uuid(), direction: z.union([z.literal(-1), z.literal(1)]) },
+      },
+      async ({ id, direction }) => {
+        await moveLanguageCategory(id, direction, client)
+        return textResult(await getLanguageCategories(client))
+      }
+    )
+    server.registerTool(
+      'delete_categoria_tecnologia',
+      {
+        title: 'Excluir categoria de tecnologia',
+        description: 'Remove a categoria; as tecnologias dela ficam sem categoria.',
+        inputSchema: { id: z.string().uuid() },
+      },
+      async ({ id }) => {
+        await deleteLanguageCategory(id, client)
         return textResult({ deleted: id })
       }
     )
@@ -305,7 +370,7 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       {
         title: 'Definir texto/config do site',
         description:
-          'Define o valor de uma chave de conteúdo do site (ex.: "seo_home_title", "sobre_texto_pt", "search_rate_limit_max"). Use read_conteudo_site pra ver as chaves existentes antes de editar.',
+          'Define o valor de uma chave de conteúdo do site (ex.: "seo_home_title", "sobre_texto_pt", "search_rate_limit_max"; "tecnologias_ativo" = "true"/"false" liga/desliga a página /tecnologias). Use read_conteudo_site pra ver as chaves existentes antes de editar.',
         inputSchema: { key: z.string(), value: z.string() },
       },
       async ({ key, value }) => {

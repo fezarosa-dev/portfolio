@@ -93,6 +93,7 @@ export type Dictionary = {
     error: string
   }
   curriculo: { eyebrow: string; title: string }
+  tecnologias: { eyebrow: string; title: string; lead: string }
   artigos: {
     eyebrow: string
     title: string
@@ -139,6 +140,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         { href: '/sobre', label: 'Sobre mim' },
         { href: '/servicos', label: 'Serviços' },
         { href: '/projetos', label: 'Projetos' },
+        { href: '/tecnologias', label: 'Tecnologias' },
         { href: '/artigos', label: 'Artigos' },
         { href: '/contato', label: 'Contato' },
         { href: '/curriculo', label: 'Currículo' },
@@ -234,6 +236,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       error: '✗ erro ao enviar, tente de novo.',
     },
     curriculo: { eyebrow: 'currículo', title: 'Currículo' },
+    tecnologias: {
+      eyebrow: 'tecnologias',
+      title: 'Tecnologias',
+      lead: 'Tudo que uso, com a porcentagem dos meus projetos que usam cada uma. Clique numa tecnologia pra ver os projetos.',
+    },
     artigos: {
       eyebrow: 'artigos',
       title: 'Artigos',
@@ -283,6 +290,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         { href: '/sobre', label: 'About' },
         { href: '/servicos', label: 'Services' },
         { href: '/projetos', label: 'Projects' },
+        { href: '/tecnologias', label: 'Technologies' },
         { href: '/artigos', label: 'Articles' },
         { href: '/contato', label: 'Contact' },
         { href: '/curriculo', label: 'Resume' },
@@ -378,6 +386,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       error: '✗ failed to send, please try again.',
     },
     curriculo: { eyebrow: 'resume', title: 'Resume' },
+    tecnologias: {
+      eyebrow: 'technologies',
+      title: 'Technologies',
+      lead: 'Everything I use, with the share of my projects that use each one. Click a technology to see its projects.',
+    },
     artigos: {
       eyebrow: 'articles',
       title: 'Articles',

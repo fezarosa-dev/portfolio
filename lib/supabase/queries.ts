@@ -9,6 +9,14 @@ export type Language = {
   icon_source: string | null
   position: number
   show_on_home: boolean
+  category_id: string | null
+}
+
+export type LanguageCategory = {
+  id: string
+  name: string
+  name_en: string | null
+  position: number
 }
 
 export type Author = {
@@ -103,6 +111,18 @@ export async function getLanguages(client?: SupabaseClient): Promise<Language[]>
 
   if (error) throw error
   return data as Language[]
+}
+
+export async function getLanguageCategories(client?: SupabaseClient): Promise<LanguageCategory[]> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('language_categories')
+    .select('*')
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+  return data as LanguageCategory[]
 }
 
 export async function getAuthors(client?: SupabaseClient): Promise<Author[]> {
