@@ -105,6 +105,18 @@ export const PAGE_SEO: Record<string, Record<Locale, PageSeo>> = {
         'Software projects built by Felipe Zanoni da Rosa — code, technologies used and technical details for each one.',
     },
   },
+  tecnologias: {
+    pt: {
+      title: 'Tecnologias',
+      description:
+        'Linguagens, frameworks e ferramentas usadas por Felipe Zanoni da Rosa, com a proporção de projetos que usa cada uma.',
+    },
+    en: {
+      title: 'Technologies',
+      description:
+        'Languages, frameworks and tools used by Felipe Zanoni da Rosa, with the share of projects using each one.',
+    },
+  },
   artigos: {
     pt: {
       title: 'Artigos',

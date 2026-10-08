@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { getLanguageUsageStats, getSiteContent } from '@/lib/supabase/queries-cached'
+import { getSiteContent } from '@/lib/supabase/queries-cached'
 import { listDriveImages, parseDriveFolderId, resolveDriveImageUrl } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
@@ -10,7 +10,6 @@ import { getPageSeo } from '@/lib/seo-runtime'
 import { LoadingPhoto } from '@/components/loading-photo'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
-import { TechChart } from '@/components/tech-chart'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
@@ -19,11 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SobrePage() {
-  const [content, { dict, locale }, techStats] = await Promise.all([
-    getSiteContent(),
-    getDictionary(),
-    getLanguageUsageStats({ includeUnused: true }),
-  ])
+  const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const driveImages = folderId ? await listDriveImages(folderId) : []
   const photoUrl = content.sobre_foto ? resolveDriveImageUrl(content.sobre_foto, driveImages) : null
@@ -42,14 +37,6 @@ export default async function SobrePage() {
           </ReactMarkdown>
         </div>
       </FadeIn>
-      {techStats.length > 0 && (
-        <FadeIn delay={0.2}>
-          <h2 className="mt-16 text-2xl font-medium tracking-tight">{dict.sobre.techsTitle}</h2>
-          <div className="mt-6">
-            <TechChart stats={techStats} locale={locale} />
-          </div>
-        </FadeIn>
-      )}
     </main>
   )
 }
