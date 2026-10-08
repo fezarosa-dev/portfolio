@@ -33,6 +33,7 @@ export function NavSettings({
   const angle = useMotionValue(0)
   const speed = useRef(IDLE_SPEED)
   const hovered = useRef(false)
+  const [hover, setHover] = useState(false)
   useAnimationFrame((_, delta) => {
     if (reduceMotion) return
     const target = open ? OPEN_SPEED : hovered.current ? HOVER_SPEED : IDLE_SPEED
@@ -46,11 +47,17 @@ export function NavSettings({
       <Popover.Trigger
         aria-label={label}
         title={label}
-        onMouseEnter={() => (hovered.current = true)}
-        onMouseLeave={() => (hovered.current = false)}
+        onMouseEnter={() => {
+          hovered.current = true
+          setHover(true)
+        }}
+        onMouseLeave={() => {
+          hovered.current = false
+          setHover(false)
+        }}
         className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
       >
-        <GearIcon angle={angle} />
+        <GearIcon angle={angle} meshed={hover || open} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-50">
