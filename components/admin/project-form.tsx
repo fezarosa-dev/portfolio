@@ -32,6 +32,7 @@ export function ProjectForm({
   const [clickMode, setClickMode] = useState<'detail' | 'link'>(project?.click_mode ?? 'detail')
   const [visible, setVisible] = useState(project?.visible ?? true)
   const [showOnHome, setShowOnHome] = useState(project?.show_on_home ?? false)
+  const [inResume, setInResume] = useState(project?.in_resume ?? false)
   const selectedLanguageIds = new Set(project?.languages.map((l) => l.id) ?? [])
   const selectedAuthorIds = new Set(project?.authors.map((a) => a.id) ?? [])
 
@@ -203,6 +204,42 @@ export function ProjectForm({
         <input type="hidden" name="show_on_home" value={showOnHome ? 'true' : 'false'} />
         <Label htmlFor="show_on_home">Aparecer na tela inicial</Label>
       </div>
+
+      <fieldset className="flex flex-col gap-4 rounded-lg border border-hairline p-4">
+        <legend className="px-1 font-mono text-xs text-steel">currículo — não aparece no site</legend>
+        <div className="flex items-center gap-2">
+          <Switch id="in_resume" checked={inResume} onCheckedChange={setInResume} />
+          <input type="hidden" name="in_resume" value={inResume ? 'true' : 'false'} />
+          <Label htmlFor="in_resume">Incluir no currículo</Label>
+        </div>
+        <BilingualField
+          name="resume_what"
+          label="O quê"
+          language={language}
+          defaultValuePt={project?.resume_what}
+          defaultValueEn={project?.resume_what_en}
+          multiline
+          rows={2}
+        />
+        <BilingualField
+          name="resume_with"
+          label="Com quê"
+          language={language}
+          defaultValuePt={project?.resume_with}
+          defaultValueEn={project?.resume_with_en}
+          multiline
+          rows={2}
+        />
+        <BilingualField
+          name="resume_solves"
+          label="Resolve"
+          language={language}
+          defaultValuePt={project?.resume_solves}
+          defaultValueEn={project?.resume_solves_en}
+          multiline
+          rows={2}
+        />
+      </fieldset>
 
       <Button type="submit">Salvar</Button>
     </form>

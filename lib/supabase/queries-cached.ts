@@ -3,6 +3,7 @@ import { draftMode } from 'next/headers'
 import { createPublicClient } from './public-client'
 import * as raw from './queries'
 import { pickSource } from './pick-source'
+import { getResumeSource } from './resume-queries'
 
 export async function isPreview(): Promise<boolean> {
   return (await draftMode()).isEnabled
@@ -127,4 +128,14 @@ const cachedContactLinks = unstable_cache(
 )
 export async function getContactLinks() {
   return pickSource(await isPreview(), () => raw.getContactLinks(createPublicClient()), cachedContactLinks)()
+}
+
+const cachedResumeSource = unstable_cache(
+  () => getResumeSource(createPublicClient()),
+  ['resume-source'],
+  opts
+)
+/** Dados estruturados do currículo (página pública e PDF). */
+export async function getResumeSourceCached() {
+  return pickSource(await isPreview(), () => getResumeSource(createPublicClient()), cachedResumeSource)()
 }

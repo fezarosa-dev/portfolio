@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { SplitTitle } from '@/components/split-title'
-import { getResume, getResumeLinks, getSiteContent } from '@/lib/supabase/queries-cached'
+import { getResume, getResumeLinks, getSiteContent, getResumeSourceCached } from '@/lib/supabase/queries-cached'
+import { buildResume, hasStructuredResume } from '@/lib/resume'
+import { ResumeView } from '@/components/resume-view'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
@@ -17,12 +19,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CurriculoPage() {
-  const [resume, links, content, { dict, locale }] = await Promise.all([
+  const [resume, links, content, source, { dict, locale }] = await Promise.all([
     getResume(),
     getResumeLinks(),
     getSiteContent(),
+    getResumeSourceCached(),
     getDictionary(),
   ])
+  const structured = buildResume(source, locale)
+  const useStructured = hasStructuredResume(structured)
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
   const driveImages = folderId ? await listDriveMedia(folderId) : []
   const resumeMd = resolveText(resume.content_md, resume.content_md_en, locale)
@@ -33,6 +38,23 @@ export default async function CurriculoPage() {
         <Eyebrow>{dict.curriculo.eyebrow}</Eyebrow>
         <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.curriculo.title} /></h1>
       </FadeIn>
+      {useStructured && (
+        <FadeIn delay={0.1}>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {(['pt', 'en'] as const).map((lang) => (
+              <li key={lang}>
+                <a
+                  href={`/api/curriculo/pdf?lang=${lang}`}
+                  download
+                  className="flex items-center gap-1.5 rounded-full border border-signal px-3 py-1 font-mono text-xs text-signal transition-colors hover:bg-signal/10"
+                >
+                  {lang === 'pt' ? 'Baixar PDF — PT' : 'Download PDF — EN'}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </FadeIn>
+      )}
       {links.length > 0 && (
         <FadeIn delay={0.1}>
           <ul className="mt-4 flex flex-wrap gap-2">
@@ -52,7 +74,11 @@ export default async function CurriculoPage() {
         </FadeIn>
       )}
       <div className="mt-6">
-        <MarkdownContent content={resumeMd} driveImages={driveImages} />
+        {useStructured ? (
+          <ResumeView resume={structured} locale={locale} />
+        ) : (
+          <MarkdownContent content={resumeMd} driveImages={driveImages} />
+        )}
       </div>
     </main>
   )
