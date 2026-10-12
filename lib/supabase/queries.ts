@@ -63,6 +63,7 @@ export type Article = {
 
 export type Project = {
   id: string
+  slug: string
   title: string | null
   title_en: string | null
   summary: string | null
@@ -159,16 +160,17 @@ export async function getVisibleProjects(client?: SupabaseClient): Promise<Proje
   return (data as unknown as ProjectRow[]).map(mapProjectRow)
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export async function getProjectById(id: string, client?: SupabaseClient): Promise<Project | null> {
-  if (!UUID_RE.test(id)) return null
+// aceita o uuid (links antigos, admin) ou o slug (URL pública)
+export async function getProjectById(idOrSlug: string, client?: SupabaseClient): Promise<Project | null> {
+  const column = UUID_RE.test(idOrSlug) ? 'id' : 'slug'
 
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('projects')
     .select(PROJECT_SELECT)
-    .eq('id', id)
+    .eq(column, idOrSlug)
     .eq('visible', true)
     .maybeSingle()
 

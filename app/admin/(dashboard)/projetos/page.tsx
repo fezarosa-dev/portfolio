@@ -10,7 +10,9 @@ export default async function AdminProjetosPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Projetos</h1>
+        <h1 className="text-2xl font-semibold">
+          Projetos <span className="font-mono text-sm font-normal text-steel">({projects.length})</span>
+        </h1>
         <Button render={<Link href="/admin/projetos/novo" />}>Novo projeto</Button>
       </div>
 

@@ -87,7 +87,7 @@ export async function POST(request: Request) {
         sourceId: project.id,
         title: project.title ?? project.title_en ?? 'Projeto',
         excerpt: project.summary ?? project.summary_en ?? '',
-        url: project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.id}`,
+        url: project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.slug}`,
       })
     }
     if (techHits.length && wantsProjects(query)) {

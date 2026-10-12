@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const projectRoutes: MetadataRoute.Sitemap = projects
     .filter((p) => p.click_mode === 'detail')
-    .flatMap((p) => entriesFor(`/projetos/${p.id}`, 'monthly', 0.7, new Date(p.created_at)))
+    .flatMap((p) => entriesFor(`/projetos/${p.slug}`, 'monthly', 0.7, new Date(p.created_at)))
 
   const articleRoutes: MetadataRoute.Sitemap = articles.flatMap((a) =>
     entriesFor(`/artigos/${a.id}`, 'monthly', 0.7, new Date(a.created_at))

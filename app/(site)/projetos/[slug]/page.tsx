@@ -1,9 +1,10 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { SplitTitle } from '@/components/split-title'
 import { HandoffLink } from '@/components/handoff-link'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getProjectById, getSiteContent } from '@/lib/supabase/queries-cached'
+import { UUID_RE } from '@/lib/supabase/queries'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { iconUrl } from '@/lib/icons'
 import { getDictionary, getLocale } from '@/lib/i18n'
@@ -18,9 +19,9 @@ import { jsonLd } from '@/lib/json-ld'
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const { id } = await params
+  const { slug: id } = await params
   const [project, locale] = await Promise.all([getProjectById(id), getLocale()])
   if (!project || project.click_mode === 'link') return {}
 
@@ -28,18 +29,20 @@ export async function generateMetadata({
   const summary = resolveText(project.summary, project.summary_en, locale)
 
   const description = summary || `Projeto ${title}, por Felipe Zanoni da Rosa.`
-  return pageMetadata(locale, `/projetos/${project.id}`, title, description)
+  return pageMetadata(locale, `/projetos/${project.slug}`, title, description)
 }
 
 export default async function ProjetoDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }) {
-  const { id } = await params
+  const { slug: id } = await params
   const project = await getProjectById(id)
   if (!project) notFound()
   if (project.click_mode === 'link') notFound()
+  // link antigo com uuid → URL curta (308 mantém o SEO)
+  if (UUID_RE.test(id)) permanentRedirect(`/${await getLocale()}/projetos/${project.slug}`)
 
   const [content, { dict, locale }] = await Promise.all([getSiteContent(), getDictionary()])
   const folderId = content.drive_folder_url ? parseDriveFolderId(content.drive_folder_url) : null
@@ -60,7 +63,7 @@ export default async function ProjetoDetailPage({
   const breadcrumbJson = breadcrumbJsonLd(locale, [
     { name: dict.nav.links[0].label, path: '' },
     { name: dict.projetos.title, path: '/projetos' },
-    { name: title, path: `/projetos/${project.id}` },
+    { name: title, path: `/projetos/${project.slug}` },
   ])
 
   return (
