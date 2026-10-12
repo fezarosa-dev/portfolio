@@ -78,6 +78,15 @@ export type Project = {
   show_on_home: boolean
   position: number
   created_at: string
+  // campos só do currículo (nunca aparecem no site público)
+  in_resume: boolean
+  resume_position: number
+  resume_what: string | null
+  resume_what_en: string | null
+  resume_with: string | null
+  resume_with_en: string | null
+  resume_solves: string | null
+  resume_solves_en: string | null
   languages: Language[]
   authors: Author[]
   company: Company | null

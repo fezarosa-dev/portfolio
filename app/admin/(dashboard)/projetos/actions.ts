@@ -36,11 +36,19 @@ export async function saveProject(formData: FormData) {
     position: Number(formData.get('position') ?? 0),
     visible: formData.get('visible') === 'true',
     show_on_home: formData.get('show_on_home') === 'true',
+    in_resume: formData.get('in_resume') === 'true',
+    resume_what: parseBilingualPt(formData, 'resume_what'),
+    resume_what_en: parseBilingualEn(formData, 'resume_what'),
+    resume_with: parseBilingualPt(formData, 'resume_with'),
+    resume_with_en: parseBilingualEn(formData, 'resume_with'),
+    resume_solves: parseBilingualPt(formData, 'resume_solves'),
+    resume_solves_en: parseBilingualEn(formData, 'resume_solves'),
   })
   await setProjectLanguages(project.id, formData.getAll('language_ids').map(String))
   await setProjectAuthors(project.id, formData.getAll('author_ids').map(String))
   if (formData.get('reindex') === 'true') await syncProjectSearchIndex(project.id)
   revalidatePath('/admin/projetos')
+  revalidatePath('/admin/autocurriculo')
 }
 
 export async function removeProject(id: string) {
