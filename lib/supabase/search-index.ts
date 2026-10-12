@@ -62,7 +62,7 @@ export async function reindexProject(project: Project, client?: SupabaseClient):
     ...project.languages.map((lang) => lang.name),
     ...project.authors.map((author) => author.name)
   )
-  const url = project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.id}`
+  const url = project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.slug}`
 
   await reindexSearchEntry(
     {

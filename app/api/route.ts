@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       page:
         project.click_mode === 'link'
           ? project.click_url
-          : `${SITE_URL}/${locale}/projetos/${project.id}`,
+          : `${SITE_URL}/${locale}/projetos/${project.slug}`,
     })),
     articles: articles.map((article) => ({
       title: resolveText(article.title, article.title_en, locale),
