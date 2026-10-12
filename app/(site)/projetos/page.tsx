@@ -21,7 +21,7 @@ export default async function ProjetosPage() {
     <main className="mx-auto max-w-4xl px-6 py-20">
       <FadeIn>
         <Eyebrow>{dict.projetos.eyebrow}</Eyebrow>
-        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.projetos.title} /></h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight"><SplitTitle text={dict.projetos.title} /> <span className="font-mono text-base font-normal text-steel">({projects.length})</span></h1>
       </FadeIn>
       <div className="mt-10">
         <Suspense>
