@@ -4,6 +4,7 @@ export const MCP_RESOURCES = [
   'tecnologias',
   'autores',
   'curriculo',
+  'autocurriculo',
   'conteudo_site',
   'mensagens',
 ] as const
@@ -20,6 +21,7 @@ export const MCP_RESOURCE_LABELS: Record<McpResource, string> = {
   tecnologias: 'Tecnologias',
   autores: 'Autores',
   curriculo: 'Currículo (e seus links)',
+  autocurriculo: 'Autocurrículo (experiências, formação, idiomas, habilidades, certificações e projetos no currículo)',
   conteudo_site: 'Conteúdo do site (textos, SEO, personalização, links de contato)',
   mensagens: 'Mensagens recebidas pelo formulário de contato',
 }

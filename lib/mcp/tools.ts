@@ -41,6 +41,8 @@ import {
 import { reindexProject, reindexArticle, reindexLanguage, reindexResume } from '@/lib/supabase/search-index'
 import { mapProjectRow, PROJECT_SELECT, type ProjectRow } from '@/lib/supabase/queries'
 import { canRead, canWrite, type McpPermissions } from './resources'
+import { registerResumeTools } from './resume-tools'
+import { PROJECT_TEMPLATE } from './project-template'
 
 function textResult(value: unknown) {
   const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
@@ -70,6 +72,30 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
   }
   if (canWrite(permissions, 'projetos')) {
     server.registerTool(
+      'get_template_projeto',
+      {
+        title: 'Template de projeto',
+        description: 'Devolve o template (campos públicos + ocultos do currículo) a seguir ao cadastrar projetos com upsert_projeto. Leia antes de criar projetos.',
+      },
+      async () => textResult(PROJECT_TEMPLATE)
+    )
+    server.registerPrompt(
+      'novo_projeto',
+      {
+        title: 'Cadastrar projeto seguindo o template',
+        description: 'Orienta a IA a cadastrar um projeto (e seus campos de currículo) via MCP.',
+        argsSchema: { descricao: z.string().describe('O que é o projeto, em linguagem livre') },
+      },
+      ({ descricao }) => ({
+        messages: [
+          {
+            role: 'user' as const,
+            content: { type: 'text' as const, text: `${PROJECT_TEMPLATE}\n\nCadastre este projeto seguindo o template acima:\n${descricao}` },
+          },
+        ],
+      })
+    )
+    server.registerTool(
       'upsert_projeto',
       {
         title: 'Criar ou editar projeto',
@@ -91,6 +117,13 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           company_id: z.string().uuid().nullable().optional(),
           language_ids: z.array(z.string().uuid()).optional().describe('Substitui as tecnologias vinculadas ao projeto'),
           author_ids: z.array(z.string().uuid()).optional().describe('Substitui os autores vinculados ao projeto'),
+          in_resume: z.boolean().optional().describe('Incluir no currículo (campo oculto ao público)'),
+          resume_what: z.string().nullable().optional().describe('Currículo — "O quê" (oculto ao público)'),
+          resume_what_en: z.string().nullable().optional(),
+          resume_with: z.string().nullable().optional().describe('Currículo — "Com quê" (oculto ao público)'),
+          resume_with_en: z.string().nullable().optional(),
+          resume_solves: z.string().nullable().optional().describe('Currículo — "Resolve" (oculto ao público)'),
+          resume_solves_en: z.string().nullable().optional(),
         },
       },
       async ({ language_ids, author_ids, ...input }) => {
@@ -351,6 +384,9 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       }
     )
   }
+
+  // --- autocurrículo (currículo estruturado) ---
+  registerResumeTools(server, permissions, client)
 
   // --- conteúdo do site (textos, SEO, personalização, links de contato) ---
   if (canRead(permissions, 'conteudo_site')) {
