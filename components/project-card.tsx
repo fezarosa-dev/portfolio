@@ -28,7 +28,7 @@ export function ProjectCard({
   locale?: Locale
 }) {
   const isExternal = project.click_mode === 'link'
-  const href = isExternal ? project.click_url ?? '#' : `/${locale}/projetos/${project.id}`
+  const href = isExternal ? project.click_url ?? '#' : `/${locale}/projetos/${project.slug}`
   const title = resolveText(project.title, project.title_en, locale)
   const summary = resolveText(project.summary, project.summary_en, locale)
 

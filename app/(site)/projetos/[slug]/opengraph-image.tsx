@@ -14,8 +14,8 @@ export const size = OG_IMAGE_SIZE
 export const contentType = OG_IMAGE_CONTENT_TYPE
 export const alt = 'Projeto de Felipe Zanoni da Rosa'
 
-export default async function Image({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug: id } = await params
   const [project, locale] = await Promise.all([getProjectById(id), getLocale()])
 
   if (!project || project.click_mode === 'link') {
