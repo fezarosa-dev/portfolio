@@ -79,6 +79,12 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       },
       async () => textResult(PROJECT_TEMPLATE)
     )
+    server.registerResource(
+      'template-projeto',
+      'template://projeto',
+      { title: 'Template de projeto', description: 'Campos públicos e ocultos do currículo pra cadastrar projetos', mimeType: 'text/markdown' },
+      async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/markdown', text: PROJECT_TEMPLATE }] })
+    )
     server.registerPrompt(
       'novo_projeto',
       {

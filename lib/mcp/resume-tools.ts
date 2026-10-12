@@ -12,7 +12,9 @@ import {
   moveProjectInResume,
   type ResumeEntity,
 } from '@/lib/supabase/resume-admin'
+import { importTechCategories } from '@/lib/supabase/resume-admin'
 import { canRead, canWrite, type McpPermissions } from './resources'
+import { RESUME_TEMPLATE } from './resume-template'
 
 /** Colunas que a IA pode escrever em cada lista (o resto, como id/position, é ignorado de propósito). */
 const ALLOWED: Record<ResumeEntity, readonly string[]> = {
@@ -42,6 +44,34 @@ function textResult(value: unknown) {
 
 /** Autocurrículo: leitura e edição do currículo estruturado (permissão "autocurriculo"). */
 export function registerResumeTools(server: McpServer, permissions: McpPermissions, client: SupabaseClient): void {
+  if (canRead(permissions, 'autocurriculo') || canWrite(permissions, 'autocurriculo')) {
+    server.registerTool(
+      'get_template_curriculo',
+      {
+        title: 'Template do currículo',
+        description: 'Devolve o template (campos, exemplos e regras) pra montar ou atualizar o currículo com as tools do autocurrículo. Leia antes de editar.',
+      },
+      async () => textResult(RESUME_TEMPLATE)
+    )
+    server.registerResource(
+      'template-curriculo',
+      'template://curriculo',
+      { title: 'Template do currículo', description: 'Campos, exemplos e regras do autocurrículo', mimeType: 'text/markdown' },
+      async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/markdown', text: RESUME_TEMPLATE }] })
+    )
+    server.registerPrompt(
+      'atualizar_curriculo',
+      {
+        title: 'Atualizar o currículo seguindo o template',
+        description: 'Orienta a IA a editar o currículo estruturado via MCP.',
+        argsSchema: { pedido: z.string().describe('O que mudar no currículo, em linguagem livre') },
+      },
+      ({ pedido }) => ({
+        messages: [{ role: 'user' as const, content: { type: 'text' as const, text: `${RESUME_TEMPLATE}\n\nFaça no currículo: ${pedido}` } }],
+      })
+    )
+  }
+
   if (canRead(permissions, 'autocurriculo')) {
     server.registerTool(
       'read_autocurriculo',
@@ -127,6 +157,15 @@ export function registerResumeTools(server: McpServer, permissions: McpPermissio
       await moveResumeItem(entity, id, direction === 'up' ? -1 : 1, category_id ? { column: 'category_id', value: category_id } : undefined, client)
       return textResult({ moved: id, direction })
     }
+  )
+
+  server.registerTool(
+    'importar_categorias_tecnologias',
+    {
+      title: 'Importar categorias das tecnologias',
+      description: 'Copia pras categorias de habilidades as categorias de tecnologias que ainda não existem lá. Retorna quantas foram criadas.',
+    },
+    async () => textResult({ created: await importTechCategories(client) })
   )
 
   server.registerTool(
