@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { upsertSiteContent, deleteSiteContentKey, getAllProjects, getAllArticles } from '@/lib/supabase/admin-queries'
+import { getAllProjects, getAllArticles } from '@/lib/supabase/admin-queries'
 import { getLanguages, getSiteContent, getResume } from '@/lib/supabase/queries'
 import {
   reindexProject,
@@ -10,68 +10,6 @@ import {
   reindexSobreTexto,
   reindexResume,
 } from '@/lib/supabase/search-index'
-import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
-import { SEO_PAGE_KEYS } from '@/lib/seo'
-import { PAGE_TEXTS } from '@/lib/page-texts'
-
-const SEO_PAGES = ['home', ...SEO_PAGE_KEYS]
-
-const KEYS = [
-  'site_icon',
-  'sobre_foto',
-  'contato_email',
-  'contato_telefone',
-  'drive_folder_url',
-  'status_color',
-  'link_github',
-  'link_linkedin',
-  'search_rate_limit_max',
-  'search_rate_limit_window_minutes',
-  'search_max_query_length',
-  'search_semantic_timeout_ms',
-  'search_results_limit',
-  'easter_eggs_ativo',
-  'tecnologias_ativo',
-  'rickroll_video_filename',
-  'rickroll_clicks',
-] as const
-
-const BILINGUAL_KEYS = [
-  'hero_title',
-  'hero_subtitle',
-  'sobre_texto',
-  'servicos_texto',
-  'status_text',
-  'como_usar_texto',
-  'privacidade_texto',
-  'termos_texto',
-  'cookies_texto',
-  ...PAGE_TEXTS.map((t) => t.key),
-  ...SEO_PAGES.flatMap((page) => [`seo_${page}_title`, `seo_${page}_description`]),
-  'seo_home_keywords',
-]
-
-async function saveSide(key: string, value: string | null) {
-  if (value === null) await deleteSiteContentKey(key)
-  else await upsertSiteContent(key, value)
-}
-
-export async function toggleMascoteAtivo(ativo: boolean) {
-  await upsertSiteContent('mascote_ativo', ativo ? 'true' : 'false')
-  revalidatePath('/admin/personalizacao')
-}
-
-export async function saveSiteContent(formData: FormData) {
-  await Promise.all([
-    ...KEYS.map((key) => upsertSiteContent(key, String(formData.get(key) ?? ''))),
-    upsertSiteContent('nav_hidden_links', formData.getAll('nav_hidden_links').join(',')),
-    ...BILINGUAL_KEYS.flatMap((key) => [
-      saveSide(key, parseBilingualPt(formData, key)),
-      saveSide(`${key}_en`, parseBilingualEn(formData, key)),
-    ]),
-  ])
-  revalidatePath('/admin/personalizacao')
-}
 
 export async function reindexAllSearchContent(): Promise<{
   projects: number

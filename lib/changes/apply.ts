@@ -27,6 +27,8 @@ import {
   updateContactLink,
   deleteContactLink,
   setContactLinksOrder,
+  upsertSiteContent,
+  deleteSiteContentKey,
 } from '@/lib/supabase/admin-queries'
 import { removeSearchEntry } from '@/lib/supabase/search-index'
 import { createClient } from '@/lib/supabase/server'
@@ -158,5 +160,9 @@ export async function applyOp(op: ChangeOp): Promise<void> {
       return deleteContactLink(op.id)
     case 'contact.order':
       return setContactLinksOrder(op.ids)
+    case 'site.set':
+      return upsertSiteContent(op.key, op.value)
+    case 'site.delete':
+      return deleteSiteContentKey(op.key)
   }
 }
