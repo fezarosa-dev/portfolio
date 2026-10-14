@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Reorder, useDragControls } from 'framer-motion'
-import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { ToastForm } from '@/components/admin/toast-form'
+import { useChanges } from '@/components/admin/changes-provider'
+import { overlayCategories, overlayLanguages, touchedIds } from '@/lib/changes/overlay'
+import type { LanguageField } from '@/lib/changes/types'
 import { iconUrl } from '@/lib/icons'
 import type { Language, LanguageCategory } from '@/lib/supabase/queries'
 
@@ -22,74 +22,34 @@ function GripIcon() {
   )
 }
 
-export type TechnologyDraft = {
-  name: string
-  nameEn: string
-  categoryId: string
-  iconUrl: string
-  showOnHome: boolean
-}
-
-export type TechnologyChange = {
-  id: string
-  text?: { name: string; nameEn: string; iconUrl: string }
-  categoryId?: string | null
-  showOnHome?: boolean
-}
-
-export type TechnologyBatch = { order?: string[]; items: TechnologyChange[] }
-
-const toDraft = (lang: Language): TechnologyDraft => ({
-  name: lang.name,
-  nameEn: lang.name_en ?? '',
-  categoryId: lang.category_id ?? '',
-  iconUrl: lang.icon_source === 'custom' ? (lang.devicon_slug ?? '') : '',
-  showOnHome: lang.show_on_home,
-})
-
-const sameDraft = (a: TechnologyDraft, b: TechnologyDraft) =>
-  a.name === b.name &&
-  a.nameEn === b.nameEn &&
-  a.categoryId === b.categoryId &&
-  a.iconUrl === b.iconUrl &&
-  a.showOnHome === b.showOnHome
-
-function diff(lang: Language, draft: TechnologyDraft): TechnologyChange | null {
-  const base = toDraft(lang)
-  if (sameDraft(base, draft)) return null
-  const change: TechnologyChange = { id: lang.id }
-  if (draft.name !== base.name || draft.nameEn !== base.nameEn || draft.iconUrl !== base.iconUrl) {
-    change.text = { name: draft.name.trim(), nameEn: draft.nameEn.trim(), iconUrl: draft.iconUrl.trim() }
-  }
-  if (draft.categoryId !== base.categoryId) change.categoryId = draft.categoryId || null
-  if (draft.showOnHome !== base.showOnHome) change.showOnHome = draft.showOnHome
-  return change
-}
+type OnUpdate = (field: LanguageField, value: string | boolean | null, what: string) => void
 
 function TechnologyRow({
   lang,
-  draft,
-  dirty,
   categories,
-  onChange,
-  removeAction,
+  touched,
+  onUpdate,
+  onRemove,
+  onDragEnd,
 }: {
   lang: Language
-  draft: TechnologyDraft
-  dirty: boolean
   categories: LanguageCategory[]
-  onChange: (patch: Partial<TechnologyDraft>) => void
-  removeAction: (id: string) => Promise<void>
+  touched: boolean
+  onUpdate: OnUpdate
+  onRemove: () => void
+  onDragEnd: () => void
 }) {
   const dragControls = useDragControls()
+  const customIcon = lang.icon_source === 'custom' ? (lang.devicon_slug ?? '') : ''
 
   return (
     <Reorder.Item
       value={lang}
       dragListener={false}
       dragControls={dragControls}
+      onDragEnd={onDragEnd}
       whileDrag={{ scale: 1.03, boxShadow: '0 10px 24px rgba(0,0,0,0.14)', zIndex: 1 }}
-      className={`flex items-center gap-2 rounded-md border bg-background px-3 py-2 ${dirty ? 'border-signal' : ''}`}
+      className={`flex items-center gap-2 rounded-md border bg-background px-3 py-2 ${touched ? 'border-orange-500' : ''}`}
     >
       <button
         type="button"
@@ -113,37 +73,50 @@ function TechnologyRow({
       )}
       <button
         type="button"
-        onClick={() => onChange({ showOnHome: !draft.showOnHome })}
-        aria-pressed={draft.showOnHome}
+        onClick={() => onUpdate('showOnHome', !lang.show_on_home, lang.show_on_home ? 'tirar da home' : 'mostrar na home')}
+        aria-pressed={lang.show_on_home}
         title={
-          draft.showOnHome
+          lang.show_on_home
             ? 'Aparece na tela inicial — clique pra tirar'
             : 'Não aparece na tela inicial — clique pra mostrar'
         }
-        className={`shrink-0 text-xl ${draft.showOnHome ? 'text-signal' : 'text-steel/50'}`}
+        className={`shrink-0 text-xl ${lang.show_on_home ? 'text-signal' : 'text-steel/50'}`}
       >
         ⌂
       </button>
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex gap-2">
           <Input
-            value={draft.name}
-            onChange={(e) => onChange({ name: e.target.value })}
+            key={lang.name}
+            defaultValue={lang.name}
             aria-label="Nome (PT)"
             placeholder="Nome (PT)"
             className="h-8"
+            onBlur={(e) => {
+              const value = e.target.value.trim()
+              if (value && value !== lang.name) onUpdate('name', value, `nome PT → “${value}”`)
+              else e.target.value = lang.name
+            }}
           />
           <Input
-            value={draft.nameEn}
-            onChange={(e) => onChange({ nameEn: e.target.value })}
+            key={lang.name_en ?? ''}
+            defaultValue={lang.name_en ?? ''}
             aria-label="Nome (EN)"
             placeholder="Nome (EN, opcional)"
             className="h-8"
+            onBlur={(e) => {
+              const value = e.target.value.trim()
+              if (value !== (lang.name_en ?? '')) onUpdate('nameEn', value, `nome EN → “${value || '(vazio)'}”`)
+            }}
           />
         </div>
         <select
-          value={draft.categoryId}
-          onChange={(e) => onChange({ categoryId: e.target.value })}
+          value={lang.category_id ?? ''}
+          onChange={(e) => {
+            const id = e.target.value
+            const name = categories.find((c) => c.id === id)?.name
+            onUpdate('categoryId', id || null, `categoria → ${name ?? 'sem categoria'}`)
+          }}
           aria-label="Categoria"
           className="h-7 rounded-md border bg-background px-2 text-xs"
         >
@@ -155,18 +128,25 @@ function TechnologyRow({
           ))}
         </select>
         <Input
-          value={draft.iconUrl}
-          onChange={(e) => onChange({ iconUrl: e.target.value })}
+          key={customIcon}
+          defaultValue={customIcon}
           aria-label="URL do ícone"
           placeholder="URL do ícone (opcional)"
           className="h-7 text-xs"
+          onBlur={(e) => {
+            const value = e.target.value.trim()
+            if (value !== customIcon) onUpdate('iconUrl', value, value ? 'ícone personalizado' : 'ícone automático')
+          }}
         />
       </div>
-      <ToastForm action={removeAction.bind(null, lang.id)} successMessage="Tecnologia removida">
-        <button type="submit" className="px-1 text-muted-foreground hover:text-destructive">
-          ×
-        </button>
-      </ToastForm>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="px-1 text-muted-foreground hover:text-destructive"
+        aria-label="Remover"
+      >
+        ×
+      </button>
     </Reorder.Item>
   )
 }
@@ -174,88 +154,39 @@ function TechnologyRow({
 export function TechnologyReorderList({
   languages,
   categories,
-  removeAction,
-  saveAction,
 }: {
   languages: Language[]
   categories: LanguageCategory[]
-  removeAction: (id: string) => Promise<void>
-  saveAction: (batch: TechnologyBatch) => Promise<void>
 }) {
-  const [order, setOrder] = useState(languages)
-  const [drafts, setDrafts] = useState<Record<string, TechnologyDraft>>(() =>
-    Object.fromEntries(languages.map((lang) => [lang.id, toDraft(lang)]))
-  )
-  const [prevLanguages, setPrevLanguages] = useState(languages)
-  const [saving, setSaving] = useState(false)
+  const { changes, enqueue } = useChanges()
+  const effective = useMemo(() => overlayLanguages(languages, changes), [languages, changes])
+  const effectiveCategories = useMemo(() => overlayCategories(categories, changes), [categories, changes])
+  const touched = useMemo(() => touchedIds(changes, 'language'), [changes])
+  const [order, setOrder] = useState(effective)
+  const [prev, setPrev] = useState(effective)
 
-  if (languages !== prevLanguages) {
-    // dados novos do servidor: mantém só o que ainda está sem salvar (rascunho diferente da versão anterior)
-    const prevById = new Map(prevLanguages.map((lang) => [lang.id, lang]))
-    setDrafts(
-      Object.fromEntries(
-        languages.map((lang) => {
-          const prev = prevById.get(lang.id)
-          const draft = drafts[lang.id]
-          const unsaved = prev && draft && !sameDraft(draft, toDraft(prev))
-          return [lang.id, unsaved ? draft : toDraft(lang)]
-        })
-      )
-    )
-    setPrevLanguages(languages)
-    setOrder(languages)
+  if (effective !== prev) {
+    setPrev(effective)
+    setOrder(effective)
   }
 
-  const changes = languages.flatMap((lang) => {
-    const draft = drafts[lang.id]
-    const change = draft && diff(lang, draft)
-    return change ? [change] : []
-  })
-  const orderChanged = order.some((lang, i) => lang.id !== languages[i]?.id)
-  const pending = changes.length + (orderChanged ? 1 : 0)
-
-  async function save() {
-    if (changes.some((c) => c.text && !c.text.name)) {
-      toast.error('Toda tecnologia precisa de nome (PT).')
-      return
-    }
-    setSaving(true)
-    try {
-      await saveAction({ order: orderChanged ? order.map((lang) => lang.id) : undefined, items: changes })
-      toast.success('Tecnologias salvas')
-    } catch {
-      toast.error('Não deu pra salvar. Tenta de novo.')
-    } finally {
-      setSaving(false)
-    }
+  function update(lang: Language, field: LanguageField, value: string | boolean | null, what: string) {
+    enqueue({ type: 'language.update', id: lang.id, field, value }, `Tecnologia “${lang.name}”: ${what}`)
   }
 
   return (
-    <>
-      <div className="sticky top-0 z-10 mb-3 flex max-w-md items-center justify-between gap-3 rounded-md border bg-background px-3 py-2">
-        <span className="font-mono text-xs text-steel">
-          {pending > 0 ? `${pending} alteração(ões) sem salvar` : 'sem alterações'}
-        </span>
-        <Button type="button" size="sm" disabled={pending === 0 || saving} onClick={save}>
-          {saving ? 'Salvando…' : 'Salvar'}
-        </Button>
-      </div>
-      <Reorder.Group axis="y" values={order} onReorder={setOrder} className="flex max-w-md flex-col gap-2">
-        {order.map((lang) => {
-          const draft = drafts[lang.id] ?? toDraft(lang)
-          return (
-            <TechnologyRow
-              key={lang.id}
-              lang={lang}
-              draft={draft}
-              dirty={!sameDraft(draft, toDraft(lang))}
-              categories={categories}
-              onChange={(patch) => setDrafts((prev) => ({ ...prev, [lang.id]: { ...draft, ...patch } }))}
-              removeAction={removeAction}
-            />
-          )
-        })}
-      </Reorder.Group>
-    </>
+    <Reorder.Group axis="y" values={order} onReorder={setOrder} className="flex max-w-md flex-col gap-2">
+      {order.map((lang) => (
+        <TechnologyRow
+          key={lang.id}
+          lang={lang}
+          categories={effectiveCategories}
+          touched={touched.has(lang.id)}
+          onUpdate={(field, value, what) => update(lang, field, value, what)}
+          onRemove={() => enqueue({ type: 'language.remove', id: lang.id }, `Tecnologia “${lang.name}”: remover`)}
+          onDragEnd={() => enqueue({ type: 'language.order', ids: order.map((l) => l.id) }, 'Tecnologias: nova ordem')}
+        />
+      ))}
+    </Reorder.Group>
   )
 }
