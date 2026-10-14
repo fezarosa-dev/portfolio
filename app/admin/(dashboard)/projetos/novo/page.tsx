@@ -1,9 +1,10 @@
+import { getAllProjects } from '@/lib/supabase/admin-queries'
 import { getLanguages, getAuthors, getCompanies } from '@/lib/supabase/queries'
-import { ProjectForm } from '@/components/admin/project-form'
-import { saveProject } from '../actions'
+import { ProjectEditor } from '@/components/admin/project-editor'
 
 export default async function NovoProjetoPage() {
-  const [availableLanguages, availableAuthors, availableCompanies] = await Promise.all([
+  const [projects, availableLanguages, availableAuthors, availableCompanies] = await Promise.all([
+    getAllProjects(),
     getLanguages(),
     getAuthors(),
     getCompanies(),
@@ -12,12 +13,12 @@ export default async function NovoProjetoPage() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold">Novo projeto</h1>
-      <ProjectForm
-        project={null}
+      <ProjectEditor
+        id={null}
+        projects={projects}
         availableLanguages={availableLanguages}
         availableAuthors={availableAuthors}
         availableCompanies={availableCompanies}
-        action={saveProject}
       />
     </div>
   )

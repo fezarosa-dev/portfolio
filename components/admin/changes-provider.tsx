@@ -41,6 +41,8 @@ export type ChangesApi = {
   sendAll: () => Promise<void>
   sending: boolean
   lastSentAt: number | null
+  /** false até a fila ser lida do localStorage (no servidor e no primeiro render) */
+  loaded: boolean
 }
 
 const ChangesContext = createContext<ChangesApi | null>(null)
@@ -56,6 +58,7 @@ export function ChangesProvider({ children }: { children: ReactNode }) {
   const [changes, setChanges] = useState<Change[]>([])
   const [sending, setSending] = useState(false)
   const [lastSentAt, setLastSentAt] = useState<number | null>(null)
+  const [loaded, setLoaded] = useState(false)
   const changesRef = useRef<Change[]>([])
   const sendingRef = useRef(false)
 
@@ -65,6 +68,7 @@ export function ChangesProvider({ children }: { children: ReactNode }) {
     changesRef.current = initial
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setChanges(initial)
+    setLoaded(true)
     const onStorage = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY) return
       const next = load()
@@ -125,8 +129,8 @@ export function ChangesProvider({ children }: { children: ReactNode }) {
   const sendAll = useCallback(() => send(), [send])
 
   const value = useMemo<ChangesApi>(
-    () => ({ changes, enqueue, revoke, sendOne, sendAll, sending, lastSentAt }),
-    [changes, enqueue, revoke, sendOne, sendAll, sending, lastSentAt]
+    () => ({ changes, enqueue, revoke, sendOne, sendAll, sending, lastSentAt, loaded }),
+    [changes, enqueue, revoke, sendOne, sendAll, sending, lastSentAt, loaded]
   )
 
   return <ChangesContext.Provider value={value}>{children}</ChangesContext.Provider>

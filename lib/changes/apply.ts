@@ -9,10 +9,18 @@ import {
   updateLanguageCategory,
   deleteLanguageCategory,
   setLanguageCategoriesOrder,
+  upsertProject,
+  setProjectLanguages,
+  setProjectAuthors,
+  setProjectVisibility,
+  deleteProject,
+  upsertArticle,
+  setArticleVisibility,
+  deleteArticle,
 } from '@/lib/supabase/admin-queries'
 import { removeSearchEntry } from '@/lib/supabase/search-index'
 import { createClient } from '@/lib/supabase/server'
-import type { ChangeOp } from './types'
+import type { ArticleData, ChangeOp, ProjectData } from './types'
 
 type LanguageUpdate = Extract<ChangeOp, { type: 'language.update' }>
 type CategoryUpdate = Extract<ChangeOp, { type: 'category.update' }>
@@ -48,6 +56,19 @@ async function applyCategoryUpdate({ id, field, value }: CategoryUpdate) {
   await updateLanguageCategory(id, name, nameEn)
 }
 
+async function saveProject(id: string, data: ProjectData) {
+  const { language_ids, author_ids, ...fields } = data
+  const project = await upsertProject({ id, ...fields })
+  await setProjectLanguages(project.id, language_ids)
+  await setProjectAuthors(project.id, author_ids)
+  if (!fields.visible) await removeSearchEntry('projects', id) // oculto sai da busca; (re)indexar é só manual
+}
+
+async function saveArticle(id: string, data: ArticleData) {
+  await upsertArticle({ id, ...data })
+  if (!data.visible) await removeSearchEntry('articles', id)
+}
+
 /** Aplica UMA operação da fila no banco. Lança erro se falhar. */
 export async function applyOp(op: ChangeOp): Promise<void> {
   switch (op.type) {
@@ -73,5 +94,27 @@ export async function applyOp(op: ChangeOp): Promise<void> {
       return deleteLanguageCategory(op.id)
     case 'category.order':
       return setLanguageCategoriesOrder(op.ids)
+    case 'project.add':
+    case 'project.update':
+      return saveProject(op.id, op.data)
+    case 'project.visible':
+      await setProjectVisibility(op.id, op.visible)
+      if (!op.visible) await removeSearchEntry('projects', op.id)
+      return
+    case 'project.remove':
+      await deleteProject(op.id)
+      await removeSearchEntry('projects', op.id)
+      return
+    case 'article.add':
+    case 'article.update':
+      return saveArticle(op.id, op.data)
+    case 'article.visible':
+      await setArticleVisibility(op.id, op.visible)
+      if (!op.visible) await removeSearchEntry('articles', op.id)
+      return
+    case 'article.remove':
+      await deleteArticle(op.id)
+      await removeSearchEntry('articles', op.id)
+      return
   }
 }

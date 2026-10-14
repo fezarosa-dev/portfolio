@@ -1,6 +1,6 @@
 import { resolveIcon } from '../icons.ts'
-import type { Language, LanguageCategory } from '../supabase/queries.ts'
-import type { Change } from './types.ts'
+import type { Article, Author, Company, Language, LanguageCategory, Project } from '../supabase/queries.ts'
+import type { ArticleData, Change, ProjectData } from './types.ts'
 
 type Positioned = { id: string; position: number }
 
@@ -100,11 +100,80 @@ export function overlayCategories(base: LanguageCategory[], stack: Change[]): La
 }
 
 /** Ids com edição ou criação pendente (pra borda laranja). Ordenar e apagar não contam. */
-export function touchedIds(stack: Change[], entity: 'language' | 'category'): Set<string> {
+export function touchedIds(stack: Change[], entity: 'language' | 'category' | 'project' | 'article'): Set<string> {
   const ids = new Set<string>()
   for (const { op } of stack) {
     if (!op.type.startsWith(`${entity}.`) || op.type.endsWith('.order') || op.type.endsWith('.remove')) continue
     ids.add((op as { id: string }).id)
   }
   return ids
+}
+
+export type ProjectContext = { languages: Language[]; authors: Author[]; companies: Company[] }
+
+function projectFrom(base: Project | null, id: string, data: ProjectData, ctx: ProjectContext): Project {
+  const { language_ids, author_ids, company_id, ...fields } = data
+  const pick = <T extends { id: string }>(all: T[], ids: string[]) => ids.flatMap((i) => all.filter((x) => x.id === i))
+  return {
+    slug: '',
+    created_at: new Date(0).toISOString(),
+    resume_position: 0,
+    ...base,
+    id,
+    ...fields,
+    languages: pick(ctx.languages, language_ids),
+    authors: pick(ctx.authors, author_ids),
+    company: ctx.companies.find((c) => c.id === company_id) ?? null,
+  }
+}
+
+/** Lista de projetos do admin (ordem: position desc) + fila pendente. */
+export function overlayProjects(base: Project[], stack: Change[], ctx: ProjectContext): Project[] {
+  let rows = [...base]
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'project.add':
+        rows = [...rows, projectFrom(null, op.id, op.data, ctx)]
+        break
+      case 'project.update':
+        rows = rows.map((row) => (row.id === op.id ? projectFrom(row, op.id, op.data, ctx) : row))
+        break
+      case 'project.visible':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, visible: op.visible } : row))
+        break
+      case 'project.remove':
+        rows = rows.filter((row) => row.id !== op.id)
+        break
+      default:
+        break
+    }
+  }
+  return [...rows].sort((a, b) => b.position - a.position)
+}
+
+function articleFrom(base: Article | null, id: string, data: ArticleData): Article {
+  return { created_at: new Date(0).toISOString(), ...base, id, ...data }
+}
+
+export function overlayArticles(base: Article[], stack: Change[]): Article[] {
+  let rows = [...base]
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'article.add':
+        rows = [...rows, articleFrom(null, op.id, op.data)]
+        break
+      case 'article.update':
+        rows = rows.map((row) => (row.id === op.id ? articleFrom(row, op.id, op.data) : row))
+        break
+      case 'article.visible':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, visible: op.visible } : row))
+        break
+      case 'article.remove':
+        rows = rows.filter((row) => row.id !== op.id)
+        break
+      default:
+        break
+    }
+  }
+  return [...rows].sort((a, b) => b.position - a.position)
 }

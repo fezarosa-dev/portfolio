@@ -10,33 +10,29 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { articleDataFromForm } from '@/lib/changes/forms'
+import type { ArticleData } from '@/lib/changes/types'
 import type { Article } from '@/lib/supabase/queries'
 
 export function ArticleForm({
   article,
-  action,
+  onSubmit,
 }: {
   article: Article | null
-  action: (formData: FormData) => Promise<void>
+  onSubmit: (data: ArticleData) => void
 }) {
   const router = useRouter()
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
   const [visible, setVisible] = useState(article?.visible ?? true)
 
-  async function handleSubmit(formData: FormData) {
-    try {
-      await action(formData)
-      toast.success('Artigo salvo')
-      router.push('/admin/artigos')
-    } catch {
-      toast.error('Não deu pra salvar o artigo. Tenta de novo.')
-    }
+  function handleSubmit(formData: FormData) {
+    onSubmit(articleDataFromForm(formData))
+    toast.success('Artigo na lista de mudanças')
+    router.push('/admin/artigos')
   }
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
-      {article && <input type="hidden" name="id" value={article.id} />}
-
       <LanguageToggle language={language} onChange={setLanguage} />
 
       <BilingualField
