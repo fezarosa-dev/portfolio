@@ -10,7 +10,15 @@ import { QueueForm } from '@/components/admin/queue-form'
 import { ResumeSection } from '@/components/admin/resume-section'
 import { ResumeSkillsSection } from '@/components/admin/resume-skills-section'
 import { useChanges } from '@/components/admin/changes-provider'
-import { overlayProjects, overlayResume, overlayResumeProjects, touchedIds } from '@/lib/changes/overlay'
+import {
+  overlayAuthors,
+  overlayCompanies,
+  overlayLanguages,
+  overlayProjects,
+  overlayResume,
+  overlayResumeProjects,
+  touchedIds,
+} from '@/lib/changes/overlay'
 import type { ResumeSource } from '@/lib/resume'
 import type { Author, Company, Language, Project } from '@/lib/supabase/queries'
 
@@ -33,7 +41,15 @@ export function ResumeAdmin({
   const { changes, enqueue, loaded } = useChanges()
   const resume = useMemo(() => overlayResume(source, changes), [source, changes])
   const allProjects = useMemo(
-    () => overlayResumeProjects(overlayProjects(projects, changes, { languages, authors, companies }), changes),
+    () =>
+      overlayResumeProjects(
+        overlayProjects(projects, changes, {
+          languages: overlayLanguages(languages, changes),
+          authors: overlayAuthors(authors, changes),
+          companies: overlayCompanies(companies, changes),
+        }),
+        changes
+      ),
     [projects, changes, languages, authors, companies]
   )
   const touched = useMemo(() => touchedIds(changes, 'resume'), [changes])

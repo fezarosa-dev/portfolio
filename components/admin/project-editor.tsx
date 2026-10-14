@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useChanges } from '@/components/admin/changes-provider'
 import { ProjectForm } from '@/components/admin/project-form'
-import { overlayProjects } from '@/lib/changes/overlay'
+import { overlayAuthors, overlayCompanies, overlayLanguages, overlayProjects } from '@/lib/changes/overlay'
 import type { ProjectData } from '@/lib/changes/types'
 import type { Author, Company, Language, Project } from '@/lib/supabase/queries'
 
@@ -23,8 +23,12 @@ export function ProjectEditor({
 }) {
   const { changes, enqueue, loaded } = useChanges()
   const ctx = useMemo(
-    () => ({ languages: availableLanguages, authors: availableAuthors, companies: availableCompanies }),
-    [availableLanguages, availableAuthors, availableCompanies]
+    () => ({
+      languages: overlayLanguages(availableLanguages, changes),
+      authors: overlayAuthors(availableAuthors, changes),
+      companies: overlayCompanies(availableCompanies, changes),
+    }),
+    [availableLanguages, availableAuthors, availableCompanies, changes]
   )
   const project = useMemo(() => (id ? overlayProjects(projects, changes, ctx).find((p) => p.id === id) ?? null : null), [id, projects, changes, ctx])
   // id gerado uma vez por formulário novo: a criação já nasce com o id que as edições seguintes vão usar

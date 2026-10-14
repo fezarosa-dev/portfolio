@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { applyChange } from '@/app/admin/(dashboard)/mudancas/actions'
+import { applyChange, savePreviewDraft } from '@/app/admin/(dashboard)/mudancas/actions'
 import {
   enqueue as enqueueChange,
   makeChange,
@@ -78,6 +78,15 @@ export function ChangesProvider({ children }: { children: ReactNode }) {
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
   }, [])
+
+  useEffect(() => {
+    // o preview do site lê a fila daqui (servidor); sincroniza com um pequeno atraso a cada mudança
+    if (!loaded) return
+    const timer = setTimeout(() => {
+      void savePreviewDraft(changes).catch(() => {})
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [changes, loaded])
 
   const update = useCallback((fn: (stack: Change[]) => Change[]) => {
     const next = fn(changesRef.current)
