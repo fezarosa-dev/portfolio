@@ -107,3 +107,29 @@ test('projectDataFromForm / articleDataFromForm leem o FormData do admin', () =>
   assert.equal(a.title, 'Meu')
   assert.equal(a.position, 7)
 })
+
+test('cadastros: editar autor ainda não criado vira parte da criação; empresa e contato com overlay e ordem', async () => {
+  const { overlayAuthors, overlayCompanies, overlayContactLinks } = await import('./overlay.ts')
+  const merged = stackOf(
+    { type: 'author.add', id: 'x', data: { name: 'Ana', url: null } },
+    { type: 'author.update', id: 'x', data: { name: 'Ana B', url: 'https://a' } }
+  )
+  assert.equal(merged.length, 1)
+  assert.deepEqual(overlayAuthors([], merged), [{ id: 'x', name: 'Ana B', url: 'https://a' }])
+
+  const companies = overlayCompanies(
+    [{ id: 'c1', name: 'Acme', name_en: null, url: null }],
+    stackOf(
+      { type: 'company.update', id: 'c1', data: { name: 'Acme SA', name_en: 'Acme Inc', url: null } },
+      { type: 'company.add', id: 'c2', data: { name: null, name_en: 'Zed', url: null } }
+    )
+  )
+  assert.deepEqual(companies.map((c) => [c.id, c.name, c.name_en]), [['c1', 'Acme SA', 'Acme Inc'], ['c2', null, 'Zed']])
+
+  const link = (id: string, position: number) => ({ id, label: id, label_en: null, url: 'u', position })
+  const links = overlayContactLinks(
+    [link('a', 0), link('b', 1)],
+    stackOf({ type: 'contact.order', ids: ['b', 'a'] }, { type: 'contact.remove', id: 'a' })
+  )
+  assert.deepEqual(links.map((l) => l.id), ['b'])
+})

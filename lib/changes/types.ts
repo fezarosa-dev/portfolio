@@ -38,6 +38,10 @@ export type ArticleData = {
   visible: boolean
 }
 
+export type AuthorData = { name: string; url: string | null }
+export type CompanyData = { name: string | null; name_en: string | null; url: string | null }
+export type ContactLinkData = { label: string | null; label_en: string | null; url: string }
+
 export type ChangeOp =
   | { type: 'language.add'; id: string; name: string; nameEn: string; iconUrl: string }
   | { type: 'language.update'; id: string; field: LanguageField; value: string | boolean | null }
@@ -55,6 +59,16 @@ export type ChangeOp =
   | { type: 'article.update'; id: string; data: ArticleData }
   | { type: 'article.visible'; id: string; visible: boolean }
   | { type: 'article.remove'; id: string }
+  | { type: 'author.add'; id: string; data: AuthorData }
+  | { type: 'author.update'; id: string; data: AuthorData }
+  | { type: 'author.remove'; id: string }
+  | { type: 'company.add'; id: string; data: CompanyData }
+  | { type: 'company.update'; id: string; data: CompanyData }
+  | { type: 'company.remove'; id: string }
+  | { type: 'contact.add'; id: string; data: ContactLinkData }
+  | { type: 'contact.update'; id: string; data: ContactLinkData }
+  | { type: 'contact.remove'; id: string }
+  | { type: 'contact.order'; ids: string[] }
 
 export type Change = {
   id: string

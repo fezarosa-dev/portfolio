@@ -13,6 +13,9 @@ export async function applyChange(op: ChangeOp): Promise<{ ok: true } | { ok: fa
     revalidatePath('/admin/projetos')
     revalidatePath('/admin/artigos')
     revalidatePath('/admin/curriculo')
+    revalidatePath('/admin/autores')
+    revalidatePath('/admin/empresas')
+    revalidatePath('/admin/contato')
     return { ok: true }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Não deu pra aplicar a mudança.' }
