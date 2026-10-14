@@ -48,7 +48,7 @@ export async function saveProject(formData: FormData) {
   await setProjectAuthors(project.id, formData.getAll('author_ids').map(String))
   if (formData.get('reindex') === 'true') await syncProjectSearchIndex(project.id)
   revalidatePath('/admin/projetos')
-  revalidatePath('/admin/autocurriculo')
+  revalidatePath('/admin/curriculo')
 }
 
 export async function removeProject(id: string) {

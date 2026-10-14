@@ -3,8 +3,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { ToastForm } from '@/components/admin/toast-form'
-import { ENTITIES, type ConfigEntity, type Field } from '@/app/admin/(dashboard)/autocurriculo/config'
-import { saveItem, removeItem, moveItem } from '@/app/admin/(dashboard)/autocurriculo/actions'
+import { ENTITIES, type ConfigEntity, type Field } from '@/app/admin/(dashboard)/curriculo/config'
+import { saveItem, removeItem, moveItem } from '@/app/admin/(dashboard)/curriculo/actions'
 
 type Row = Record<string, unknown> & { id: string }
 type Company = { id: string; name: string | null }
