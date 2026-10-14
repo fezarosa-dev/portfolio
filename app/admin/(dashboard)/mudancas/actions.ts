@@ -10,6 +10,9 @@ export async function applyChange(op: ChangeOp): Promise<{ ok: true } | { ok: fa
   try {
     await applyOp(op)
     revalidatePath('/admin/tecnologias')
+    revalidatePath('/admin/projetos')
+    revalidatePath('/admin/artigos')
+    revalidatePath('/admin/curriculo')
     return { ok: true }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Não deu pra aplicar a mudança.' }
