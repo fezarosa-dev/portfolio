@@ -6,9 +6,7 @@ import { TechnologyReorderList } from '@/components/admin/technology-reorder-lis
 import {
   saveLanguage,
   removeLanguage,
-  editLanguage,
-  saveLanguagesOrder,
-  toggleShowOnHome,
+  saveLanguagesBatch,
   saveCategory,
   editCategory,
   removeCategory,
@@ -97,10 +95,8 @@ export default async function TecnologiasPage() {
       <TechnologyReorderList
         languages={languages}
         categories={categories}
-        editAction={editLanguage}
         removeAction={removeLanguage}
-        saveOrderAction={saveLanguagesOrder}
-        toggleShowOnHomeAction={toggleShowOnHome}
+        saveAction={saveLanguagesBatch}
       />
     </div>
   )
