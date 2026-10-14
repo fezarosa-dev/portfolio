@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { projectDataFromForm } from '@/lib/changes/forms'
+import type { ProjectData } from '@/lib/changes/types'
 import { iconUrl } from '@/lib/icons'
 import type { Project, Language, Author, Company } from '@/lib/supabase/queries'
 
@@ -18,13 +20,13 @@ export function ProjectForm({
   availableLanguages,
   availableAuthors,
   availableCompanies,
-  action,
+  onSubmit,
 }: {
   project: Project | null
   availableLanguages: Language[]
   availableAuthors: Author[]
   availableCompanies: Company[]
-  action: (formData: FormData) => Promise<void>
+  onSubmit: (data: ProjectData) => void
 }) {
   const router = useRouter()
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
@@ -35,20 +37,14 @@ export function ProjectForm({
   const selectedLanguageIds = new Set(project?.languages.map((l) => l.id) ?? [])
   const selectedAuthorIds = new Set(project?.authors.map((a) => a.id) ?? [])
 
-  async function handleSubmit(formData: FormData) {
-    try {
-      await action(formData)
-      toast.success('Projeto salvo')
-      router.push('/admin/projetos')
-    } catch {
-      toast.error('Não deu pra salvar o projeto. Tenta de novo.')
-    }
+  function handleSubmit(formData: FormData) {
+    onSubmit(projectDataFromForm(formData))
+    toast.success('Projeto na lista de mudanças')
+    router.push('/admin/projetos')
   }
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
-      {project && <input type="hidden" name="id" value={project.id} />}
-
       <LanguageToggle language={language} onChange={setLanguage} />
 
       <BilingualField

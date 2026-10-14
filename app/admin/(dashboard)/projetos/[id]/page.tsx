@@ -1,14 +1,8 @@
-import { notFound } from 'next/navigation'
 import { getAllProjects } from '@/lib/supabase/admin-queries'
 import { getLanguages, getAuthors, getCompanies } from '@/lib/supabase/queries'
-import { ProjectForm } from '@/components/admin/project-form'
-import { saveProject } from '../actions'
+import { ProjectEditor } from '@/components/admin/project-editor'
 
-export default async function EditarProjetoPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function EditarProjetoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const [projects, availableLanguages, availableAuthors, availableCompanies] = await Promise.all([
     getAllProjects(),
@@ -16,18 +10,16 @@ export default async function EditarProjetoPage({
     getAuthors(),
     getCompanies(),
   ])
-  const project = projects.find((p) => p.id === id)
-  if (!project) notFound()
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold">Editar projeto</h1>
-      <ProjectForm
-        project={project}
+      <ProjectEditor
+        id={id}
+        projects={projects}
         availableLanguages={availableLanguages}
         availableAuthors={availableAuthors}
         availableCompanies={availableCompanies}
-        action={saveProject}
       />
     </div>
   )

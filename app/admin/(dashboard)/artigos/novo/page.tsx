@@ -1,11 +1,13 @@
-import { ArticleForm } from '@/components/admin/article-form'
-import { saveArticle } from '../actions'
+import { getAllArticles } from '@/lib/supabase/admin-queries'
+import { ArticleEditor } from '@/components/admin/article-editor'
 
-export default function NovoArtigoPage() {
+export default async function NovoArtigoPage() {
+  const articles = await getAllArticles()
+
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold">Novo artigo</h1>
-      <ArticleForm article={null} action={saveArticle} />
+      <ArticleEditor id={null} articles={articles} />
     </div>
   )
 }
