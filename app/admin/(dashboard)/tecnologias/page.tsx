@@ -1,15 +1,8 @@
 import { getLanguageCategories, getLanguages } from '@/lib/supabase/queries'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { ToastForm } from '@/components/admin/toast-form'
 import { CategoryList } from '@/components/admin/category-list'
+import { CategoryAddForm } from '@/components/admin/category-add-form'
 import { TechnologyReorderList } from '@/components/admin/technology-reorder-list'
 import { TechnologyAddForm } from '@/components/admin/technology-add-form'
-import {
-  saveCategory,
-  saveCategoriesBatch,
-  removeCategory,
-} from './actions'
 
 export default async function TecnologiasPage() {
   const [languages, categories] = await Promise.all([getLanguages(), getLanguageCategories()])
@@ -30,14 +23,10 @@ export default async function TecnologiasPage() {
         <p className="mb-3 text-sm text-muted-foreground">
           Agrupam as tecnologias na página /tecnologias do site (ex: Linguagens, Frameworks, Infra).
           Escolha a categoria de cada tecnologia na lista abaixo. Apagar uma categoria deixa as
-          tecnologias dela sem categoria. Use ↑ ↓ pra mudar a ordem das seções e clique em Salvar pra gravar.
+          tecnologias dela sem categoria. Use ↑ ↓ pra mudar a ordem das seções; as mudanças vão pra Lista de mudanças.
         </p>
-        <CategoryList categories={categories} removeAction={removeCategory} saveAction={saveCategoriesBatch} />
-        <ToastForm action={saveCategory} successMessage="Categoria adicionada" className="flex gap-2">
-          <Input name="name" placeholder="Nome (ex: Linguagens)" required />
-          <Input name="nameEn" placeholder="Inglês (ex: Languages)" />
-          <Button type="submit">Adicionar</Button>
-        </ToastForm>
+        <CategoryList categories={categories} />
+        <CategoryAddForm />
       </section>
 
       <h2 className="mb-2 text-lg font-semibold">Tecnologias</h2>
