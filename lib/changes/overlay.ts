@@ -1,5 +1,5 @@
 import { resolveIcon } from '../icons.ts'
-import type { Article, Author, Company, Language, LanguageCategory, Project } from '../supabase/queries.ts'
+import type { Article, Author, Company, ContactLink, Language, LanguageCategory, Project } from '../supabase/queries.ts'
 import type { ArticleData, Change, ProjectData } from './types.ts'
 
 type Positioned = { id: string; position: number }
@@ -100,7 +100,10 @@ export function overlayCategories(base: LanguageCategory[], stack: Change[]): La
 }
 
 /** Ids com edição ou criação pendente (pra borda laranja). Ordenar e apagar não contam. */
-export function touchedIds(stack: Change[], entity: 'language' | 'category' | 'project' | 'article'): Set<string> {
+export function touchedIds(
+  stack: Change[],
+  entity: 'language' | 'category' | 'project' | 'article' | 'author' | 'company' | 'contact'
+): Set<string> {
   const ids = new Set<string>()
   for (const { op } of stack) {
     if (!op.type.startsWith(`${entity}.`) || op.type.endsWith('.order') || op.type.endsWith('.remove')) continue
@@ -176,4 +179,67 @@ export function overlayArticles(base: Article[], stack: Change[]): Article[] {
     }
   }
   return [...rows].sort((a, b) => b.position - a.position)
+}
+
+export function overlayAuthors(base: Author[], stack: Change[]): Author[] {
+  let rows = [...base]
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'author.add':
+        rows = [...rows, { id: op.id, ...op.data }]
+        break
+      case 'author.update':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, ...op.data } : row))
+        break
+      case 'author.remove':
+        rows = rows.filter((row) => row.id !== op.id)
+        break
+      default:
+        break
+    }
+  }
+  return rows
+}
+
+export function overlayCompanies(base: Company[], stack: Change[]): Company[] {
+  let rows = [...base]
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'company.add':
+        rows = [...rows, { id: op.id, ...op.data }]
+        break
+      case 'company.update':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, ...op.data } : row))
+        break
+      case 'company.remove':
+        rows = rows.filter((row) => row.id !== op.id)
+        break
+      default:
+        break
+    }
+  }
+  return rows
+}
+
+export function overlayContactLinks(base: ContactLink[], stack: Change[]): ContactLink[] {
+  let rows = base.map((row) => ({ ...row }))
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'contact.add':
+        rows = [...rows, { id: op.id, ...op.data, position: rows.length }]
+        break
+      case 'contact.update':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, ...op.data } : row))
+        break
+      case 'contact.remove':
+        rows = rows.filter((row) => row.id !== op.id)
+        break
+      case 'contact.order':
+        rows = applyOrder(rows, op.ids)
+        break
+      default:
+        break
+    }
+  }
+  return rows
 }
