@@ -97,6 +97,14 @@ export async function deleteLanguageCategory(id: string, client?: SupabaseClient
   if (error) throw error
 }
 
+export async function setLanguageCategoriesOrder(orderedIds: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
+  const results = await Promise.all(
+    orderedIds.map((id, position) => supabase.from('language_categories').update({ position }).eq('id', id))
+  )
+  for (const result of results) if (result.error) throw result.error
+}
+
 export async function moveLanguageCategory(id: string, direction: -1 | 1, client?: SupabaseClient): Promise<void> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase

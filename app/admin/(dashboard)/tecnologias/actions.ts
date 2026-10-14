@@ -11,9 +11,10 @@ import {
   addLanguageCategory,
   updateLanguageCategory,
   deleteLanguageCategory,
-  moveLanguageCategory,
+  setLanguageCategoriesOrder,
 } from '@/lib/supabase/admin-queries'
 import { reindexLanguage, removeSearchEntry } from '@/lib/supabase/search-index'
+import type { CategoryBatch } from '@/components/admin/category-list'
 import type { TechnologyBatch } from '@/components/admin/technology-reorder-list'
 
 export async function saveLanguage(formData: FormData) {
@@ -53,19 +54,14 @@ export async function saveCategory(formData: FormData) {
   revalidatePath('/admin/tecnologias')
 }
 
-export async function editCategory(id: string, formData: FormData) {
-  const name = String(formData.get('name') ?? '').trim()
-  if (!name) return
-  await updateLanguageCategory(id, name, String(formData.get('nameEn') ?? ''))
+export async function saveCategoriesBatch(batch: CategoryBatch) {
+  await Promise.all(batch.items.map((item) => updateLanguageCategory(item.id, item.name, item.nameEn)))
+  if (batch.order) await setLanguageCategoriesOrder(batch.order)
+  updateTag('site') // /tecnologias usa o cache 'site'
   revalidatePath('/admin/tecnologias')
 }
 
 export async function removeCategory(id: string) {
   await deleteLanguageCategory(id)
-  revalidatePath('/admin/tecnologias')
-}
-
-export async function moveCategory(id: string, direction: -1 | 1) {
-  await moveLanguageCategory(id, direction)
   revalidatePath('/admin/tecnologias')
 }
