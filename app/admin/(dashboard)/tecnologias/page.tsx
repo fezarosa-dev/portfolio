@@ -4,10 +4,8 @@ import { Button } from '@/components/ui/button'
 import { ToastForm } from '@/components/admin/toast-form'
 import { CategoryList } from '@/components/admin/category-list'
 import { TechnologyReorderList } from '@/components/admin/technology-reorder-list'
+import { TechnologyAddForm } from '@/components/admin/technology-add-form'
 import {
-  saveLanguage,
-  removeLanguage,
-  saveLanguagesBatch,
   saveCategory,
   saveCategoriesBatch,
   removeCategory,
@@ -22,7 +20,7 @@ export default async function TecnologiasPage() {
       <p className="mb-6 text-sm text-muted-foreground">
         Digite o nome da linguagem, framework ou ferramenta (ex: Python, TypeScript, Docker) — o
         ícone é encontrado automaticamente pelo nome. Se não encontrar (ex: Cython), preencha a
-        URL do ícone manualmente. Arraste pelos pontinhos pra reordenar como aparecem no site. O
+        URL do ícone manualmente. Arraste pelos pontinhos pra reordenar. Cada mudança vai pra Lista de mudanças — envie de lá. O
         ⌂ liga/desliga se a tecnologia aparece na tela inicial — ela continua valendo nos
         projetos e nos filtros mesmo desligada ali.
       </p>
@@ -43,25 +41,9 @@ export default async function TecnologiasPage() {
       </section>
 
       <h2 className="mb-2 text-lg font-semibold">Tecnologias</h2>
-      <ToastForm
-        action={saveLanguage}
-        successMessage="Tecnologia adicionada"
-        className="mb-8 flex max-w-sm flex-col gap-2"
-      >
-        <div className="flex gap-2">
-          <Input name="name" placeholder="Nome PT (ex: Python)" required />
-          <Input name="name_en" placeholder="Nome EN (opcional)" />
-          <Button type="submit">Adicionar</Button>
-        </div>
-        <Input name="iconUrl" placeholder="URL do ícone (opcional, se não for encontrado)" />
-      </ToastForm>
+      <TechnologyAddForm />
 
-      <TechnologyReorderList
-        languages={languages}
-        categories={categories}
-        removeAction={removeLanguage}
-        saveAction={saveLanguagesBatch}
-      />
+      <TechnologyReorderList languages={languages} categories={categories} />
     </div>
   )
 }

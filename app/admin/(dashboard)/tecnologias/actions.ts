@@ -2,48 +2,12 @@
 
 import { revalidatePath, updateTag } from 'next/cache'
 import {
-  addLanguage,
-  deleteLanguage,
-  updateLanguage,
-  setLanguagesOrder,
-  setLanguageShowOnHome,
-  setLanguageCategory,
   addLanguageCategory,
   updateLanguageCategory,
   deleteLanguageCategory,
   setLanguageCategoriesOrder,
 } from '@/lib/supabase/admin-queries'
-import { removeSearchEntry } from '@/lib/supabase/search-index'
 import type { CategoryBatch } from '@/components/admin/category-list'
-import type { TechnologyBatch } from '@/components/admin/technology-reorder-list'
-
-export async function saveLanguage(formData: FormData) {
-  const name = String(formData.get('name') ?? '').trim()
-  if (!name) return
-  const iconUrl = String(formData.get('iconUrl') ?? '').trim()
-
-  await addLanguage(name, iconUrl || undefined, String(formData.get('name_en') ?? ''))
-  revalidatePath('/admin/tecnologias')
-}
-
-export async function removeLanguage(id: string) {
-  await deleteLanguage(id)
-  await removeSearchEntry('languages', id)
-  revalidatePath('/admin/tecnologias')
-}
-
-export async function saveLanguagesBatch(batch: TechnologyBatch) {
-  for (const item of batch.items) {
-    if (item.text) {
-      await updateLanguage(item.id, item.text.name, item.text.iconUrl || undefined, item.text.nameEn)
-    }
-    if (item.categoryId !== undefined) await setLanguageCategory(item.id, item.categoryId)
-    if (item.showOnHome !== undefined) await setLanguageShowOnHome(item.id, item.showOnHome)
-  }
-  if (batch.order) await setLanguagesOrder(batch.order)
-  updateTag('site') // a home e /tecnologias usam o cache 'site'
-  revalidatePath('/admin/tecnologias')
-}
 
 export async function saveCategory(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
