@@ -17,7 +17,27 @@ import {
   upsertArticle,
   setArticleVisibility,
   deleteArticle,
+  addAuthor,
+  updateAuthor,
+  deleteAuthor,
+  addCompany,
+  updateCompany,
+  deleteCompany,
+  addContactLink,
+  updateContactLink,
+  deleteContactLink,
+  setContactLinksOrder,
+  upsertSiteContent,
+  deleteSiteContentKey,
 } from '@/lib/supabase/admin-queries'
+import {
+  saveResumeItem,
+  deleteResumeItem,
+  saveResumeProfile,
+  setProjectInResume,
+  setResumeItemsOrder,
+  setProjectsResumeOrder,
+} from '@/lib/supabase/resume-admin'
 import { removeSearchEntry } from '@/lib/supabase/search-index'
 import { createClient } from '@/lib/supabase/server'
 import type { ArticleData, ChangeOp, ProjectData } from './types'
@@ -116,5 +136,61 @@ export async function applyOp(op: ChangeOp): Promise<void> {
       await deleteArticle(op.id)
       await removeSearchEntry('articles', op.id)
       return
+    case 'author.add':
+      if (!op.data.name.trim()) throw new Error('O autor precisa de nome.')
+      await addAuthor(op.data.name, op.data.url, undefined, op.id)
+      return
+    case 'author.update':
+      if (!op.data.name.trim()) throw new Error('O autor precisa de nome.')
+      await updateAuthor(op.id, op.data.name, op.data.url)
+      return
+    case 'author.remove':
+      return deleteAuthor(op.id)
+    case 'company.add':
+      if (!op.data.name && !op.data.name_en) throw new Error('A empresa precisa de nome (PT ou EN).')
+      await addCompany(op.data.name, op.data.name_en, op.data.url, undefined, op.id)
+      return
+    case 'company.update':
+      if (!op.data.name && !op.data.name_en) throw new Error('A empresa precisa de nome (PT ou EN).')
+      await updateCompany(op.id, op.data.name, op.data.name_en, op.data.url)
+      return
+    case 'company.remove':
+      return deleteCompany(op.id)
+    case 'contact.add':
+      if (!op.data.url.trim()) throw new Error('O contato precisa de link.')
+      await addContactLink(op.data.label, op.data.label_en, op.data.url, undefined, op.id)
+      return
+    case 'contact.update':
+      if (!op.data.url.trim()) throw new Error('O contato precisa de link.')
+      await updateContactLink(op.id, op.data.label, op.data.label_en, op.data.url)
+      return
+    case 'contact.remove':
+      return deleteContactLink(op.id)
+    case 'contact.order':
+      return setContactLinksOrder(op.ids)
+    case 'resume.profile':
+      return saveResumeProfile(op.values)
+    case 'resume.add':
+      await saveResumeItem(
+        op.entity,
+        null,
+        { ...op.data, id: op.id },
+        op.entity === 'skills' && typeof op.data.category_id === 'string' ? { column: 'category_id', value: op.data.category_id } : undefined
+      )
+      return
+    case 'resume.update':
+      return saveResumeItem(op.entity, op.id, op.data)
+    case 'resume.remove':
+      return deleteResumeItem(op.entity, op.id)
+    case 'resume.order':
+      return setResumeItemsOrder(op.entity, op.ids)
+    case 'resume.project':
+      return setProjectInResume(op.id, op.inResume)
+    case 'resume.projectOrder':
+      return setProjectsResumeOrder(op.ids)
+    case 'site.set':
+      return upsertSiteContent(op.key, op.value)
+    case 'site.delete':
+      return deleteSiteContentKey(op.key)
   }
 }

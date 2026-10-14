@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,7 +12,6 @@ import { IconUpload } from '@/components/admin/icon-upload'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
 import { PAGE_TEXTS, defaultPageText } from '@/lib/page-texts'
-import { MascoteAtivoToggle } from '@/components/admin/mascote-ativo-toggle'
 
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/', label: 'Home' },
@@ -88,20 +87,23 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export function SiteContentForm({
   content,
-  action,
-  mascoteAtivo,
-  toggleMascoteAtivo,
+  onSubmit,
 }: {
   content: Record<string, string>
-  action: (formData: FormData) => Promise<void>
-  mascoteAtivo: boolean
-  toggleMascoteAtivo: (ativo: boolean) => Promise<void>
+  onSubmit: (formData: FormData, initial: FormData) => void
 }) {
+  const formRef = useRef<HTMLFormElement>(null)
+  const initialRef = useRef<FormData | null>(null)
+  useEffect(() => {
+    // foto de como o formulário abriu: o que o usuário não mexeu não vira mudança
+    if (formRef.current) initialRef.current = new FormData(formRef.current)
+  }, [])
   const [sobreFoto, setSobreFoto] = useState(content.sobre_foto ?? '')
   const [siteIcon, setSiteIcon] = useState(content.site_icon ?? '')
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
   const [tecnologiasAtivo, setTecnologiasAtivo] = useState(content.tecnologias_ativo !== 'false')
   const [easterEggsAtivo, setEasterEggsAtivo] = useState(content.easter_eggs_ativo !== 'false')
+  const [mascoteAtivo, setMascoteAtivo] = useState(content.mascote_ativo === 'true')
   const lookup = (key: string): string | null => (key in content ? content[key] : null)
   const hiddenNavLinks = new Set(
     (content.nav_hidden_links ?? '')
@@ -110,17 +112,13 @@ export function SiteContentForm({
       .filter(Boolean)
   )
 
-  async function handleSubmit(formData: FormData) {
-    try {
-      await action(formData)
-      toast.success('Personalização salva')
-    } catch {
-      toast.error('Não deu pra salvar. Tenta de novo.')
-    }
+  function handleSubmit(formData: FormData) {
+    onSubmit(formData, initialRef.current ?? formData)
+    toast.success('Personalização na lista de mudanças')
   }
 
   return (
-    <form action={handleSubmit} className="flex max-w-2xl flex-col gap-6">
+    <form ref={formRef} action={handleSubmit} className="flex max-w-2xl flex-col gap-6">
       <LanguageToggle language={language} onChange={setLanguage} />
 
       <Tabs defaultValue="home">
@@ -436,7 +434,9 @@ export function SiteContentForm({
 
           <Section title="mascote e easter eggs">
             <div className="flex items-center gap-2">
-              <MascoteAtivoToggle ativo={mascoteAtivo} action={toggleMascoteAtivo} />
+              <input type="hidden" name="mascote_ativo" value={mascoteAtivo ? 'true' : 'false'} />
+              <Switch id="mascote_ativo" checked={mascoteAtivo} onCheckedChange={setMascoteAtivo} />
+              <Label htmlFor="mascote_ativo">Mostrar mascote no site</Label>
             </div>
             <p className="-mt-2 font-mono text-xs text-steel">
               o cachorro dormindo fixo no canto do site — clicar nele acorda e mostra uma piada;

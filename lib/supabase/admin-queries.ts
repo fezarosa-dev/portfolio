@@ -216,11 +216,11 @@ export async function setProjectAuthors(projectId: string, authorIds: string[], 
   if (error) throw error
 }
 
-export async function addAuthor(name: string, url: string | null, client?: SupabaseClient): Promise<Author> {
+export async function addAuthor(name: string, url: string | null, client?: SupabaseClient, id?: string): Promise<Author> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('authors')
-    .insert({ name: name.trim(), url: url?.trim() || null })
+    .insert({ ...(id && { id }), name: name.trim(), url: url?.trim() || null })
     .select()
     .single()
   if (error) throw error
@@ -249,12 +249,13 @@ export async function addCompany(
   name: string | null,
   nameEn: string | null,
   url: string | null,
-  client?: SupabaseClient
+  client?: SupabaseClient,
+  id?: string
 ): Promise<Company> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from('companies')
-    .insert({ name: name?.trim() || null, name_en: nameEn?.trim() || null, url: url?.trim() || null })
+    .insert({ ...(id && { id }), name: name?.trim() || null, name_en: nameEn?.trim() || null, url: url?.trim() || null })
     .select()
     .single()
   if (error) throw error
@@ -383,7 +384,8 @@ export async function addContactLink(
   label: string | null,
   label_en: string | null,
   url: string,
-  client?: SupabaseClient
+  client?: SupabaseClient,
+  id?: string
 ): Promise<ContactLink> {
   const supabase = client ?? (await createClient())
 
@@ -393,7 +395,7 @@ export async function addContactLink(
 
   const { data, error } = await supabase
     .from('contact_links')
-    .insert({ label: label?.trim() ?? null, label_en, url: url.trim(), position: count ?? 0 })
+    .insert({ ...(id && { id }), label: label?.trim() ?? null, label_en, url: url.trim(), position: count ?? 0 })
     .select()
     .single()
   if (error) throw error
