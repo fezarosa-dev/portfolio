@@ -18,7 +18,13 @@ import { resolveIcon } from '@/lib/icons'
 // pelo MCP, ver lib/mcp/) — sem ele, seguem usando o client autenticado por cookie
 // de sempre. Ver lib/supabase/service.ts.
 
-export async function addLanguage(name: string, customIconUrl?: string, nameEn?: string | null, client?: SupabaseClient): Promise<Language> {
+export async function addLanguage(
+  name: string,
+  customIconUrl?: string,
+  nameEn?: string | null,
+  client?: SupabaseClient,
+  id?: string
+): Promise<Language> {
   const icon = customIconUrl ? { slug: customIconUrl, variant: null, source: 'custom' as const } : resolveIcon(name)
   const supabase = client ?? (await createClient())
 
@@ -29,6 +35,7 @@ export async function addLanguage(name: string, customIconUrl?: string, nameEn?:
   const { data, error } = await supabase
     .from('languages')
     .insert({
+      ...(id && { id }),
       name: name.trim(),
       name_en: nameEn?.trim() || null,
       devicon_slug: icon?.slug ?? null,
@@ -66,12 +73,17 @@ export async function setLanguageCategory(id: string, categoryId: string | null,
   if (error) throw error
 }
 
-export async function addLanguageCategory(name: string, nameEn?: string | null, client?: SupabaseClient): Promise<LanguageCategory> {
+export async function addLanguageCategory(
+  name: string,
+  nameEn?: string | null,
+  client?: SupabaseClient,
+  id?: string
+): Promise<LanguageCategory> {
   const supabase = client ?? (await createClient())
   const { count } = await supabase.from('language_categories').select('*', { count: 'exact', head: true })
   const { data, error } = await supabase
     .from('language_categories')
-    .insert({ name: name.trim(), name_en: nameEn?.trim() || null, position: count ?? 0 })
+    .insert({ ...(id && { id }), name: name.trim(), name_en: nameEn?.trim() || null, position: count ?? 0 })
     .select()
     .single()
   if (error) throw error
