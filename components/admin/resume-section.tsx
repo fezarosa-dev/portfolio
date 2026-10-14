@@ -1,10 +1,13 @@
+'use client'
+
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { ToastForm } from '@/components/admin/toast-form'
-import { ENTITIES, type ConfigEntity, type Field } from '@/app/admin/(dashboard)/curriculo/config'
-import { saveItem, removeItem, moveItem } from '@/app/admin/(dashboard)/curriculo/actions'
+import { QueueForm } from '@/components/admin/queue-form'
+import { useChanges } from '@/components/admin/changes-provider'
+import { ENTITIES, parseEntityForm, type ConfigEntity, type Field } from '@/app/admin/(dashboard)/curriculo/config'
+import type { ResumeEntity } from '@/lib/changes/types'
 
 type Row = Record<string, unknown> & { id: string }
 type Company = { id: string; name: string | null }
@@ -56,6 +59,7 @@ function FieldInput({ field, row, companies }: { field: Field; row?: Row; compan
   )
 }
 
+/** Formulário de um item da lista (criar sem `row`, editar com `row`); enfileira em vez de gravar. */
 export function ItemForm({
   entity,
   row,
@@ -65,10 +69,24 @@ export function ItemForm({
   row?: Row
   companies: Company[]
 }) {
+  const { enqueue } = useChanges()
+  const config = ENTITIES[entity]
+
+  function handleSubmit(formData: FormData) {
+    const data = parseEntityForm(config.fields, formData) as Record<string, string | number | null>
+    const what = config.summary(data) || config.title
+    if (row) enqueue({ type: 'resume.update', entity, id: row.id, data }, `Currículo › ${config.title}: editar “${what}”`)
+    else enqueue({ type: 'resume.add', entity, id: crypto.randomUUID(), data }, `Currículo › ${config.title}: novo “${what}”`)
+  }
+
   return (
-    <ToastForm action={saveItem.bind(null, entity)} successMessage={row ? 'Salvo' : 'Adicionado'} className="grid gap-3 sm:grid-cols-2">
-      {row && <input type="hidden" name="id" value={row.id} />}
-      {ENTITIES[entity].fields.map((field) => (
+    <QueueForm
+      onSubmit={handleSubmit}
+      resetOnSubmit={!row}
+      className="grid gap-3 sm:grid-cols-2"
+      message={row ? 'Edição na lista de mudanças' : 'Item na lista de mudanças'}
+    >
+      {config.fields.map((field) => (
         <FieldInput key={field.name} field={field} row={row} companies={companies} />
       ))}
       <div className="sm:col-span-2">
@@ -76,28 +94,59 @@ export function ItemForm({
           {row ? 'Salvar' : 'Adicionar'}
         </Button>
       </div>
-    </ToastForm>
+    </QueueForm>
   )
 }
 
-export function RowControls({ entity, id, categoryId }: { entity: string; id: string; categoryId?: string }) {
+/** ↑ ↓ ✕ de um item; `siblings` são os ids da lista (ou da categoria) na ordem atual. */
+export function RowControls({
+  entity,
+  id,
+  siblings,
+  scopeId,
+  what,
+}: {
+  entity: ResumeEntity
+  id: string
+  siblings: string[]
+  scopeId?: string
+  what: string
+}) {
+  const { enqueue } = useChanges()
+  const index = siblings.indexOf(id)
+
+  function move(direction: -1 | 1) {
+    const to = index + direction
+    if (index < 0 || to < 0 || to >= siblings.length) return
+    const ids = [...siblings]
+    ;[ids[index], ids[to]] = [ids[to], ids[index]]
+    enqueue({ type: 'resume.order', entity, scopeId, ids }, `Currículo: nova ordem (${what})`)
+  }
+
   return (
     <div className="flex gap-1">
-      <form action={moveItem.bind(null, entity, id, -1, categoryId)}>
-        <Button type="submit" variant="outline" size="sm" aria-label="Subir">
-          ↑
-        </Button>
-      </form>
-      <form action={moveItem.bind(null, entity, id, 1, categoryId)}>
-        <Button type="submit" variant="outline" size="sm" aria-label="Descer">
-          ↓
-        </Button>
-      </form>
-      <form action={removeItem.bind(null, entity, id)}>
-        <Button type="submit" variant="outline" size="sm" aria-label="Excluir">
-          ✕
-        </Button>
-      </form>
+      <Button type="button" variant="outline" size="sm" aria-label="Subir" disabled={index <= 0} onClick={() => move(-1)}>
+        ↑
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        aria-label="Descer"
+        disabled={index < 0 || index >= siblings.length - 1}
+        onClick={() => move(1)}
+      >
+        ↓
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        aria-label="Excluir"
+        onClick={() => enqueue({ type: 'resume.remove', entity, id }, `Currículo: excluir “${what}”`)}
+      >
+        ✕
+      </Button>
     </div>
   )
 }
@@ -106,12 +155,15 @@ export function ResumeSection({
   entity,
   rows,
   companies = [],
+  touched,
 }: {
   entity: Exclude<ConfigEntity, 'skill_categories'>
   rows: Row[]
   companies?: Company[]
+  touched: Set<string>
 }) {
   const config = ENTITIES[entity]
+  const ids = rows.map((row) => row.id)
   return (
     <section className="mt-10" id={entity}>
       <h2 className="text-lg font-semibold">{config.title}</h2>
@@ -119,15 +171,18 @@ export function ResumeSection({
 
       <ul className="mt-4 flex flex-col gap-2">
         {rows.map((row) => (
-          <li key={row.id} className="rounded-lg border border-hairline p-3">
+          <li
+            key={row.id}
+            className={`rounded-lg border p-3 ${touched.has(row.id) ? 'border-orange-500' : 'border-hairline'}`}
+          >
             <div className="flex items-center justify-between gap-3">
               <details className="min-w-0 flex-1">
                 <summary className="cursor-pointer truncate text-sm">{config.summary(row)}</summary>
                 <div className="mt-3">
-                  <ItemForm entity={entity} row={row} companies={companies} />
+                  <ItemForm key={JSON.stringify(row)} entity={entity} row={row} companies={companies} />
                 </div>
               </details>
-              <RowControls entity={entity} id={row.id} />
+              <RowControls entity={entity} id={row.id} siblings={ids} what={config.summary(row)} />
             </div>
           </li>
         ))}

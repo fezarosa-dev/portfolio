@@ -73,6 +73,19 @@ export async function moveResumeItem(
   await Promise.all(ids.map((rowId, position) => supabase.from(table).update({ position }).eq('id', rowId)))
 }
 
+/** Grava a ordem de uma lista: `ids` na ordem desejada viram as posições 0..n-1. */
+export async function setResumeItemsOrder(entity: ResumeEntity, ids: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = await db(client)
+  const results = await Promise.all(ids.map((id, position) => supabase.from(RESUME_TABLES[entity]).update({ position }).eq('id', id)))
+  for (const result of results) if (result.error) throw result.error
+}
+
+export async function setProjectsResumeOrder(ids: string[], client?: SupabaseClient): Promise<void> {
+  const supabase = await db(client)
+  const results = await Promise.all(ids.map((id, resume_position) => supabase.from('projects').update({ resume_position }).eq('id', id)))
+  for (const result of results) if (result.error) throw result.error
+}
+
 export async function saveResumeProfile(values: Record<string, string | null>, client?: SupabaseClient): Promise<void> {
   const supabase = await db(client)
   const { data, error: readError } = await supabase.from('resume').select('id').limit(1).maybeSingle()
