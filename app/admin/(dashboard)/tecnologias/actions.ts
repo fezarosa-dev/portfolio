@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import {
   addLanguage,
   deleteLanguage,
@@ -14,6 +14,7 @@ import {
   moveLanguageCategory,
 } from '@/lib/supabase/admin-queries'
 import { reindexLanguage, removeSearchEntry } from '@/lib/supabase/search-index'
+import type { TechnologyBatch } from '@/components/admin/technology-reorder-list'
 
 export async function saveLanguage(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
@@ -25,30 +26,23 @@ export async function saveLanguage(formData: FormData) {
   revalidatePath('/admin/tecnologias')
 }
 
-export async function editLanguage(id: string, formData: FormData) {
-  const name = String(formData.get('name') ?? '').trim()
-  if (!name) return
-  const iconUrl = String(formData.get('iconUrl') ?? '').trim()
-
-  const language = await updateLanguage(id, name, iconUrl || undefined, String(formData.get('name_en') ?? ''))
-  await setLanguageCategory(id, String(formData.get('categoryId') ?? '') || null)
-  if (formData.get('reindex') === 'true') await reindexLanguage(language)
-  revalidatePath('/admin/tecnologias')
-}
-
 export async function removeLanguage(id: string) {
   await deleteLanguage(id)
   await removeSearchEntry('languages', id)
   revalidatePath('/admin/tecnologias')
 }
 
-export async function saveLanguagesOrder(orderedIds: string[]) {
-  await setLanguagesOrder(orderedIds)
-  revalidatePath('/admin/tecnologias')
-}
-
-export async function toggleShowOnHome(id: string, showOnHome: boolean) {
-  await setLanguageShowOnHome(id, showOnHome)
+export async function saveLanguagesBatch(batch: TechnologyBatch) {
+  for (const item of batch.items) {
+    if (item.text) {
+      const language = await updateLanguage(item.id, item.text.name, item.text.iconUrl || undefined, item.text.nameEn)
+      if (batch.reindex) await reindexLanguage(language)
+    }
+    if (item.categoryId !== undefined) await setLanguageCategory(item.id, item.categoryId)
+    if (item.showOnHome !== undefined) await setLanguageShowOnHome(item.id, item.showOnHome)
+  }
+  if (batch.order) await setLanguagesOrder(batch.order)
+  updateTag('site') // a home e /tecnologias usam o cache 'site'
   revalidatePath('/admin/tecnologias')
 }
 
