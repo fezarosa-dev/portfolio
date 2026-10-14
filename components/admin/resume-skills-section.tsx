@@ -42,12 +42,32 @@ export function ResumeSkillsSection({
 
               <ul className="mt-3 flex flex-col gap-1.5">
                 {items.map((skill) => (
-                  <li key={skill.id} className="flex items-center justify-between gap-3 rounded-md bg-card px-2.5 py-1.5 text-sm">
-                    <span className="truncate">
-                      {skill.language_id ? techName.get(skill.language_id) : skill.label}
-                      {skill.language_id && <span className="ml-2 font-mono text-xs text-steel">tecnologia</span>}
-                    </span>
-                    <RowControls entity="skills" id={skill.id} categoryId={category.id} />
+                  <li key={skill.id} className="rounded-md bg-card px-2.5 py-1.5 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="truncate">
+                        {skill.language_id ? techName.get(skill.language_id) : skill.label}
+                        {skill.language_id ? (
+                          <span className="ml-2 font-mono text-xs text-steel">tecnologia — nome PT/EN em Tecnologias</span>
+                        ) : (
+                          skill.label_en && <span className="ml-2 font-mono text-xs text-steel">EN: {skill.label_en}</span>
+                        )}
+                      </span>
+                      <RowControls entity="skills" id={skill.id} categoryId={category.id} />
+                    </div>
+                    {!skill.language_id && (
+                      <details className="mt-1.5">
+                        <summary className="cursor-pointer font-mono text-xs text-signal">editar</summary>
+                        <ToastForm action={saveItem.bind(null, 'skills')} successMessage="Salvo" className="mt-2 flex flex-wrap items-end gap-2">
+                          <input type="hidden" name="id" value={skill.id} />
+                          <input type="hidden" name="category_id" value={category.id} />
+                          <Input name="label" defaultValue={skill.label ?? ''} aria-label="Habilidade (PT)" placeholder="PT" className="w-44" />
+                          <Input name="label_en" defaultValue={skill.label_en ?? ''} aria-label="Habilidade (EN)" placeholder="EN (opcional)" className="w-44" />
+                          <Button type="submit" size="sm">
+                            Salvar
+                          </Button>
+                        </ToastForm>
+                      </details>
+                    )}
                   </li>
                 ))}
               </ul>

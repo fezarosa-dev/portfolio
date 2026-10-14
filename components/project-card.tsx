@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { setHandoff } from '@/lib/handoff'
 import { iconUrl } from '@/lib/icons'
-import { resolveText } from '@/lib/bilingual'
+import { resolveText, langName } from '@/lib/bilingual'
 import { AuthorNames } from '@/components/author-names'
 import type { Project } from '@/lib/supabase/queries'
 import type { Locale } from '@/lib/i18n'
@@ -96,7 +96,7 @@ export function ProjectCard({
                     className="h-4 w-4"
                   />
                 )}
-                {lang.name}
+                {langName(lang, locale)}
               </>
             )
 
@@ -105,7 +105,7 @@ export function ProjectCard({
                 key={lang.id}
                 type="button"
                 onClick={() => onTechClick(lang.id)}
-                title={`Filtrar por ${lang.name}`}
+                title={`Filtrar por ${langName(lang, locale)}`}
                 className={pillClassName}
               >
                 {pillContent}
@@ -115,7 +115,7 @@ export function ProjectCard({
                 key={lang.id}
                 href={`/${locale}/projetos`}
                 onClick={() => setHandoff('tech', [lang.id])}
-                title={`Ver projetos com ${lang.name}`}
+                title={`Ver projetos com ${langName(lang, locale)}`}
                 className={pillClassName}
               >
                 {pillContent}

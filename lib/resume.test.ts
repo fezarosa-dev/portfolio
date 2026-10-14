@@ -38,7 +38,7 @@ const src: ResumeSource = {
     { id: 's2', category_id: 'k2', language_id: null, label: 'Custom', label_en: null, position: 1 },
     { id: 's1', category_id: 'k2', language_id: 'l1', label: null, label_en: null, position: 0 },
   ],
-  technologies: { l1: { name: 'Rust' } },
+  technologies: { l1: { name: 'Rust', name_en: null }, l2: { name: 'Banco de dados', name_en: 'Database' } },
   certifications: [],
 }
 
@@ -51,4 +51,19 @@ test('buildResume respeita a ordem, resolve empresa/tecnologia e esconde categor
   assert.deepEqual(r.skills, [{ category: 'Langs', items: ['Rust', 'Custom'] }])
   assert.deepEqual(r.contactLines, ['BR  |  1  |  a@b.c', 'x.dev'])
   assert.equal(buildResume(src, 'en').summary, 'Summary')
+})
+
+test('tecnologia usa o nome do idioma (EN vazio cai pro PT) e "Com quê" vem das tecnologias vinculadas por id', () => {
+  const withTechs: ResumeSource = {
+    ...src,
+    skills: [{ id: 's3', category_id: 'k2', language_id: 'l2', label: null, label_en: null, position: 0 }],
+    projects: [
+      { id: 'p1', title: 'P', title_en: null, resume_what: null, resume_what_en: null, resume_with: null, resume_with_en: null, resume_solves: null, resume_solves_en: null, resume_position: 0, project_languages: [{ language_id: 'l1' }, { language_id: 'l2' }] },
+      { id: 'p2', title: 'Q', title_en: null, resume_what: null, resume_what_en: null, resume_with: 'texto próprio', resume_with_en: null, resume_solves: null, resume_solves_en: null, resume_position: 1, project_languages: [{ language_id: 'l1' }] },
+    ],
+  }
+  assert.deepEqual(buildResume(withTechs, 'pt').skills[0].items, ['Banco de dados'])
+  assert.deepEqual(buildResume(withTechs, 'en').skills[0].items, ['Database'])
+  assert.deepEqual(buildResume(withTechs, 'pt').projects.map((p) => p.with), ['Rust, Banco de dados', 'texto próprio'])
+  assert.deepEqual(buildResume(withTechs, 'en').projects.map((p) => p.with), ['Rust, Database', 'texto próprio'])
 })

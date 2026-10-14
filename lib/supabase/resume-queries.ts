@@ -33,14 +33,14 @@ export async function getResumeSource(client?: SupabaseClient): Promise<ResumeSo
       all(
         supabase
           .from('projects')
-          .select('id, title, title_en, resume_what, resume_what_en, resume_with, resume_with_en, resume_solves, resume_solves_en, resume_position')
+          .select('id, title, title_en, resume_what, resume_what_en, resume_with, resume_with_en, resume_solves, resume_solves_en, resume_position, project_languages(language_id)')
           .eq('in_resume', true)
       ),
       all(supabase.from('resume_education').select('*')),
       all(supabase.from('resume_spoken_languages').select('*')),
       all(supabase.from('resume_skill_categories').select('*')),
       all(supabase.from('resume_skills').select('*')),
-      all<{ id: string; name: string }>(supabase.from('languages').select('id, name')),
+      all<{ id: string; name: string; name_en: string | null }>(supabase.from('languages').select('id, name, name_en')),
       all(supabase.from('resume_certifications').select('*')),
     ])
 
@@ -61,7 +61,7 @@ export async function getResumeSource(client?: SupabaseClient): Promise<ResumeSo
     spoken,
     categories,
     skills,
-    technologies: Object.fromEntries(languages.map((l) => [l.id, { name: l.name }])),
+    technologies: Object.fromEntries(languages.map((l) => [l.id, { name: l.name, name_en: l.name_en }])),
     certifications,
   } as ResumeSource
 }

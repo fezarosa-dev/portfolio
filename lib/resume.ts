@@ -84,6 +84,8 @@ export type ResumeProjectRow = {
   resume_solves: string | null
   resume_solves_en: string | null
   resume_position: number
+  /** tecnologias vinculadas ao projeto, por id */
+  project_languages?: { language_id: string }[]
 }
 
 export type ResumeSource = {
@@ -97,7 +99,7 @@ export type ResumeSource = {
   categories: ResumeSkillCategoryRow[]
   skills: ResumeSkillRow[]
   /** nome das tecnologias vinculadas, por id (habilidades que apontam pra uma tecnologia) */
-  technologies: Record<string, { name: string }>
+  technologies: Record<string, { name: string; name_en: string | null }>
   certifications: ResumeCertificationRow[]
 }
 
@@ -187,6 +189,10 @@ export function buildResume(src: ResumeSource, locale: Locale): Resume {
   const labels = RESUME_LABELS[locale]
   const companyName = new Map(src.companies.map((c) => [c.id, t(c.name, c.name_en)]))
   const profile = src.profile
+  const techName = (id: string) => {
+    const tech = src.technologies[id]
+    return tech ? t(tech.name, tech.name_en) : ''
+  }
 
   const contactLines = [
     [t(profile?.location ?? null, profile?.location_en ?? null), src.contact.phone, src.contact.email].filter(Boolean),
@@ -221,7 +227,8 @@ export function buildResume(src: ResumeSource, locale: Locale): Resume {
       .map((p) => ({
         title: t(p.title, p.title_en),
         what: t(p.resume_what, p.resume_what_en),
-        with: t(p.resume_with, p.resume_with_en),
+        // sem texto próprio, "Com quê" lista as tecnologias vinculadas ao projeto (por id, no idioma da página)
+        with: t(p.resume_with, p.resume_with_en) || (p.project_languages ?? []).map((l) => techName(l.language_id)).filter(Boolean).join(', '),
         solves: t(p.resume_solves, p.resume_solves_en),
       })),
     education: [...src.education].sort(byPosition).map((e) => ({
@@ -239,7 +246,7 @@ export function buildResume(src: ResumeSource, locale: Locale): Resume {
         category: t(category.name, category.name_en),
         items: (itemsByCategory.get(category.id) ?? [])
           .sort(byPosition)
-          .map((s) => (s.language_id ? (src.technologies[s.language_id]?.name ?? '') : t(s.label, s.label_en)))
+          .map((s) => (s.language_id ? techName(s.language_id) : t(s.label, s.label_en)))
           .filter(Boolean),
       }))
       .filter((c) => c.items.length > 0),
