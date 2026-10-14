@@ -28,14 +28,16 @@ function TechnologyRow({
   onDragEnd,
   editAction,
   removeAction,
-  toggleShowOnHomeAction,
+  showOnHome,
+  onToggleShowOnHome,
 }: {
   lang: Language
   categories: LanguageCategory[]
   onDragEnd: () => void
   editAction: (id: string, formData: FormData) => Promise<void>
   removeAction: (id: string) => Promise<void>
-  toggleShowOnHomeAction: (id: string, showOnHome: boolean) => Promise<void>
+  showOnHome: boolean
+  onToggleShowOnHome: () => void
 }) {
   const dragControls = useDragControls()
 
@@ -45,7 +47,11 @@ function TechnologyRow({
       dragListener={false}
       dragControls={dragControls}
       onDragEnd={onDragEnd}
-      whileDrag={{ scale: 1.03, boxShadow: '0 10px 24px rgba(0,0,0,0.14)', zIndex: 1 }}
+      whileDrag={{
+        scale: 1.03,
+        boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
+        zIndex: 1,
+      }}
       className="flex items-center gap-2 rounded-md border bg-background px-3 py-2"
     >
       <button
@@ -68,19 +74,19 @@ function TechnologyRow({
           ⚠
         </span>
       )}
-      <form action={toggleShowOnHomeAction.bind(null, lang.id, !lang.show_on_home)}>
-        <button
-          type="submit"
-          title={
-            lang.show_on_home
-              ? 'Aparece na tela inicial — clique pra tirar'
-              : 'Não aparece na tela inicial — clique pra mostrar'
-          }
-          className={`shrink-0 text-xl ${lang.show_on_home ? 'text-signal' : 'text-steel/50'}`}
-        >
-          ⌂
-        </button>
-      </form>
+      <button
+        type="button"
+        onClick={onToggleShowOnHome}
+        aria-pressed={showOnHome}
+        title={
+          showOnHome
+            ? 'Aparece na tela inicial — clique pra tirar (e salve lá em cima)'
+            : 'Não aparece na tela inicial — clique pra mostrar (e salve lá em cima)'
+        }
+        className={`shrink-0 text-xl ${showOnHome ? 'text-signal' : 'text-steel/50'}`}
+      >
+        ⌂
+      </button>
       <ToastForm
         action={editAction.bind(null, lang.id)}
         successMessage="Tecnologia atualizada"
@@ -89,7 +95,12 @@ function TechnologyRow({
       >
         <div className="flex gap-2">
           <Input name="name" defaultValue={lang.name} placeholder="Nome (PT)" className="h-8" />
-          <Input name="name_en" defaultValue={lang.name_en ?? ''} placeholder="Nome (EN, opcional)" className="h-8" />
+          <Input
+            name="name_en"
+            defaultValue={lang.name_en ?? ''}
+            placeholder="Nome (EN, opcional)"
+            className="h-8"
+          />
           <Button type="submit" variant="outline" size="sm">
             Salvar
           </Button>
@@ -128,21 +139,41 @@ export function TechnologyReorderList({
   editAction,
   removeAction,
   saveOrderAction,
-  toggleShowOnHomeAction,
+  saveShowOnHomeAction,
 }: {
   languages: Language[]
   categories: LanguageCategory[]
   editAction: (id: string, formData: FormData) => Promise<void>
   removeAction: (id: string) => Promise<void>
   saveOrderAction: (orderedIds: string[]) => Promise<void>
-  toggleShowOnHomeAction: (id: string, showOnHome: boolean) => Promise<void>
+  saveShowOnHomeAction: (changes: { id: string; showOnHome: boolean }[]) => Promise<void>
 }) {
+  const [homeEdits, setHomeEdits] = useState<Record<string, boolean>>({})
+  const [savingHome, setSavingHome] = useState(false)
   const [order, setOrder] = useState(languages)
   const [prevLanguages, setPrevLanguages] = useState(languages)
 
   if (languages !== prevLanguages) {
     setPrevLanguages(languages)
     setOrder(languages)
+    setHomeEdits({})
+  }
+
+  const homeValue = (lang: Language) => homeEdits[lang.id] ?? lang.show_on_home
+  const changes = languages
+    .filter((lang) => homeEdits[lang.id] !== undefined && homeEdits[lang.id] !== lang.show_on_home)
+    .map((lang) => ({ id: lang.id, showOnHome: homeEdits[lang.id] }))
+
+  async function saveHome() {
+    setSavingHome(true)
+    try {
+      await saveShowOnHomeAction(changes)
+      toast.success('Visibilidade na home salva')
+    } catch {
+      toast.error('Não deu pra salvar. Tenta de novo.')
+    } finally {
+      setSavingHome(false)
+    }
   }
 
   async function handleDragEnd() {
@@ -154,23 +185,31 @@ export function TechnologyReorderList({
   }
 
   return (
-    <Reorder.Group
-      axis="y"
-      values={order}
-      onReorder={setOrder}
-      className="flex max-w-md flex-col gap-2"
-    >
-      {order.map((lang) => (
-        <TechnologyRow
-          key={lang.id}
-          lang={lang}
-          categories={categories}
-          onDragEnd={handleDragEnd}
-          editAction={editAction}
-          removeAction={removeAction}
-          toggleShowOnHomeAction={toggleShowOnHomeAction}
-        />
-      ))}
-    </Reorder.Group>
+    <>
+      <div className="sticky top-0 z-10 mb-3 flex max-w-md items-center justify-between gap-3 rounded-md border bg-background px-3 py-2">
+        <span className="font-mono text-xs text-steel">
+          {changes.length > 0
+            ? `${changes.length} alteração(ões) de visibilidade na home`
+            : 'visibilidade na home (⌂) sem alterações'}
+        </span>
+        <Button type="button" size="sm" disabled={changes.length === 0 || savingHome} onClick={saveHome}>
+          {savingHome ? 'Salvando…' : 'Salvar'}
+        </Button>
+      </div>
+      <Reorder.Group axis="y" values={order} onReorder={setOrder} className="flex max-w-md flex-col gap-2">
+        {order.map((lang) => (
+          <TechnologyRow
+            key={lang.id}
+            lang={lang}
+            categories={categories}
+            onDragEnd={handleDragEnd}
+            editAction={editAction}
+            removeAction={removeAction}
+            showOnHome={homeValue(lang)}
+            onToggleShowOnHome={() => setHomeEdits((prev) => ({ ...prev, [lang.id]: !homeValue(lang) }))}
+          />
+        ))}
+      </Reorder.Group>
+    </>
   )
 }

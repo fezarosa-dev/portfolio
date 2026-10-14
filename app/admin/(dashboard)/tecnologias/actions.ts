@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import {
   addLanguage,
   deleteLanguage,
@@ -47,8 +47,9 @@ export async function saveLanguagesOrder(orderedIds: string[]) {
   revalidatePath('/admin/tecnologias')
 }
 
-export async function toggleShowOnHome(id: string, showOnHome: boolean) {
-  await setLanguageShowOnHome(id, showOnHome)
+export async function saveShowOnHomeBatch(changes: { id: string; showOnHome: boolean }[]) {
+  await Promise.all(changes.map((change) => setLanguageShowOnHome(change.id, change.showOnHome)))
+  updateTag('site') // a home usa o cache 'site'
   revalidatePath('/admin/tecnologias')
 }
 

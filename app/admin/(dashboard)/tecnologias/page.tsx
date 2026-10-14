@@ -8,7 +8,7 @@ import {
   removeLanguage,
   editLanguage,
   saveLanguagesOrder,
-  toggleShowOnHome,
+  saveShowOnHomeBatch,
   saveCategory,
   editCategory,
   removeCategory,
@@ -100,7 +100,7 @@ export default async function TecnologiasPage() {
         editAction={editLanguage}
         removeAction={removeLanguage}
         saveOrderAction={saveLanguagesOrder}
-        toggleShowOnHomeAction={toggleShowOnHome}
+        saveShowOnHomeAction={saveShowOnHomeBatch}
       />
     </div>
   )
