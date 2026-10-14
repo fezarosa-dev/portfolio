@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { ToastForm } from '@/components/admin/toast-form'
 import { ItemForm, RowControls } from '@/components/admin/resume-section'
-import { saveItem, importCategories } from '@/app/admin/(dashboard)/autocurriculo/actions'
+import { saveItem, importCategories } from '@/app/admin/(dashboard)/curriculo/actions'
 import type { ResumeSkillCategoryRow, ResumeSkillRow } from '@/lib/resume'
 
 export function ResumeSkillsSection({

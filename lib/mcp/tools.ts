@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { getLanguages, getLanguageCategories, getAuthors, getCompanies, getResume, getResumeLinks, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
+import { getLanguages, getLanguageCategories, getAuthors, getCompanies, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
 import {
   getAllProjects,
   upsertProject,
@@ -18,6 +18,7 @@ import {
   updateLanguage,
   deleteLanguage,
   setLanguageCategory,
+  setLanguageShowOnHome,
   addLanguageCategory,
   updateLanguageCategory,
   deleteLanguageCategory,
@@ -25,10 +26,6 @@ import {
   addAuthor,
   updateAuthor,
   deleteAuthor,
-  upsertResume,
-  addResumeLink,
-  updateResumeLink,
-  deleteResumeLink,
   upsertSiteContent,
   deleteSiteContentKey,
   addContactLink,
@@ -38,10 +35,11 @@ import {
   markMessageRead,
   deleteMessage,
 } from '@/lib/supabase/admin-queries'
-import { reindexProject, reindexArticle, reindexLanguage, reindexResume } from '@/lib/supabase/search-index'
+import { reindexProject, reindexArticle, reindexLanguage } from '@/lib/supabase/search-index'
 import { mapProjectRow, PROJECT_SELECT, type ProjectRow } from '@/lib/supabase/queries'
 import { canRead, canWrite, type McpPermissions } from './resources'
 import { registerResumeTools } from './resume-tools'
+import { registerSiteTools } from './site-tools'
 import { PROJECT_TEMPLATE } from './project-template'
 
 function textResult(value: unknown) {
@@ -252,14 +250,16 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
             .nullable()
             .optional()
             .describe('Categoria da tecnologia (veja list_categorias_tecnologia); null remove a categoria; omitido não altera'),
+          show_on_home: z.boolean().optional().describe('Mostrar na home; omitido não altera'),
         },
       },
-      async ({ id, name, icon_url, category_id }) => {
+      async ({ id, name, icon_url, category_id, show_on_home }) => {
         const saved = id ? await updateLanguage(id, name, icon_url, client) : await addLanguage(name, icon_url, client)
         if (category_id !== undefined) {
           await setLanguageCategory(saved.id, category_id, client)
           saved.category_id = category_id
         }
+        if (show_on_home !== undefined) await setLanguageShowOnHome(saved.id, show_on_home, client)
         await reindexLanguage(saved, client)
         return textResult(saved)
       }
@@ -343,56 +343,11 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
     )
   }
 
-  // --- currículo (e seus links) ---
-  if (canRead(permissions, 'curriculo')) {
-    server.registerTool(
-      'read_curriculo',
-      { title: 'Ler currículo', description: 'Retorna o conteúdo em Markdown do currículo (PT/EN) e seus links.' },
-      async () => textResult({ ...(await getResume(client)), links: await getResumeLinks(client) })
-    )
-  }
-  if (canWrite(permissions, 'curriculo')) {
-    server.registerTool(
-      'update_curriculo',
-      {
-        title: 'Atualizar currículo',
-        description: 'Substitui o conteúdo em Markdown do currículo. Campos omitidos apagam o texto correspondente.',
-        inputSchema: { content_md: z.string().nullable().optional(), content_md_en: z.string().nullable().optional() },
-      },
-      async ({ content_md = null, content_md_en = null }) => {
-        await upsertResume(content_md, content_md_en, client)
-        await reindexResume(content_md, content_md_en, client)
-        return textResult({ content_md, content_md_en })
-      }
-    )
-    server.registerTool(
-      'upsert_link_curriculo',
-      {
-        title: 'Criar ou editar link do currículo',
-        inputSchema: {
-          id: z.string().uuid().optional(),
-          label: z.string().nullable().optional(),
-          label_en: z.string().nullable().optional(),
-          url: z.string(),
-        },
-      },
-      async ({ id, label = null, label_en = null, url }) => {
-        const link = id ? await updateResumeLink(id, label, label_en, url, client) : await addResumeLink(label, label_en, url, client)
-        return textResult(link)
-      }
-    )
-    server.registerTool(
-      'delete_link_curriculo',
-      { title: 'Excluir link do currículo', inputSchema: { id: z.string().uuid() } },
-      async ({ id }) => {
-        await deleteResumeLink(id, client)
-        return textResult({ deleted: id })
-      }
-    )
-  }
-
-  // --- autocurrículo (currículo estruturado) ---
+  // --- currículo estruturado ---
   registerResumeTools(server, permissions, client)
+
+  // --- template geral, visibilidade e ordenação ---
+  registerSiteTools(server, permissions, client)
 
   // --- conteúdo do site (textos, SEO, personalização, links de contato) ---
   if (canRead(permissions, 'conteudo_site')) {
