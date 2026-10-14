@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export type Language = {
   id: string
   name: string
+  name_en: string | null
   devicon_slug: string | null
   devicon_variant: string | null
   icon_source: string | null

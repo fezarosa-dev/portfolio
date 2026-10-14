@@ -24,7 +24,7 @@ Regras gerais: PT obrigatório; campos *_en opcionais (vazio cai pro PT). Texto 
 
 ## Habilidades
 1. Categoria: entity "skill_categories" → { "name": "Linguagens e Scripting", "name_en": "Languages & Scripting" }  (ou importar_categorias_tecnologias pra copiar as das tecnologias)
-2. Habilidade: entity "skills" → { "category_id": "<uuid>", "language_id": "<uuid de tecnologia>" }  OU  { "category_id": "<uuid>", "label": "Metodologias Ágeis" } (texto livre, pra o que não é tecnologia)
+2. Habilidade: entity "skills" → { "category_id": "<uuid>", "language_id": "<uuid de tecnologia>" } (vínculo por id; o nome PT/EN vem da tecnologia — edite com upsert_tecnologia name/name_en)  OU  { "category_id": "<uuid>", "label": "Metodologias Ágeis", "label_en": "Agile Methodologies" } (texto livre, pra o que não é tecnologia)
 
 ## Projetos no currículo
 - set_projeto_no_curriculo { id, in_resume: true } inclui (vai pro fim); mover_projeto_no_curriculo reordena.

@@ -18,7 +18,7 @@ import { resolveIcon } from '@/lib/icons'
 // pelo MCP, ver lib/mcp/) — sem ele, seguem usando o client autenticado por cookie
 // de sempre. Ver lib/supabase/service.ts.
 
-export async function addLanguage(name: string, customIconUrl?: string, client?: SupabaseClient): Promise<Language> {
+export async function addLanguage(name: string, customIconUrl?: string, nameEn?: string | null, client?: SupabaseClient): Promise<Language> {
   const icon = customIconUrl ? { slug: customIconUrl, variant: null, source: 'custom' as const } : resolveIcon(name)
   const supabase = client ?? (await createClient())
 
@@ -30,6 +30,7 @@ export async function addLanguage(name: string, customIconUrl?: string, client?:
     .from('languages')
     .insert({
       name: name.trim(),
+      name_en: nameEn?.trim() || null,
       devicon_slug: icon?.slug ?? null,
       devicon_variant: icon?.variant ?? null,
       icon_source: icon?.source ?? null,
@@ -125,6 +126,7 @@ export async function updateLanguage(
   id: string,
   name: string,
   customIconUrl?: string,
+  nameEn?: string | null,
   client?: SupabaseClient
 ): Promise<Language> {
   const icon = customIconUrl ? { slug: customIconUrl, variant: null, source: 'custom' as const } : resolveIcon(name)
@@ -133,6 +135,7 @@ export async function updateLanguage(
     .from('languages')
     .update({
       name: name.trim(),
+      ...(nameEn !== undefined && { name_en: nameEn?.trim() || null }),
       devicon_slug: icon?.slug ?? null,
       devicon_variant: icon?.variant ?? null,
       icon_source: icon?.source ?? null,

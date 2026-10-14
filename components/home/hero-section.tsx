@@ -9,6 +9,7 @@ import { Typewriter } from '@/components/typewriter'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { Language } from '@/lib/supabase/queries'
 import type { Locale } from '@/lib/i18n'
+import { langName } from '@/lib/bilingual'
 
 export function HeroSection({
   title,
@@ -96,7 +97,7 @@ export function HeroSection({
               <Link
                 href={`/${locale}/projetos`}
                 onClick={() => setHandoff('tech', [lang.id])}
-                title={`Ver projetos com ${lang.name}`}
+                title={`Ver projetos com ${langName(lang, locale)}`}
                 className="flex items-center gap-1.5 rounded-full border border-hairline bg-card/70 px-3 py-1 font-mono text-xs text-steel shadow-sm backface-hidden transition-colors hover:border-signal hover:text-signal"
               >
                 {lang.devicon_slug && (
@@ -107,7 +108,7 @@ export function HeroSection({
                     className="h-4 w-4"
                   />
                 )}
-                {lang.name}
+                {langName(lang, locale)}
               </Link>
             </motion.li>
           ))}

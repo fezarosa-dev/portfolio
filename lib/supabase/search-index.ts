@@ -59,7 +59,7 @@ export async function reindexProject(project: Project, client?: SupabaseClient):
     project.content_md,
     project.content_md_en,
     project.company?.name,
-    ...project.languages.map((lang) => lang.name),
+    ...project.languages.flatMap((lang) => [lang.name, lang.name_en]),
     ...project.authors.map((author) => author.name)
   )
   const url = project.click_mode === 'link' && project.click_url ? project.click_url : `/projetos/${project.slug}`
@@ -109,7 +109,7 @@ export async function reindexLanguage(language: Language, client?: SupabaseClien
       sourceId: language.id,
       title: language.name,
       excerpt: '',
-      searchText: language.name,
+      searchText: [language.name, language.name_en].filter(Boolean).join(' '),
       url: `/projetos?tech=${language.id}`,
     },
     client

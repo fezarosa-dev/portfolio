@@ -88,7 +88,8 @@ function TechnologyRow({
         confirmReindex
       >
         <div className="flex gap-2">
-          <Input name="name" defaultValue={lang.name} className="h-8" />
+          <Input name="name" defaultValue={lang.name} placeholder="Nome (PT)" className="h-8" />
+          <Input name="name_en" defaultValue={lang.name_en ?? ''} placeholder="Nome (EN, opcional)" className="h-8" />
           <Button type="submit" variant="outline" size="sm">
             Salvar
           </Button>
