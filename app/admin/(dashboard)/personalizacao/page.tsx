@@ -1,6 +1,6 @@
 import { getSiteContent } from '@/lib/supabase/queries'
-import { SiteContentForm } from '@/components/admin/site-content-form'
-import { saveSiteContent, toggleMascoteAtivo } from './actions'
+import { PersonalizacaoAdmin } from '@/components/admin/personalizacao-admin'
+import { SITE_KEYS, SITE_BILINGUAL_KEYS } from '@/lib/site-keys'
 
 export default async function PersonalizacaoPage() {
   const content = await getSiteContent()
@@ -8,12 +8,7 @@ export default async function PersonalizacaoPage() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold">Personalização</h1>
-      <SiteContentForm
-        content={content}
-        action={saveSiteContent}
-        mascoteAtivo={content.mascote_ativo === 'true'}
-        toggleMascoteAtivo={toggleMascoteAtivo}
-      />
+      <PersonalizacaoAdmin content={content} plainKeys={[...SITE_KEYS]} bilingualKeys={[...SITE_BILINGUAL_KEYS]} />
     </div>
   )
 }

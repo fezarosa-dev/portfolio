@@ -243,3 +243,12 @@ export function overlayContactLinks(base: ContactLink[], stack: Change[]): Conta
   }
   return rows
 }
+
+export function overlaySiteContent(base: Record<string, string>, stack: Change[]): Record<string, string> {
+  const content = { ...base }
+  for (const { op } of [...stack].reverse()) {
+    if (op.type === 'site.set') content[op.key] = op.value
+    else if (op.type === 'site.delete') delete content[op.key]
+  }
+  return content
+}

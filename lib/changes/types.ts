@@ -69,6 +69,8 @@ export type ChangeOp =
   | { type: 'contact.update'; id: string; data: ContactLinkData }
   | { type: 'contact.remove'; id: string }
   | { type: 'contact.order'; ids: string[] }
+  | { type: 'site.set'; key: string; value: string }
+  | { type: 'site.delete'; key: string }
 
 export type Change = {
   id: string
