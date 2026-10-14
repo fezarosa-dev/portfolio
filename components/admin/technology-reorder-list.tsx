@@ -37,7 +37,7 @@ export type TechnologyChange = {
   showOnHome?: boolean
 }
 
-export type TechnologyBatch = { order?: string[]; items: TechnologyChange[]; reindex: boolean }
+export type TechnologyBatch = { order?: string[]; items: TechnologyChange[] }
 
 const toDraft = (lang: Language): TechnologyDraft => ({
   name: lang.name,
@@ -219,12 +219,9 @@ export function TechnologyReorderList({
       toast.error('Toda tecnologia precisa de nome (PT).')
       return
     }
-    const reindex = changes.some((c) => c.text)
-      ? window.confirm('Atualizar a busca com essas mudanças agora? (recalcula o texto pesquisável e o embedding)')
-      : false
     setSaving(true)
     try {
-      await saveAction({ order: orderChanged ? order.map((lang) => lang.id) : undefined, items: changes, reindex })
+      await saveAction({ order: orderChanged ? order.map((lang) => lang.id) : undefined, items: changes })
       toast.success('Tecnologias salvas')
     } catch {
       toast.error('Não deu pra salvar. Tenta de novo.')

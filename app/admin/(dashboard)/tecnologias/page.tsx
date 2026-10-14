@@ -47,7 +47,6 @@ export default async function TecnologiasPage() {
         action={saveLanguage}
         successMessage="Tecnologia adicionada"
         className="mb-8 flex max-w-sm flex-col gap-2"
-        confirmReindex
       >
         <div className="flex gap-2">
           <Input name="name" placeholder="Nome PT (ex: Python)" required />

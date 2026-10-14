@@ -70,7 +70,6 @@ export async function saveSiteContent(formData: FormData) {
       saveSide(`${key}_en`, parseBilingualEn(formData, key)),
     ]),
   ])
-  await reindexSobreTexto(parseBilingualPt(formData, 'sobre_texto'), parseBilingualEn(formData, 'sobre_texto'))
   revalidatePath('/admin/personalizacao')
 }
 
