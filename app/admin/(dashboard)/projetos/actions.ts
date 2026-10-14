@@ -8,15 +8,8 @@ import {
   setProjectLanguages,
   setProjectAuthors,
 } from '@/lib/supabase/admin-queries'
-import { getProjectById } from '@/lib/supabase/queries'
-import { reindexProject, removeSearchEntry } from '@/lib/supabase/search-index'
+import { removeSearchEntry } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
-
-async function syncProjectSearchIndex(id: string) {
-  const fullProject = await getProjectById(id)
-  if (fullProject) await reindexProject(fullProject)
-  else await removeSearchEntry('projects', id)
-}
 
 export async function saveProject(formData: FormData) {
   const id = formData.get('id')
@@ -46,7 +39,6 @@ export async function saveProject(formData: FormData) {
   })
   await setProjectLanguages(project.id, formData.getAll('language_ids').map(String))
   await setProjectAuthors(project.id, formData.getAll('author_ids').map(String))
-  if (formData.get('reindex') === 'true') await syncProjectSearchIndex(project.id)
   revalidatePath('/admin/projetos')
   revalidatePath('/admin/curriculo')
 }
@@ -59,6 +51,7 @@ export async function removeProject(id: string) {
 
 export async function toggleVisibility(id: string, visible: boolean) {
   await setProjectVisibility(id, visible)
-  await syncProjectSearchIndex(id)
+  // oculto sai da busca (limpeza); (re)indexar é só manual
+  if (!visible) await removeSearchEntry('projects', id)
   revalidatePath('/admin/projetos')
 }

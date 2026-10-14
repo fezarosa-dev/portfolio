@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
-import { withReindexConfirm } from '@/components/admin/with-reindex-confirm'
 import type { Article } from '@/lib/supabase/queries'
 
 export function ArticleForm({
@@ -26,7 +25,7 @@ export function ArticleForm({
 
   async function handleSubmit(formData: FormData) {
     try {
-      await action(withReindexConfirm(formData))
+      await action(formData)
       toast.success('Artigo salvo')
       router.push('/admin/artigos')
     } catch {

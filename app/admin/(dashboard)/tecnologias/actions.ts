@@ -13,7 +13,7 @@ import {
   deleteLanguageCategory,
   setLanguageCategoriesOrder,
 } from '@/lib/supabase/admin-queries'
-import { reindexLanguage, removeSearchEntry } from '@/lib/supabase/search-index'
+import { removeSearchEntry } from '@/lib/supabase/search-index'
 import type { CategoryBatch } from '@/components/admin/category-list'
 import type { TechnologyBatch } from '@/components/admin/technology-reorder-list'
 
@@ -22,8 +22,7 @@ export async function saveLanguage(formData: FormData) {
   if (!name) return
   const iconUrl = String(formData.get('iconUrl') ?? '').trim()
 
-  const language = await addLanguage(name, iconUrl || undefined, String(formData.get('name_en') ?? ''))
-  if (formData.get('reindex') === 'true') await reindexLanguage(language)
+  await addLanguage(name, iconUrl || undefined, String(formData.get('name_en') ?? ''))
   revalidatePath('/admin/tecnologias')
 }
 
@@ -36,8 +35,7 @@ export async function removeLanguage(id: string) {
 export async function saveLanguagesBatch(batch: TechnologyBatch) {
   for (const item of batch.items) {
     if (item.text) {
-      const language = await updateLanguage(item.id, item.text.name, item.text.iconUrl || undefined, item.text.nameEn)
-      if (batch.reindex) await reindexLanguage(language)
+      await updateLanguage(item.id, item.text.name, item.text.iconUrl || undefined, item.text.nameEn)
     }
     if (item.categoryId !== undefined) await setLanguageCategory(item.id, item.categoryId)
     if (item.showOnHome !== undefined) await setLanguageShowOnHome(item.id, item.showOnHome)
