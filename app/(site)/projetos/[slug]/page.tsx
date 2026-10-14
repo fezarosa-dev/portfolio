@@ -8,7 +8,7 @@ import { UUID_RE } from '@/lib/supabase/queries'
 import { listDriveMedia, parseDriveFolderId } from '@/lib/drive'
 import { iconUrl } from '@/lib/icons'
 import { getDictionary, getLocale } from '@/lib/i18n'
-import { resolveText } from '@/lib/bilingual'
+import { resolveText, langName } from '@/lib/bilingual'
 import { pageMetadata, breadcrumbJsonLd } from '@/lib/seo'
 import { MarkdownContent } from '@/components/markdown-content'
 import { AuthorNames } from '@/components/author-names'
@@ -137,7 +137,7 @@ export default async function ProjetoDetailPage({
                 key={lang.id}
                 href={`/${locale}/projetos`}
                 handoff={['tech', [lang.id]]}
-                title={`Ver projetos com ${lang.name}`}
+                title={`Ver projetos com ${langName(lang, locale)}`}
                 className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-mono text-xs text-steel hover:border-signal hover:text-signal"
               >
                 {lang.devicon_slug && (
@@ -148,7 +148,7 @@ export default async function ProjetoDetailPage({
                     className="h-3.5 w-3.5"
                   />
                 )}
-                {lang.name}
+                {langName(lang, locale)}
               </HandoffLink>
             ))}
           </div>

@@ -110,17 +110,17 @@ export async function moveProjectInResume(projectId: string, dir: -1 | 1, client
 export async function importTechCategories(client?: SupabaseClient): Promise<number> {
   const supabase = await db(client)
   const [{ data: tech, error: e1 }, { data: mine, error: e2 }] = await Promise.all([
-    supabase.from('language_categories').select('name, name_en').order('position'),
-    supabase.from('resume_skill_categories').select('name, position'),
+    supabase.from('language_categories').select('id, name, name_en').order('position'),
+    supabase.from('resume_skill_categories').select('source_category_id, position'),
   ])
   if (e1 || e2) throw e1 ?? e2
-  const existing = new Set((mine ?? []).map((c) => (c.name ?? '').toLowerCase()))
-  const missing = (tech ?? []).filter((c) => !existing.has((c.name ?? '').toLowerCase()))
+  const existing = new Set((mine ?? []).map((c) => c.source_category_id).filter(Boolean))
+  const missing = (tech ?? []).filter((c) => !existing.has(c.id))
   const start = Math.max(-1, ...(mine ?? []).map((c) => c.position)) + 1
   if (missing.length) {
     const { error } = await supabase
       .from('resume_skill_categories')
-      .insert(missing.map((c, i) => ({ name: c.name, name_en: c.name_en, position: start + i })))
+      .insert(missing.map((c, i) => ({ name: c.name, name_en: c.name_en, source_category_id: c.id, position: start + i })))
     if (error) throw error
   }
   return missing.length

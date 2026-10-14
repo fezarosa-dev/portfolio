@@ -6,6 +6,8 @@ import { AnimatePresence, motion, useAnimationControls } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { HandoffLink } from '@/components/handoff-link'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
+import { langName } from '@/lib/bilingual'
+import type { Locale } from '@/lib/i18n'
 
 const PER_PAGE = 4
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -110,7 +112,7 @@ export function TechCard({
         )}
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-mono text-lg font-medium text-foreground transition-colors group-hover:text-signal">
-            {tech.name}
+            {langName(tech, locale as Locale)}
           </h3>
           <p className="font-mono text-xs text-steel">{tech.projects.length ? labels.projects : labels.none}</p>
         </div>

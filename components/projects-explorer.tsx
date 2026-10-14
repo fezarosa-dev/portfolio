@@ -6,7 +6,7 @@ import { takeHandoff } from '@/lib/handoff'
 import { ProjectCard } from '@/components/project-card'
 import { TechCombobox } from '@/components/tech-combobox'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
-import { resolveText } from '@/lib/bilingual'
+import { resolveText, langName } from '@/lib/bilingual'
 import type { Project, Language } from '@/lib/supabase/queries'
 import type { Dictionary, Locale } from '@/lib/i18n'
 
@@ -36,8 +36,8 @@ export function ProjectsExplorer({
     for (const project of projects) {
       for (const lang of project.languages) byId.set(lang.id, lang)
     }
-    return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name))
-  }, [projects])
+    return Array.from(byId.values()).sort((a, b) => langName(a, locale).localeCompare(langName(b, locale)))
+  }, [projects, locale])
 
   function addTechFilter(id: string) {
     setTechFilters((prev) => (prev.includes(id) ? prev : [...prev, id]))
@@ -57,7 +57,7 @@ export function ProjectsExplorer({
           resolveText(p.title, p.title_en, locale),
           resolveText(p.summary, p.summary_en, locale),
           p.company ? resolveText(p.company.name, p.company.name_en, locale) : '',
-          ...p.languages.map((lang) => lang.name),
+          ...p.languages.flatMap((lang) => [lang.name, lang.name_en ?? '']),
           ...p.authors.map((author) => author.name),
         ]
           .join(' ')
@@ -107,7 +107,7 @@ export function ProjectsExplorer({
               onClick={() => removeTechFilter(lang.id)}
               className="flex items-center gap-1.5 rounded-full border border-signal px-3 py-1 font-mono text-xs text-signal"
             >
-              {lang.name} <span aria-hidden>×</span>
+              {langName(lang, locale)} <span aria-hidden>×</span>
             </button>
           ))}
         </div>

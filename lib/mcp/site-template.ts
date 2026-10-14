@@ -33,7 +33,8 @@ Templates específicos: get_template_projeto (projetos) e get_template_curriculo
 { "title": "Título", "summary": "Resumo de 1–2 frases", "content_md": "# Markdown…", "visible": true } (+ title_en, summary_en, content_md_en). Imagens só por nome de arquivo da pasta do Drive.
 
 ## Tecnologias
-- upsert_tecnologia { name, icon_url?, category_id?, show_on_home? } — o ícone é achado pelo nome (devicon). ordenar_tecnologias { ordered_ids } define a ordem de exibição.
+- upsert_tecnologia { name (PT), name_en? (EN; vazio cai pro PT), icon_url?, category_id?, show_on_home? } — o currículo e o site mostram o nome no idioma da página, sempre ligado à tecnologia por id.
+  O ícone é achado pelo nome (devicon). ordenar_tecnologias { ordered_ids } define a ordem de exibição.
 - upsert_categoria_tecnologia { name, name_en } / mover_categoria_tecnologia { id, direction: -1|1 }.
 
 ## Autores e empresas

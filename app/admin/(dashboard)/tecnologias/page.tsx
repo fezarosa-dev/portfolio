@@ -87,7 +87,8 @@ export default async function TecnologiasPage() {
         confirmReindex
       >
         <div className="flex gap-2">
-          <Input name="name" placeholder="Nome (ex: Python)" required />
+          <Input name="name" placeholder="Nome PT (ex: Python)" required />
+          <Input name="name_en" placeholder="Nome EN (opcional)" />
           <Button type="submit">Adicionar</Button>
         </div>
         <Input name="iconUrl" placeholder="URL do ícone (opcional, se não for encontrado)" />

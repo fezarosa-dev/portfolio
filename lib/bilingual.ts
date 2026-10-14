@@ -17,6 +17,11 @@ export function resolveText(
   return fallback ?? ''
 }
 
+/** Nome de tecnologia no idioma da página (EN vazio/ausente cai pro nome PT). */
+export function langName(lang: { name: string; name_en?: string | null }, locale: Locale): string {
+  return resolveText(lang.name, lang.name_en, locale)
+}
+
 function parseSide(formData: FormData, fieldName: string, blankName: string): string | null {
   const value = String(formData.get(fieldName) ?? '').trim()
   if (value) return value

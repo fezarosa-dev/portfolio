@@ -243,7 +243,8 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           'Cria uma tecnologia nova (sem "id") ou renomeia uma existente (com "id"). O ícone é resolvido automaticamente pelo nome (devicon), a menos que "icon_url" seja informado.',
         inputSchema: {
           id: z.string().uuid().optional(),
-          name: z.string(),
+          name: z.string().describe('Nome em português'),
+          name_en: z.string().nullable().optional().describe('Nome em inglês; vazio/null cai pro nome PT; omitido não altera'),
           icon_url: z.string().optional(),
           category_id: z
             .string()
@@ -254,8 +255,8 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           show_on_home: z.boolean().optional().describe('Mostrar na home; omitido não altera'),
         },
       },
-      async ({ id, name, icon_url, category_id, show_on_home }) => {
-        const saved = id ? await updateLanguage(id, name, icon_url, client) : await addLanguage(name, icon_url, client)
+      async ({ id, name, name_en, icon_url, category_id, show_on_home }) => {
+        const saved = id ? await updateLanguage(id, name, icon_url, name_en, client) : await addLanguage(name, icon_url, name_en, client)
         if (category_id !== undefined) {
           await setLanguageCategory(saved.id, category_id, client)
           saved.category_id = category_id
