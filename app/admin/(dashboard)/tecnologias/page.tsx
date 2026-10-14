@@ -2,15 +2,15 @@ import { getLanguageCategories, getLanguages } from '@/lib/supabase/queries'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ToastForm } from '@/components/admin/toast-form'
+import { CategoryList } from '@/components/admin/category-list'
 import { TechnologyReorderList } from '@/components/admin/technology-reorder-list'
 import {
   saveLanguage,
   removeLanguage,
   saveLanguagesBatch,
   saveCategory,
-  editCategory,
+  saveCategoriesBatch,
   removeCategory,
-  moveCategory,
 } from './actions'
 
 export default async function TecnologiasPage() {
@@ -32,44 +32,9 @@ export default async function TecnologiasPage() {
         <p className="mb-3 text-sm text-muted-foreground">
           Agrupam as tecnologias na página /tecnologias do site (ex: Linguagens, Frameworks, Infra).
           Escolha a categoria de cada tecnologia na lista abaixo. Apagar uma categoria deixa as
-          tecnologias dela sem categoria. Use ↑ ↓ pra mudar a ordem das seções.
+          tecnologias dela sem categoria. Use ↑ ↓ pra mudar a ordem das seções e clique em Salvar pra gravar.
         </p>
-        <ul className="mb-3 flex flex-col gap-2">
-          {categories.map((c, i) => (
-            <li key={c.id} className="flex items-center gap-2 rounded-md border bg-background px-3 py-2">
-              <ToastForm action={moveCategory.bind(null, c.id, -1)} successMessage="Ordem atualizada">
-                <button type="submit" disabled={i === 0} className="px-1 text-steel hover:text-signal disabled:opacity-30">
-                  ↑
-                </button>
-              </ToastForm>
-              <ToastForm action={moveCategory.bind(null, c.id, 1)} successMessage="Ordem atualizada">
-                <button
-                  type="submit"
-                  disabled={i === categories.length - 1}
-                  className="px-1 text-steel hover:text-signal disabled:opacity-30"
-                >
-                  ↓
-                </button>
-              </ToastForm>
-              <ToastForm
-                action={editCategory.bind(null, c.id)}
-                successMessage="Categoria atualizada"
-                className="flex flex-1 gap-2"
-              >
-                <Input name="name" defaultValue={c.name} className="h-8" required />
-                <Input name="nameEn" defaultValue={c.name_en ?? ''} placeholder="Inglês" className="h-8" />
-                <Button type="submit" variant="outline" size="sm">
-                  Salvar
-                </Button>
-              </ToastForm>
-              <ToastForm action={removeCategory.bind(null, c.id)} successMessage="Categoria removida">
-                <button type="submit" className="px-1 text-muted-foreground hover:text-destructive">
-                  ×
-                </button>
-              </ToastForm>
-            </li>
-          ))}
-        </ul>
+        <CategoryList categories={categories} removeAction={removeCategory} saveAction={saveCategoriesBatch} />
         <ToastForm action={saveCategory} successMessage="Categoria adicionada" className="flex gap-2">
           <Input name="name" placeholder="Nome (ex: Linguagens)" required />
           <Input name="nameEn" placeholder="Inglês (ex: Languages)" />
