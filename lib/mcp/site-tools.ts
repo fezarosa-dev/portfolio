@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { revalidateTag } from 'next/cache'
 import {
   upsertProject,
   upsertArticle,
@@ -8,9 +9,11 @@ import {
   setLanguagesOrder,
   setContactLinksOrder,
   upsertSiteContent,
+  getAllProjects,
+  getAllArticles,
 } from '@/lib/supabase/admin-queries'
-import { getLanguages, getContactLinks, mapProjectRow, PROJECT_SELECT, type ProjectRow } from '@/lib/supabase/queries'
-import { reindexProject, reindexArticle } from '@/lib/supabase/search-index'
+import { getLanguages, getContactLinks, getSiteContent, mapProjectRow, PROJECT_SELECT, type ProjectRow } from '@/lib/supabase/queries'
+import { reindexProject, reindexArticle, reindexLanguage, reindexSobreTexto } from '@/lib/supabase/search-index'
 import { canRead, canWrite, MCP_RESOURCES, type McpPermissions } from './resources'
 import { buildSiteTemplate, NAV_PAGES } from './site-template'
 
@@ -114,6 +117,41 @@ export function registerSiteTools(server: McpServer, permissions: McpPermissions
         if (mascote !== undefined) writes.push(upsertSiteContent('mascote_ativo', flag(mascote), client))
         await Promise.all(writes)
         return textResult({ menu_oculto, pagina_tecnologias, easter_eggs, mascote })
+      }
+    )
+    server.registerTool(
+      'reindexar_busca',
+      {
+        title: 'Reindexar a busca',
+        description: 'Reconstrói o índice de busca de todos os projetos e artigos visíveis, tecnologias e do texto "sobre". Use depois de mudanças em massa. Retorna as contagens.',
+      },
+      async () => {
+        const [projects, articles, languages, content] = await Promise.all([
+          getAllProjects(client),
+          getAllArticles(client),
+          getLanguages(client),
+          getSiteContent(client),
+        ])
+        await Promise.all([
+          ...projects.filter((p) => p.visible).map((p) => reindexProject(p, client)),
+          ...articles.filter((a) => a.visible).map((a) => reindexArticle(a, client)),
+          ...languages.map((l) => reindexLanguage(l, client)),
+        ])
+        await reindexSobreTexto(content.sobre_texto ?? null, content.sobre_texto_en ?? null, client)
+        return textResult({ projetos: projects.filter((p) => p.visible).length, artigos: articles.filter((a) => a.visible).length, tecnologias: languages.length })
+      }
+    )
+    server.registerTool(
+      'republicar_site',
+      {
+        title: 'Republicar o site',
+        description: 'Invalida o cache público na hora (igual ao botão Republicar do admin). Normalmente desnecessário: toda escrita já faz isso.',
+      },
+      async () => {
+        revalidateTag('site', { expire: 0 })
+        const at = new Date().toISOString()
+        await upsertSiteContent('last_republish_at', at, client)
+        return textResult({ republished_at: at })
       }
     )
     server.registerTool(
