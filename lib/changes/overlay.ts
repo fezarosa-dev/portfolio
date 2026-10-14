@@ -1,6 +1,7 @@
 import { resolveIcon } from '../icons.ts'
 import type { Article, Author, Company, ContactLink, Language, LanguageCategory, Project } from '../supabase/queries.ts'
-import type { ArticleData, Change, ProjectData } from './types.ts'
+import type { ResumeSource } from '../resume.ts'
+import type { ArticleData, Change, ProjectData, ResumeEntity } from './types.ts'
 
 type Positioned = { id: string; position: number }
 
@@ -102,12 +103,12 @@ export function overlayCategories(base: LanguageCategory[], stack: Change[]): La
 /** Ids com edição ou criação pendente (pra borda laranja). Ordenar e apagar não contam. */
 export function touchedIds(
   stack: Change[],
-  entity: 'language' | 'category' | 'project' | 'article' | 'author' | 'company' | 'contact'
+  entity: 'language' | 'category' | 'project' | 'article' | 'author' | 'company' | 'contact' | 'resume'
 ): Set<string> {
   const ids = new Set<string>()
   for (const { op } of stack) {
     if (!op.type.startsWith(`${entity}.`) || op.type.endsWith('.order') || op.type.endsWith('.remove')) continue
-    ids.add((op as { id: string }).id)
+    if ('id' in op) ids.add(op.id)
   }
   return ids
 }
@@ -251,4 +252,88 @@ export function overlaySiteContent(base: Record<string, string>, stack: Change[]
     else if (op.type === 'site.delete') delete content[op.key]
   }
   return content
+}
+
+const RESUME_LISTS = {
+  experiences: 'experiences',
+  education: 'education',
+  spoken: 'spoken',
+  certifications: 'certifications',
+  skill_categories: 'categories',
+  skills: 'skills',
+} as const satisfies Record<ResumeEntity, keyof ResumeSource>
+
+type Row = Record<string, unknown> & { id: string; position: number }
+
+/** Currículo estruturado + fila pendente (perfil, listas e ordens). Os projetos do currículo vêm de overlayResumeProjects. */
+export function overlayResume(source: ResumeSource, stack: Change[]): ResumeSource {
+  const lists: Record<ResumeEntity, Row[]> = {
+    experiences: [], education: [], spoken: [], certifications: [], skill_categories: [], skills: [],
+  }
+  for (const entity of Object.keys(RESUME_LISTS) as ResumeEntity[]) {
+    lists[entity] = (source[RESUME_LISTS[entity]] as unknown as Row[]).map((row) => ({ ...row }))
+  }
+  let profile: ResumeSource['profile'] = source.profile ? { ...source.profile } : null
+
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'resume.profile':
+        profile = {
+          full_name: null, headline: null, headline_en: null, location: null, location_en: null, summary: null, summary_en: null,
+          ...profile,
+          ...op.values,
+        }
+        break
+      case 'resume.add': {
+        const list = lists[op.entity]
+        const position = Math.max(-1, ...list.map((row) => row.position)) + 1
+        lists[op.entity] = [...list, { ...op.data, id: op.id, position }]
+        break
+      }
+      case 'resume.update':
+        lists[op.entity] = lists[op.entity].map((row) => (row.id === op.id ? { ...row, ...op.data } : row))
+        break
+      case 'resume.remove':
+        lists[op.entity] = lists[op.entity].filter((row) => row.id !== op.id)
+        break
+      case 'resume.order': {
+        const rows = lists[op.entity]
+        const inScope = (row: Row) => !op.scopeId || row.category_id === op.scopeId
+        const ordered = applyOrder(rows.filter(inScope), op.ids)
+        const byId = new Map(ordered.map((row) => [row.id, row]))
+        lists[op.entity] = rows.map((row) => byId.get(row.id) ?? row)
+        break
+      }
+      default:
+        break
+    }
+  }
+
+  const sorted = (rows: Row[]) => [...rows].sort((a, b) => a.position - b.position)
+  return {
+    ...source,
+    profile,
+    experiences: sorted(lists.experiences) as unknown as ResumeSource['experiences'],
+    education: sorted(lists.education) as unknown as ResumeSource['education'],
+    spoken: sorted(lists.spoken) as unknown as ResumeSource['spoken'],
+    certifications: sorted(lists.certifications) as unknown as ResumeSource['certifications'],
+    categories: sorted(lists.skill_categories) as unknown as ResumeSource['categories'],
+    skills: sorted(lists.skills) as unknown as ResumeSource['skills'],
+  }
+}
+
+/** Projetos já com as mudanças de projeto aplicadas + quem entra no currículo e em que ordem. */
+export function overlayResumeProjects(projects: Project[], stack: Change[]): Project[] {
+  let rows = projects.map((row) => ({ ...row }))
+  for (const { op } of [...stack].reverse()) {
+    if (op.type === 'resume.project') {
+      const last = Math.max(-1, ...rows.filter((row) => row.in_resume).map((row) => row.resume_position))
+      rows = rows.map((row) =>
+        row.id !== op.id ? row : { ...row, in_resume: op.inResume, resume_position: op.inResume && !row.in_resume ? last + 1 : row.resume_position }
+      )
+    } else if (op.type === 'resume.projectOrder') {
+      rows = rows.map((row) => (op.ids.includes(row.id) ? { ...row, resume_position: op.ids.indexOf(row.id) } : row))
+    }
+  }
+  return rows
 }

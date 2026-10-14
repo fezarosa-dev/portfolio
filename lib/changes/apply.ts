@@ -30,6 +30,14 @@ import {
   upsertSiteContent,
   deleteSiteContentKey,
 } from '@/lib/supabase/admin-queries'
+import {
+  saveResumeItem,
+  deleteResumeItem,
+  saveResumeProfile,
+  setProjectInResume,
+  setResumeItemsOrder,
+  setProjectsResumeOrder,
+} from '@/lib/supabase/resume-admin'
 import { removeSearchEntry } from '@/lib/supabase/search-index'
 import { createClient } from '@/lib/supabase/server'
 import type { ArticleData, ChangeOp, ProjectData } from './types'
@@ -160,6 +168,26 @@ export async function applyOp(op: ChangeOp): Promise<void> {
       return deleteContactLink(op.id)
     case 'contact.order':
       return setContactLinksOrder(op.ids)
+    case 'resume.profile':
+      return saveResumeProfile(op.values)
+    case 'resume.add':
+      await saveResumeItem(
+        op.entity,
+        null,
+        { ...op.data, id: op.id },
+        op.entity === 'skills' && typeof op.data.category_id === 'string' ? { column: 'category_id', value: op.data.category_id } : undefined
+      )
+      return
+    case 'resume.update':
+      return saveResumeItem(op.entity, op.id, op.data)
+    case 'resume.remove':
+      return deleteResumeItem(op.entity, op.id)
+    case 'resume.order':
+      return setResumeItemsOrder(op.entity, op.ids)
+    case 'resume.project':
+      return setProjectInResume(op.id, op.inResume)
+    case 'resume.projectOrder':
+      return setProjectsResumeOrder(op.ids)
     case 'site.set':
       return upsertSiteContent(op.key, op.value)
     case 'site.delete':

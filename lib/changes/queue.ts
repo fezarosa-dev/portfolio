@@ -4,6 +4,8 @@ const entityOf = (op: ChangeOp) => op.type.split('.')[0]
 
 /** Chave de coalescência: editar o mesmo campo de novo substitui a entrada anterior. */
 export function opKey(op: ChangeOp): string {
+  if (op.type === 'resume.profile') return 'resume:profile'
+  if (op.type === 'resume.order') return `resume:order:${op.entity}:${op.scopeId ?? ''}`
   if ('ids' in op) return `${entityOf(op)}:order`
   if (op.type === 'site.set' || op.type === 'site.delete') return `site:${op.key}`
   switch (op.type) {
@@ -17,7 +19,7 @@ export function opKey(op: ChangeOp): string {
 
 /** Entidade afetada ("language:abc"), ou null pras ordenações. */
 export function targetOf(op: ChangeOp): string | null {
-  if ('ids' in op) return null
+  if ('ids' in op || op.type === 'resume.profile') return null
   if (op.type === 'site.set' || op.type === 'site.delete') return `site:${op.key}`
   return `${entityOf(op)}:${op.id}`
 }
