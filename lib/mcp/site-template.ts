@@ -24,6 +24,11 @@ Templates específicos: get_template_projeto (projetos) e get_template_curriculo
   - easter_eggs: liga/desliga todos os easter eggs de teclado.
   - mascote: mostra/esconde o mascote.
 
+## Manutenção
+- reindexar_busca: reconstrói o índice de busca (projetos/artigos visíveis, tecnologias, "sobre"). Use após mudanças em massa.
+- republicar_site: invalida o cache público (toda escrita já faz isso; raramente necessário).
+- Ordem dos projetos: upsert_projeto { id, position } (maior aparece primeiro).
+
 ## Artigos — upsert_artigo
 { "title": "Título", "summary": "Resumo de 1–2 frases", "content_md": "# Markdown…", "visible": true } (+ title_en, summary_en, content_md_en). Imagens só por nome de arquivo da pasta do Drive.
 
