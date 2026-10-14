@@ -119,7 +119,7 @@ function projectFrom(base: Project | null, id: string, data: ProjectData, ctx: P
   const { language_ids, author_ids, company_id, ...fields } = data
   const pick = <T extends { id: string }>(all: T[], ids: string[]) => ids.flatMap((i) => all.filter((x) => x.id === i))
   return {
-    slug: '',
+    slug: id, // sem slug até o banco gerar: o uuid também abre a página do projeto
     created_at: new Date(0).toISOString(),
     resume_position: 0,
     ...base,
@@ -152,7 +152,14 @@ export function overlayProjects(base: Project[], stack: Change[], ctx: ProjectCo
         break
     }
   }
-  return [...rows].sort((a, b) => b.position - a.position)
+  // tecnologias/autores/empresa renomeados, criados ou apagados na fila refletem nos projetos que os usam
+  const refreshed = rows.map((row) => ({
+    ...row,
+    languages: row.languages.flatMap((l) => ctx.languages.filter((x) => x.id === l.id)),
+    authors: row.authors.flatMap((a) => ctx.authors.filter((x) => x.id === a.id)),
+    company: row.company ? (ctx.companies.find((c) => c.id === row.company?.id) ?? null) : null,
+  }))
+  return refreshed.sort((a, b) => b.position - a.position)
 }
 
 function articleFrom(base: Article | null, id: string, data: ArticleData): Article {

@@ -11,6 +11,17 @@ async function all<T>(query: PromiseLike<{ data: T[] | null; error: unknown }>):
   return data ?? []
 }
 
+/** Contato do cabeçalho do currículo, a partir das chaves do conteúdo do site. */
+export function resumeContact(c: Record<string, string>): ResumeSource['contact'] {
+  return {
+    email: c.contato_email ?? '',
+    phone: c.contato_telefone ?? '',
+    links: [SITE_HOST, c.link_linkedin && stripProtocol(c.link_linkedin), c.link_github && stripProtocol(c.link_github)].filter(
+      Boolean
+    ) as string[],
+  }
+}
+
 /** Tudo que o currículo (página e PDF) precisa, numa leitura só. */
 export async function getResumeSource(client?: SupabaseClient): Promise<ResumeSource> {
   const supabase = client ?? (await createClient())
@@ -47,13 +58,7 @@ export async function getResumeSource(client?: SupabaseClient): Promise<ResumeSo
   const c = Object.fromEntries(content.map((row) => [row.key, row.value]))
   return {
     profile,
-    contact: {
-      email: c.contato_email ?? '',
-      phone: c.contato_telefone ?? '',
-      links: [SITE_HOST, c.link_linkedin && stripProtocol(c.link_linkedin), c.link_github && stripProtocol(c.link_github)].filter(
-        Boolean
-      ) as string[],
-    },
+    contact: resumeContact(c),
     experiences,
     companies,
     projects,
