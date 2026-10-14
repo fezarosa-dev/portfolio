@@ -22,8 +22,8 @@ export default async function PreviewPage() {
       {isEnabled ? (
         <>
           <p className="rounded-md border border-hairline bg-card px-4 py-2 font-mono text-xs text-steel">
-            ● Preview ativo — você vê as mudanças salvas na hora. Visitantes veem
-            a versão de até 60s atrás até você usar “Republicar agora”.
+            ● Preview ativo — você vê o site com a sua Lista de mudanças já aplicada (mesmo
+            o que ainda não foi enviado). Visitantes veem a versão de até 60s atrás até você enviar e/ou usar “Republicar agora”.
           </p>
           <PreviewFrame />
         </>

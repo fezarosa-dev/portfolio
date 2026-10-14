@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { useChanges } from '@/components/admin/changes-provider'
-import { overlayProjects, touchedIds } from '@/lib/changes/overlay'
+import { overlayAuthors, overlayCompanies, overlayLanguages, overlayProjects, touchedIds } from '@/lib/changes/overlay'
 import type { Author, Company, Language, Project } from '@/lib/supabase/queries'
 
 export function ProjectsAdminList({
@@ -20,7 +20,12 @@ export function ProjectsAdminList({
 }) {
   const { changes, enqueue } = useChanges()
   const list = useMemo(
-    () => overlayProjects(projects, changes, { languages, authors, companies }),
+    () =>
+      overlayProjects(projects, changes, {
+        languages: overlayLanguages(languages, changes),
+        authors: overlayAuthors(authors, changes),
+        companies: overlayCompanies(companies, changes),
+      }),
     [projects, changes, languages, authors, companies]
   )
   const touched = useMemo(() => touchedIds(changes, 'project'), [changes])

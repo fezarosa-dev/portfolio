@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useChanges } from '@/components/admin/changes-provider'
 
 type Device = 'desktop' | 'tablet' | 'mobile'
 
@@ -14,6 +15,15 @@ export function PreviewFrame() {
   const [locale, setLocale] = useState<'pt' | 'en'>('pt')
   const [device, setDevice] = useState<Device>('desktop')
   const [nonce, setNonce] = useState(0)
+  const { changes, loaded } = useChanges()
+  const signature = changes.map((c) => c.id).join()
+
+  useEffect(() => {
+    // a fila mudou: espera o rascunho ser gravado (~700ms) e recarrega o site embutido
+    if (!loaded) return
+    const timer = setTimeout(() => setNonce((n) => n + 1), 1500)
+    return () => clearTimeout(timer)
+  }, [signature, loaded])
 
   const src = `/${locale}`
 
