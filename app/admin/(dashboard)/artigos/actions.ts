@@ -2,8 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { upsertArticle, deleteArticle, setArticleVisibility } from '@/lib/supabase/admin-queries'
-import { getArticleById } from '@/lib/supabase/queries'
-import { reindexArticle, removeSearchEntry } from '@/lib/supabase/search-index'
+import { removeSearchEntry } from '@/lib/supabase/search-index'
 import { parseBilingualPt, parseBilingualEn } from '@/lib/bilingual'
 
 export async function saveArticle(formData: FormData) {
@@ -19,11 +18,7 @@ export async function saveArticle(formData: FormData) {
     position: Number(formData.get('position') ?? 0),
     visible: formData.get('visible') === 'true',
   })
-  if (article.visible) {
-    if (formData.get('reindex') === 'true') await reindexArticle(article)
-  } else {
-    await removeSearchEntry('articles', article.id)
-  }
+  if (!article.visible) await removeSearchEntry('articles', article.id)
   revalidatePath('/admin/artigos')
 }
 
@@ -35,11 +30,6 @@ export async function removeArticle(id: string) {
 
 export async function toggleArticleVisibility(id: string, visible: boolean) {
   await setArticleVisibility(id, visible)
-  if (visible) {
-    const article = await getArticleById(id)
-    if (article) await reindexArticle(article)
-  } else {
-    await removeSearchEntry('articles', id)
-  }
+  if (!visible) await removeSearchEntry('articles', id)
   revalidatePath('/admin/artigos')
 }
