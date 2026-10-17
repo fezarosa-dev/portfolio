@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { SplitTitle } from '@/components/split-title'
-import { ArrowUpRight, ExternalLink, Mail, MessageCircle, Phone } from 'lucide-react'
+import { ArrowUpRight, CalendarDays, ExternalLink, Mail, MessageCircle, Phone } from 'lucide-react'
 import { getContactLinks, getSiteContent } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
@@ -16,6 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo('contato', locale)
   return pageMetadata(locale, '/contato', seo.title, seo.description)
 }
+
+const AGENDA_URL = 'https://calendar.app.google/zF79cMrKtSe33uvH9'
 
 function iconFor(url: string) {
   if (url.startsWith('mailto:')) return Mail
@@ -68,6 +70,29 @@ export default async function ContatoPage() {
             </ul>
           </FadeIn>
         )}
+
+        <FadeIn delay={0.08}>
+          <div className="flex flex-col gap-4 rounded-lg border border-hairline bg-card p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+            <div className="flex items-start gap-4">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-signal/10 text-signal">
+                <CalendarDays className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="font-display text-xl font-medium tracking-tight">{dict.contato.scheduleTitle}</h2>
+                <p className="mt-1 text-steel">{dict.contato.scheduleText}</p>
+              </div>
+            </div>
+            <a
+              href={AGENDA_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-signal px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            >
+              {dict.contato.scheduleCta}
+              <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+        </FadeIn>
 
         <FadeIn delay={0.1}>
           <div id="formulario" className="scroll-mt-24 rounded-lg border border-hairline bg-card p-6 sm:p-8 lg:p-10">
