@@ -7,6 +7,7 @@ import { resolveText } from '@/lib/bilingual'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
 import { ContactForm } from './contact-form'
+import { ScheduleButton } from './schedule-button'
 import { pageText } from '@/lib/page-texts'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -16,8 +17,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo('contato', locale)
   return pageMetadata(locale, '/contato', seo.title, seo.description)
 }
-
-const AGENDA_URL = 'https://calendar.app.google/zF79cMrKtSe33uvH9'
 
 function iconFor(url: string) {
   if (url.startsWith('mailto:')) return Mail
@@ -82,15 +81,7 @@ export default async function ContatoPage() {
                 <p className="mt-1 text-steel">{dict.contato.scheduleText}</p>
               </div>
             </div>
-            <a
-              href={AGENDA_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-signal px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              {dict.contato.scheduleCta}
-              <ArrowUpRight className="h-4 w-4" />
-            </a>
+            <ScheduleButton label={dict.contato.scheduleCta} />
           </div>
         </FadeIn>
 
