@@ -76,6 +76,9 @@ export type Dictionary = {
     title: string
     lead: string
     formTitle: string
+    scheduleTitle: string
+    scheduleText: string
+    scheduleCta: string
     categoryLabel: string
     categories: { vaga: string; projeto: string; duvida: string; outro: string }
     subjectLabel: string
@@ -221,6 +224,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       title: 'Vamos conversar',
       lead: 'Escolha o canal que preferir ou mande uma mensagem pelo formulário — respondo o quanto antes.',
       formTitle: 'Mande uma mensagem',
+      scheduleTitle: 'Agende uma conversa',
+      scheduleText: 'Prefere falar ao vivo? Escolha um horário livre na minha agenda.',
+      scheduleCta: 'Ver horários',
       categoryLabel: 'Sobre o quê?',
       categories: { vaga: 'Vaga / oportunidade', projeto: 'Projeto / freela', duvida: 'Dúvida', outro: 'Outro' },
       subjectLabel: 'Assunto',
@@ -373,6 +379,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       title: "Let's talk",
       lead: "Pick the channel you prefer or send a message through the form — I'll reply as soon as I can.",
       formTitle: 'Send a message',
+      scheduleTitle: 'Book a call',
+      scheduleText: 'Prefer to talk live? Pick a free slot on my calendar.',
+      scheduleCta: 'See available times',
       categoryLabel: 'What is it about?',
       categories: { vaga: 'Job / opportunity', projeto: 'Project / freelance', duvida: 'Question', outro: 'Other' },
       subjectLabel: 'Subject',
