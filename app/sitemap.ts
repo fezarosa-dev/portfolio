@@ -40,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(content.tecnologias_ativo === 'false' ? [] : entriesFor('/tecnologias', 'weekly', 0.7)),
     ...entriesFor('/artigos', 'weekly', 0.8),
     ...entriesFor('/contato', 'yearly', 0.5),
+    ...entriesFor('/agenda', 'yearly', 0.4),
     ...entriesFor('/curriculo', 'monthly', 0.6),
     ...entriesFor('/status', 'weekly', 0.4),
     ...entriesFor('/busca', 'weekly', 0.4),
