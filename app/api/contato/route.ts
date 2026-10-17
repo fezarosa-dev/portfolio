@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     )
   }
 
-  await insertMessage({ name, email, phone: phone || null, subject, category, message, ip })
+  await insertMessage({ name, email, ...(phone && { phone }), subject, category, message, ip })
   await notifyNewMessage(name, email, phone, subject, category, message)
   return NextResponse.json({ ok: true })
 }
