@@ -88,6 +88,8 @@ export type Dictionary = {
     namePlaceholder: string
     emailLabel: string
     emailPlaceholder: string
+    phoneLabel: string
+    phonePlaceholder: string
     messageLabel: string
     messagePlaceholder: string
     send: string
@@ -236,6 +238,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       namePlaceholder: 'Seu nome',
       emailLabel: 'E-mail',
       emailPlaceholder: 'Seu e-mail',
+      phoneLabel: 'Telefone (opcional)',
+      phonePlaceholder: '(DDD) 90000-0000',
       messageLabel: 'Mensagem',
       messagePlaceholder: 'Sua mensagem',
       send: 'Enviar',
@@ -391,6 +395,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       namePlaceholder: 'Your name',
       emailLabel: 'Email',
       emailPlaceholder: 'Your email',
+      phoneLabel: 'Phone (optional)',
+      phonePlaceholder: '+55 (00) 90000-0000',
       messageLabel: 'Message',
       messagePlaceholder: 'Your message',
       send: 'Send',

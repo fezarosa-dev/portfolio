@@ -7,6 +7,7 @@ import { clientIp, isSameOriginJson } from '@/lib/request-guard'
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro']
 const MAX_SUBJECT = 120
 const MAX_MESSAGE = 4000
+const PHONE_RE = /^[+\d\s().-]{8,30}$/
 const RATE_LIMIT_MAX = 3
 const RATE_LIMIT_WINDOW_MINUTES = 15
 
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
   if (String(body.website ?? '').trim()) return NextResponse.json({ ok: true })
   const name = String(body.name ?? '').trim()
   const email = String(body.email ?? '').trim()
+  const phone = String(body.phone ?? '').trim()
   const subject = String(body.subject ?? '').trim()
   const category = String(body.category ?? '')
   const message = String(body.message ?? '').trim()
@@ -58,6 +60,10 @@ export async function POST(request: Request) {
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     return NextResponse.json({ error: 'E-mail inválido.' }, { status: 400 })
+  }
+
+  if (phone && !PHONE_RE.test(phone)) {
+    return NextResponse.json({ error: 'Telefone inválido.' }, { status: 400 })
   }
 
   const domain = email.split('@')[1]
@@ -77,7 +83,7 @@ export async function POST(request: Request) {
     )
   }
 
-  await insertMessage({ name, email, subject, category, message, ip })
-  await notifyNewMessage(name, email, subject, category, message)
+  await insertMessage({ name, email, phone: phone || null, subject, category, message, ip })
+  await notifyNewMessage(name, email, phone, subject, category, message)
   return NextResponse.json({ ok: true })
 }
