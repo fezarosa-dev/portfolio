@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { SplitTitle } from '@/components/split-title'
 import { ArrowUpRight, CalendarDays, ExternalLink, Mail, MessageCircle, Phone } from 'lucide-react'
 import { getContactLinks, getSiteContent } from '@/lib/supabase/queries-cached'
@@ -8,6 +7,7 @@ import { resolveText } from '@/lib/bilingual'
 import { pageMetadata } from '@/lib/seo'
 import { getPageSeo } from '@/lib/seo-runtime'
 import { ContactForm } from './contact-form'
+import { ScheduleButton } from './schedule-button'
 import { pageText } from '@/lib/page-texts'
 import { Eyebrow } from '@/components/eyebrow'
 import { FadeIn } from '@/components/fade-in'
@@ -81,13 +81,7 @@ export default async function ContatoPage() {
                 <p className="mt-1 text-steel">{dict.contato.scheduleText}</p>
               </div>
             </div>
-            <Link
-              href={`/${locale}/agenda`}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-signal px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              {dict.contato.scheduleCta}
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <ScheduleButton label={dict.contato.scheduleCta} />
           </div>
         </FadeIn>
 
