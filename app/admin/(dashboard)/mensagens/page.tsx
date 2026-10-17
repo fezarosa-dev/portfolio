@@ -26,7 +26,7 @@ export default async function MensagensPage() {
             >
               <div className="flex items-center justify-between gap-4">
                 <p className="font-medium">
-                  {msg.name} <span className="text-steel">— {msg.email}</span>
+                  {msg.name} <span className="text-steel">— {msg.email}{msg.phone && ` · ${msg.phone}`}</span>
                 </p>
                 <p className="shrink-0 font-mono text-xs text-steel">
                   {new Date(msg.created_at).toLocaleString('pt-BR')}
