@@ -13,6 +13,7 @@ import type { Dictionary } from '@/lib/i18n'
 
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
 const MAX_MESSAGE = 4000
+const MAX_PHONE = 30
 const MIN_HEIGHT = 176
 const MAX_HEIGHT = 720
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -199,6 +200,7 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
         body: JSON.stringify({
           name: formData.get('name'),
           email: formData.get('email'),
+          phone: formData.get('phone'),
           category: formData.get('category'),
           subject: formData.get('subject'),
           message: formData.get('message'),
@@ -278,6 +280,19 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
             className="h-11"
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="contact-phone">{dict.phoneLabel}</Label>
+        <Input
+          id="contact-phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          maxLength={MAX_PHONE}
+          placeholder={dict.phonePlaceholder}
+          className="h-11"
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
