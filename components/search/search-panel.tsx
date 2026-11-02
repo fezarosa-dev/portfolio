@@ -248,7 +248,7 @@ export function SearchPanel({
                           setHandoff('tech', [stat.id])
                           onNavigate?.()
                         }}
-                        className="flex w-24 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
+                        className="flex w-28 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
                       >
                         {stat.devicon_slug && (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -258,7 +258,7 @@ export function SearchPanel({
                             className="h-4 w-4 shrink-0"
                           />
                         )}
-                        <span className="truncate font-mono text-xs text-foreground">{stat.name}</span>
+                        <span className="font-mono text-xs leading-tight text-foreground">{stat.name}</span>
                       </Link>
                       <Tooltip>
                         <TooltipTrigger

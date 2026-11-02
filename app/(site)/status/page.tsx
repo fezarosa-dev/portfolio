@@ -37,14 +37,14 @@ function StatCard({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 block truncate font-mono text-2xl text-foreground transition-colors hover:text-signal"
+          className="mt-2 block break-words font-mono text-2xl text-foreground transition-colors hover:text-signal"
         >
           {value}
         </a>
       ) : (
-        <p className="mt-2 truncate font-mono text-2xl text-foreground">{value}</p>
+        <p className="mt-2 break-words font-mono text-2xl text-foreground">{value}</p>
       )}
-      {hint && <p className="mt-1 truncate font-mono text-xs text-steel">{hint}</p>}
+      {hint && <p className="mt-1 break-words font-mono text-xs text-steel">{hint}</p>}
     </div>
   )
 }
@@ -91,7 +91,7 @@ export default async function StatusPage() {
         <p className="mt-3 max-w-lg text-steel">{dict.status.subtitle}</p>
       </FadeIn>
 
-      <FadeIn delay={0.1} className="mt-10 grid gap-4 sm:grid-cols-2">
+      <FadeIn delay={0.1} className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard
           label={dict.status.deployLabel}
           value={sha ? sha.slice(0, 7) : dict.status.deployLocal}
