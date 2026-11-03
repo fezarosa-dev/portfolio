@@ -955,7 +955,7 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
         offset: [0.2, 0.75, 1.5],
         spin: [0, 0, 0],
         delay: 0.2,
-        labelAt: [0, 0.32, 0.1],
+        labelAt: [0, 0.36, 0.1],
         node: <Cpu brushed={brushed} stats={{ projects, technologies, companies }} en={en} />,
       },
       ...[0, 1, 2, 3].map<Part>((i) => ({
@@ -967,18 +967,18 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
         labelAt: [0, 0.42, 0.1],
         node: <Ram accent={i % 2 ? CARAMEL : SIGNAL} brushed={brushed} />,
       })),
-      { key: 'gpu', assembled: [-0.05, -0.2, -0.12], offset: [0.15, -0.35, 1.45], spin: [-0.5, 0.15, 0], delay: 0.12, labelAt: [0, 0.3, 0.1], node: <Gpu brushed={brushed} /> },
+      { key: 'gpu', assembled: [-0.05, -0.2, -0.12], offset: [0.15, -0.35, 1.45], spin: [-0.5, 0.15, 0], delay: 0.12, labelAt: [0, 0.42, 0], node: <Gpu brushed={brushed} /> },
       // a fonte sai para a frente e para a esquerda, sem descer (antes afundava na plataforma)
-      { key: 'psu', assembled: [-0.47, -0.86, 0], offset: [-0.3, 0.02, 2.2], spin: [0, 0.35, 0], delay: 0.06, labelAt: [0, 0.34, 0.2], node: <Psu brushed={brushed} /> },
+      { key: 'psu', assembled: [-0.47, -0.86, 0], offset: [-0.3, 0.02, 2.2], spin: [0, 0.35, 0], delay: 0.06, labelAt: [0, 0.5, 0], node: <Psu brushed={brushed} /> },
       // SSD na placa-mãe, entre o processador e a placa de vídeo; HDs no fundo, na frente da fonte
-      { key: 'nvme', assembled: [-0.22, 0.12, -0.405], offset: [1.0, 0.3, 2.0], spin: [-0.15, 0.4, 0.1], delay: 0.18, labelAt: [0, 0.26, 0.05], node: <group scale={1.6}><Nvme brushed={brushed} /></group> },
+      { key: 'nvme', assembled: [-0.22, 0.12, -0.405], offset: [1.27, -0.07, 2.0], spin: [-0.15, 0.4, 0.1], delay: 0.18, labelAt: [0, 0.26, 0.05], node: <group scale={1.6}><Nvme brushed={brushed} /></group> },
       ...[0, 1].map<Part>((i) => ({
         key: `hdd${i}`,
         assembled: [0.5, -0.92 + i * 0.09, 0.05],
         offset: [1.0 - i * 0.15, 0.05 + i * 0.6, 1.9 + i * 0.4],
         spin: [0, -0.4 - i * 0.2, 0],
         delay: 0.1 + i * 0.04,
-        labelAt: [0, 0.22, 0],
+        labelAt: [0, -0.22, 0.25],
         node: <Hdd brushed={brushed} label={i ? 'RESTORE' : 'BACKUP'} />,
       })),
       ...[0.55, 0, -0.55].map<Part>((y, i) => ({
@@ -987,7 +987,8 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
         offset: [1.6, (1 - i) * 0.45, 0.5],
         spin: [0, -0.5, 0],
         delay: 0.08 + i * 0.04,
-        labelAt: [0, 0, 0.4],
+        // entre a ventoinha do meio e a de baixo, sem cobrir nenhuma
+        labelAt: [0, -0.5, 0.4],
         node: (
           <group rotation={[0, Math.PI / 2, 0]}>
             <Fan />
