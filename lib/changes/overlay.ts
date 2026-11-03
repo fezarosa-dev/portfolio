@@ -145,6 +145,9 @@ export function overlayProjects(base: Project[], stack: Change[], ctx: ProjectCo
       case 'project.visible':
         rows = rows.map((row) => (row.id === op.id ? { ...row, visible: op.visible } : row))
         break
+      case 'project.client':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, client_id: op.client_id } : row))
+        break
       case 'project.remove':
         rows = rows.filter((row) => row.id !== op.id)
         break

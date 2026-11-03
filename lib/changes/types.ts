@@ -73,6 +73,8 @@ export type ChangeOp =
   | { type: 'client.add'; id: string; data: ClientData }
   | { type: 'client.update'; id: string; data: ClientData }
   | { type: 'client.remove'; id: string }
+  // põe o projeto num grupo de cliente (ou tira, com null); o grupo é da mesma empresa do projeto
+  | { type: 'project.client'; id: string; client_id: string | null }
   | { type: 'contact.add'; id: string; data: ContactLinkData }
   | { type: 'contact.update'; id: string; data: ContactLinkData }
   | { type: 'contact.remove'; id: string }

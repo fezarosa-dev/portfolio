@@ -8,6 +8,7 @@ import {
   deleteProject,
   setProjectLanguages,
   setProjectAuthors,
+  setProjectsClient,
   addCompany,
   updateCompany,
   deleteCompany,
@@ -44,6 +45,8 @@ import { canRead, canWrite, type McpPermissions } from './resources'
 import { registerResumeTools } from './resume-tools'
 import { registerSiteTools } from './site-tools'
 import { PROJECT_TEMPLATE } from './project-template'
+import { CLIENTS_TEMPLATE } from './clients-template'
+import { clientBreakdown } from '@/lib/company-count'
 
 function textResult(value: unknown) {
   const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
@@ -78,6 +81,26 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           'Grupos de clientes dentro das empresas (ex.: clientes diferentes dentro de "Freelancer"). Cada grupo conta como um cliente no número de empresas do site; o nome é interno (não aparece no site).',
       },
       async () => textResult(await getCompanyClients(client))
+    )
+    server.registerTool(
+      'read_contagem_clientes',
+      {
+        title: 'Conferir a contagem de empresas',
+        description:
+          'O número de "empresas atendidas" que o site mostra, explicado: cada cliente contado (grupo ou empresa) com os projetos que o fazem contar, os projetos fora da conta e avisos de configuração. Rode antes e depois de mexer em grupos.',
+      },
+      async () => {
+        const [projects, companies, clients] = await Promise.all([getAllProjects(client), getCompanies(client), getCompanyClients(client)])
+        return textResult(clientBreakdown(projects, companies, clients))
+      }
+    )
+    server.registerTool(
+      'get_template_empresas',
+      {
+        title: 'Guia de empresas e grupos de clientes',
+        description: 'Como o site conta as empresas atendidas e o passo a passo para configurar grupos de clientes (ex.: clientes de Freelancer). Leia antes de mexer em grupos.',
+      },
+      async () => textResult(CLIENTS_TEMPLATE)
     )
   }
   if (canWrite(permissions, 'projetos')) {
@@ -196,17 +219,29 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       {
         title: 'Criar ou renomear grupo de cliente',
         description:
-          'Cria um grupo de cliente dentro de uma empresa (sem "id", com company_id e name) ou renomeia um existente (com "id" e name). Depois vincule projetos com upsert_projeto { client_id }.',
+          'Cria um grupo de cliente dentro de uma empresa (sem "id", com company_id e name) ou renomeia um existente (com "id" e name). Com project_ids, define a lista inteira de projetos do grupo na mesma chamada (os que saírem da lista ficam sem grupo). Devolve o grupo e a contagem atualizada. Guia: get_template_empresas.',
         inputSchema: {
           id: z.string().uuid().optional(),
           company_id: z.string().uuid().optional().describe('Obrigatório ao criar'),
           name: z.string().min(1),
+          project_ids: z
+            .array(z.string().uuid())
+            .optional()
+            .describe('Projetos do grupo (list_projetos), todos da mesma empresa do grupo. Substitui a lista atual; omita para não mexer.'),
         },
       },
-      async ({ id, company_id, name }) => {
-        if (id) return textResult(await updateCompanyClient(id, name, client))
-        if (!company_id) throw new Error('company_id é obrigatório para criar um grupo')
-        return textResult(await addCompanyClient(company_id, name, client))
+      async ({ id, company_id, name, project_ids }) => {
+        if (!id && !company_id) throw new Error('company_id é obrigatório para criar um grupo')
+        const group = id ? await updateCompanyClient(id, name, client) : await addCompanyClient(company_id!, name, client)
+        if (project_ids) {
+          const { data, error } = await client.from('projects').select('id').eq('client_id', group.id)
+          if (error) throw error
+          // confere e põe os novos antes de soltar os antigos: se algum projeto não bater, nada muda
+          await setProjectsClient(project_ids, group.id, client)
+          await setProjectsClient(data.map((p) => p.id).filter((pid) => !project_ids.includes(pid)), null, client)
+        }
+        const [projects, companies, clients] = await Promise.all([getAllProjects(client), getCompanies(client), getCompanyClients(client)])
+        return textResult({ grupo: group, contagem: clientBreakdown(projects, companies, clients) })
       }
     )
     server.registerTool(

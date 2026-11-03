@@ -312,6 +312,32 @@ export async function deleteCompanyClient(id: string, client?: SupabaseClient): 
   if (error) throw error
 }
 
+/**
+ * Põe os projetos num grupo de cliente (ou tira, com null). O grupo precisa ser da mesma empresa de cada projeto:
+ * o banco garante (chave composta) e aqui o erro sai legível, apontando qual projeto não bate.
+ */
+export async function setProjectsClient(projectIds: string[], clientId: string | null, client?: SupabaseClient): Promise<void> {
+  if (projectIds.length === 0) return
+  const supabase = client ?? (await createClient())
+  if (clientId) {
+    const [{ data: group, error: groupError }, { data: rows, error: rowsError }] = await Promise.all([
+      supabase.from('company_clients').select('company_id, name').eq('id', clientId).single(),
+      supabase.from('projects').select('id, title, title_en, company_id').in('id', projectIds),
+    ])
+    if (groupError) throw groupError
+    if (rowsError) throw rowsError
+    const missing = projectIds.filter((id) => !rows.some((r) => r.id === id))
+    if (missing.length) throw new Error(`Projeto(s) não encontrado(s): ${missing.join(', ')}`)
+    const wrong = rows.filter((r) => r.company_id !== group.company_id)
+    if (wrong.length)
+      throw new Error(
+        `O grupo "${group.name}" é de outra empresa. Mude a empresa destes projetos antes: ${wrong.map((r) => r.title ?? r.title_en ?? r.id).join(', ')}`
+      )
+  }
+  const { error } = await supabase.from('projects').update({ client_id: clientId }).in('id', projectIds)
+  if (error) throw error
+}
+
 export async function deleteCompany(id: string, client?: SupabaseClient): Promise<void> {
   const supabase = client ?? (await createClient())
   const { error } = await supabase.from('companies').delete().eq('id', id)
