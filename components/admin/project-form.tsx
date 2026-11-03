@@ -13,19 +13,21 @@ import { BilingualField } from '@/components/admin/bilingual-field'
 import { projectDataFromForm } from '@/lib/changes/forms'
 import type { ProjectData } from '@/lib/changes/types'
 import { iconUrl } from '@/lib/icons'
-import type { Project, Language, Author, Company } from '@/lib/supabase/queries'
+import type { Project, Language, Author, Company, CompanyClient } from '@/lib/supabase/queries'
 
 export function ProjectForm({
   project,
   availableLanguages,
   availableAuthors,
   availableCompanies,
+  availableClients,
   onSubmit,
 }: {
   project: Project | null
   availableLanguages: Language[]
   availableAuthors: Author[]
   availableCompanies: Company[]
+  availableClients: CompanyClient[]
   onSubmit: (data: ProjectData) => void
 }) {
   const router = useRouter()
@@ -34,6 +36,8 @@ export function ProjectForm({
   const [visible, setVisible] = useState(project?.visible ?? true)
   const [showOnHome, setShowOnHome] = useState(project?.show_on_home ?? false)
   const [inResume, setInResume] = useState(project?.in_resume ?? false)
+  const [companyId, setCompanyId] = useState(project?.company?.id ?? '')
+  const companyClients = availableClients.filter((c) => c.company_id === companyId)
   const selectedLanguageIds = new Set(project?.languages.map((l) => l.id) ?? [])
   const selectedAuthorIds = new Set(project?.authors.map((a) => a.id) ?? [])
 
@@ -139,7 +143,8 @@ export function ProjectForm({
           <select
             id="company_id"
             name="company_id"
-            defaultValue={project?.company?.id ?? ''}
+            value={companyId}
+            onChange={(e) => setCompanyId(e.target.value)}
             className="w-full rounded border p-2"
           >
             <option value="">Nenhuma</option>
@@ -151,6 +156,28 @@ export function ProjectForm({
           </select>
         )}
       </div>
+
+      {companyClients.length > 0 && (
+        <div>
+          <Label htmlFor="client_id">Grupo de cliente</Label>
+          {/* key: trocar de empresa zera a escolha (o grupo é sempre de uma empresa só) */}
+          <select
+            key={companyId}
+            id="client_id"
+            name="client_id"
+            defaultValue={project?.company?.id === companyId ? (project?.client_id ?? '') : ''}
+            className="w-full rounded border p-2"
+          >
+            <option value="">Nenhum (conta pela empresa)</option>
+            {companyClients.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-muted-foreground">Interno: o nome do grupo não aparece no site, só entra na contagem de clientes.</p>
+        </div>
+      )}
 
       <div>
         <Label htmlFor="repo_url">Link do repositório</Label>

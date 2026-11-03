@@ -9,6 +9,7 @@ Antes de criar, rode list_projetos / list_tecnologias / list_empresas / list_aut
 - content_md / content_md_en: página do projeto em Markdown (contexto, o que foi feito, resultado). Imagens só por nome de arquivo da pasta do Drive.
 - repo_url, site_url: links (omita se não houver). click_mode: "detail" (padrão, abre a página do projeto) ou "link" (+ click_url).
 - company_id (empresa/contexto), language_ids (tecnologias usadas), author_ids.
+- client_id (opcional): grupo de cliente dentro da empresa (list_grupos_clientes / upsert_grupo_cliente). Use quando a mesma empresa reúne clientes diferentes (ex.: Freelancer): cada grupo conta como um cliente no número de empresas do site. O nome do grupo é interno.
 - visible: true pra publicar. show_on_home: true só se for destaque da home.
 
 ## Campos OCULTOS (só alimentam o currículo; nunca aparecem no site público)

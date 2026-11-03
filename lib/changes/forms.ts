@@ -16,6 +16,8 @@ export function projectDataFromForm(formData: FormData): ProjectData {
     click_mode: formData.get('click_mode') === 'link' ? 'link' : 'detail',
     click_url: text(formData, 'click_url'),
     company_id: text(formData, 'company_id'),
+    // grupo só vale junto com uma empresa
+    client_id: text(formData, 'company_id') ? text(formData, 'client_id') : null,
     position: Number(formData.get('position') ?? 0) || 0,
     visible: formData.get('visible') === 'true',
     show_on_home: formData.get('show_on_home') === 'true',

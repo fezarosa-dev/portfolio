@@ -23,6 +23,9 @@ import {
   addCompany,
   updateCompany,
   deleteCompany,
+  addCompanyClient,
+  updateCompanyClient,
+  deleteCompanyClient,
   addContactLink,
   updateContactLink,
   deleteContactLink,
@@ -156,6 +159,16 @@ export async function applyOp(op: ChangeOp): Promise<void> {
       return
     case 'company.remove':
       return deleteCompany(op.id)
+    case 'client.add':
+      if (!op.data.name.trim()) throw new Error('O grupo precisa de nome.')
+      await addCompanyClient(op.data.company_id, op.data.name, undefined, op.id)
+      return
+    case 'client.update':
+      if (!op.data.name.trim()) throw new Error('O grupo precisa de nome.')
+      await updateCompanyClient(op.id, op.data.name)
+      return
+    case 'client.remove':
+      return deleteCompanyClient(op.id)
     case 'contact.add':
       if (!op.data.url.trim()) throw new Error('O contato precisa de link.')
       await addContactLink(op.data.label, op.data.label_en, op.data.url, undefined, op.id)

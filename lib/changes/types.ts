@@ -13,6 +13,7 @@ export type ProjectData = {
   click_mode: 'detail' | 'link'
   click_url: string | null
   company_id: string | null
+  client_id: string | null
   position: number
   visible: boolean
   show_on_home: boolean
@@ -40,6 +41,7 @@ export type ArticleData = {
 
 export type AuthorData = { name: string; url: string | null }
 export type CompanyData = { name: string | null; name_en: string | null; url: string | null }
+export type ClientData = { company_id: string; name: string }
 export type ContactLinkData = { label: string | null; label_en: string | null; url: string }
 
 export type ResumeEntity = 'experiences' | 'education' | 'spoken' | 'certifications' | 'skill_categories' | 'skills'
@@ -68,6 +70,9 @@ export type ChangeOp =
   | { type: 'company.add'; id: string; data: CompanyData }
   | { type: 'company.update'; id: string; data: CompanyData }
   | { type: 'company.remove'; id: string }
+  | { type: 'client.add'; id: string; data: ClientData }
+  | { type: 'client.update'; id: string; data: ClientData }
+  | { type: 'client.remove'; id: string }
   | { type: 'contact.add'; id: string; data: ContactLinkData }
   | { type: 'contact.update'; id: string; data: ContactLinkData }
   | { type: 'contact.remove'; id: string }

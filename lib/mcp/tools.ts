@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { getLanguages, getLanguageCategories, getAuthors, getCompanies, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
+import { getLanguages, getLanguageCategories, getAuthors, getCompanies, getCompanyClients, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
 import {
   getAllProjects,
   upsertProject,
@@ -11,6 +11,9 @@ import {
   addCompany,
   updateCompany,
   deleteCompany,
+  addCompanyClient,
+  updateCompanyClient,
+  deleteCompanyClient,
   getAllArticles,
   upsertArticle,
   deleteArticle,
@@ -67,6 +70,15 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       { title: 'Listar empresas', description: 'Lista as empresas cadastradas, usadas como vínculo dos projetos.' },
       async () => textResult(await getCompanies(client))
     )
+    server.registerTool(
+      'list_grupos_clientes',
+      {
+        title: 'Listar grupos de clientes',
+        description:
+          'Grupos de clientes dentro das empresas (ex.: clientes diferentes dentro de "Freelancer"). Cada grupo conta como um cliente no número de empresas do site; o nome é interno (não aparece no site).',
+      },
+      async () => textResult(await getCompanyClients(client))
+    )
   }
   if (canWrite(permissions, 'projetos')) {
     server.registerTool(
@@ -120,6 +132,12 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           show_on_home: z.boolean().optional(),
           position: z.number().int().optional().describe('Ordem na lista (maior aparece primeiro)'),
           company_id: z.string().uuid().nullable().optional(),
+          client_id: z
+            .string()
+            .uuid()
+            .nullable()
+            .optional()
+            .describe('Grupo de cliente (list_grupos_clientes) da MESMA empresa do projeto; null tira do grupo. Trocar company_id sem mandar client_id tira o projeto do grupo antigo.'),
           language_ids: z.array(z.string().uuid()).optional().describe('Substitui as tecnologias vinculadas ao projeto'),
           author_ids: z.array(z.string().uuid()).optional().describe('Substitui os autores vinculados ao projeto'),
           in_resume: z.boolean().optional().describe('Incluir no currículo (campo oculto ao público)'),
@@ -132,6 +150,12 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
         },
       },
       async ({ language_ids, author_ids, ...input }) => {
+        // o grupo é da empresa: mudou de empresa sem dizer o grupo, o projeto sai do grupo antigo
+        if (input.id && input.company_id !== undefined && input.client_id === undefined) {
+          const { data } = await client.from('projects').select('company_id').eq('id', input.id).single()
+          if (data && data.company_id !== input.company_id) input.client_id = null
+        }
+        if (input.company_id === null) input.client_id = null
         const saved = await upsertProject(input, client)
         if (language_ids) await setProjectLanguages(saved.id, language_ids, client)
         if (author_ids) await setProjectAuthors(saved.id, author_ids, client)
@@ -165,6 +189,36 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           ? await updateCompany(id, name, name_en, url, client)
           : await addCompany(name, name_en, url, client)
         return textResult(company)
+      }
+    )
+    server.registerTool(
+      'upsert_grupo_cliente',
+      {
+        title: 'Criar ou renomear grupo de cliente',
+        description:
+          'Cria um grupo de cliente dentro de uma empresa (sem "id", com company_id e name) ou renomeia um existente (com "id" e name). Depois vincule projetos com upsert_projeto { client_id }.',
+        inputSchema: {
+          id: z.string().uuid().optional(),
+          company_id: z.string().uuid().optional().describe('Obrigatório ao criar'),
+          name: z.string().min(1),
+        },
+      },
+      async ({ id, company_id, name }) => {
+        if (id) return textResult(await updateCompanyClient(id, name, client))
+        if (!company_id) throw new Error('company_id é obrigatório para criar um grupo')
+        return textResult(await addCompanyClient(company_id, name, client))
+      }
+    )
+    server.registerTool(
+      'delete_grupo_cliente',
+      {
+        title: 'Excluir grupo de cliente',
+        description: 'Remove o grupo; os projetos dele continuam na empresa, só saem do grupo.',
+        inputSchema: { id: z.string().uuid() },
+      },
+      async ({ id }) => {
+        await deleteCompanyClient(id, client)
+        return textResult({ deleted: id })
       }
     )
     server.registerTool(

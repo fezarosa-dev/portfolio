@@ -39,6 +39,7 @@ Templates específicos: get_template_projeto (projetos) e get_template_curriculo
 
 ## Autores e empresas
 - upsert_autor { name, url? }; upsert_empresa { name, name_en?, url? }. Reaproveite os existentes.
+- Grupos de clientes (internos, contam como clientes distintos): list_grupos_clientes, upsert_grupo_cliente { company_id, name }, delete_grupo_cliente; vincule com upsert_projeto { client_id }.
 
 ## Contato
 - upsert_link_contato { label, label_en?, url }; ordenar_links_contato { ordered_ids }; delete_link_contato.

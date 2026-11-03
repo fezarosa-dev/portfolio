@@ -1,5 +1,5 @@
 import { resolveIcon } from '../icons.ts'
-import type { Article, Author, Company, ContactLink, Language, LanguageCategory, Project } from '../supabase/queries.ts'
+import type { Article, Author, Company, CompanyClient, ContactLink, Language, LanguageCategory, Project } from '../supabase/queries.ts'
 import type { ResumeSource } from '../resume.ts'
 import type { ArticleData, Change, ProjectData, ResumeEntity } from './types.ts'
 
@@ -103,7 +103,7 @@ export function overlayCategories(base: LanguageCategory[], stack: Change[]): La
 /** Ids com edição ou criação pendente (pra borda laranja). Ordenar e apagar não contam. */
 export function touchedIds(
   stack: Change[],
-  entity: 'language' | 'category' | 'project' | 'article' | 'author' | 'company' | 'contact' | 'resume'
+  entity: 'language' | 'category' | 'project' | 'article' | 'author' | 'company' | 'client' | 'contact' | 'resume'
 ): Set<string> {
   const ids = new Set<string>()
   for (const { op } of stack) {
@@ -221,6 +221,30 @@ export function overlayCompanies(base: Company[], stack: Change[]): Company[] {
         break
       case 'company.remove':
         rows = rows.filter((row) => row.id !== op.id)
+        break
+      default:
+        break
+    }
+  }
+  return rows
+}
+
+export function overlayClients(base: CompanyClient[], stack: Change[]): CompanyClient[] {
+  let rows = [...base]
+  for (const { op } of [...stack].reverse()) {
+    switch (op.type) {
+      case 'client.add':
+        rows = [...rows, { id: op.id, ...op.data }]
+        break
+      case 'client.update':
+        rows = rows.map((row) => (row.id === op.id ? { ...row, ...op.data } : row))
+        break
+      case 'client.remove':
+        rows = rows.filter((row) => row.id !== op.id)
+        break
+      // empresa removida leva os grupos dela junto (o banco faz o mesmo)
+      case 'company.remove':
+        rows = rows.filter((row) => row.company_id !== op.id)
         break
       default:
         break

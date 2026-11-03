@@ -5,6 +5,7 @@ import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
 import { pageText } from '@/lib/page-texts'
 import { projectTechRows } from '@/lib/site-keys'
+import { countClients } from '@/lib/company-count'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsStory } from '@/components/home/projects-3d/projects-story'
@@ -56,7 +57,7 @@ export default async function HomePage() {
         stats={{
           projects: projects.length,
           technologies: languages.length,
-          companies: new Set(projects.flatMap((p) => (p.company ? [p.company.id] : []))).size,
+          companies: countClients(projects),
         }}
         projects={projects.filter((p) => p.show_on_home)}
         eyebrow={dict.home.projectsEyebrow}

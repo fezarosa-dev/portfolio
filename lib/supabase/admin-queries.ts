@@ -6,6 +6,7 @@ import type {
   LanguageCategory,
   Author,
   Company,
+  CompanyClient,
   ProjectRow,
   ResumeLink,
   ContactLink,
@@ -181,6 +182,7 @@ export async function upsertProject(
   input: Partial<Omit<Project, 'languages' | 'authors' | 'company'>> & {
     id?: string
     company_id?: string | null
+    client_id?: string | null
   },
   client?: SupabaseClient
 ): Promise<Omit<Project, 'languages' | 'authors' | 'company'>> {
@@ -278,6 +280,36 @@ export async function updateCompany(
     .single()
   if (error) throw error
   return data as Company
+}
+
+export async function addCompanyClient(companyId: string, name: string, client?: SupabaseClient, id?: string): Promise<CompanyClient> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('company_clients')
+    .insert({ ...(id && { id }), company_id: companyId, name: name.trim() })
+    .select('id, company_id, name')
+    .single()
+  if (error) throw error
+  return data as CompanyClient
+}
+
+export async function updateCompanyClient(id: string, name: string, client?: SupabaseClient): Promise<CompanyClient> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('company_clients')
+    .update({ name: name.trim() })
+    .eq('id', id)
+    .select('id, company_id, name')
+    .single()
+  if (error) throw error
+  return data as CompanyClient
+}
+
+/** Apaga o grupo; os projetos dele continuam na empresa (o banco só solta o client_id). */
+export async function deleteCompanyClient(id: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client ?? (await createClient())
+  const { error } = await supabase.from('company_clients').delete().eq('id', id)
+  if (error) throw error
 }
 
 export async function deleteCompany(id: string, client?: SupabaseClient): Promise<void> {
