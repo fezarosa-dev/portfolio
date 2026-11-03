@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono, Bricolage_Grotesque, Climate_Crisis } from "next/font/google";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { ReduceMotionProvider } from "@/components/reduce-motion-provider";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import { getSiteContent } from "@/lib/supabase/queries-cached";
 import "./globals.css";
 
@@ -116,6 +117,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           initialEnabled={reduceMotionCookie === "true"}
           cookieSet={reduceMotionCookie !== undefined}
         >
+          <SmoothScroll />
           {children}
         </ReduceMotionProvider>
         {analyticsConsent && <GoogleAnalytics />}

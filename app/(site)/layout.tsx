@@ -5,7 +5,6 @@ import { Footer } from '@/components/footer'
 import { Mascote } from '@/components/mascote'
 import { SudoEasterEgg } from '@/components/sudo-easter-egg'
 import { SpinEasterEgg } from '@/components/spin-easter-egg'
-import { SmoothScroll } from '@/components/smooth-scroll'
 import { CustomScrollbar } from '@/components/custom-scrollbar'
 import { HoverEffects } from '@/components/hover-effects'
 import { CookieConsent } from '@/components/cookie-consent'
@@ -133,7 +132,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         </>
       )}
       <CustomScrollbar />
-      <SmoothScroll />
       <HoverEffects />
       <ImagePreloader photoUrl={photoUrl} urls={preloadUrls} />
       <CookieConsent />
