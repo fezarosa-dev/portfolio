@@ -178,7 +178,7 @@ export function SearchPanel({
           onChange={(e) => handleQueryChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="h-12 w-full rounded-xl border border-hairline bg-background pl-10 pr-10 font-mono text-sm outline-none transition-[border-color,box-shadow] placeholder:text-steel/70 focus:border-signal focus:ring-4 focus:ring-signal/15"
+          className={`h-12 w-full rounded-xl border border-hairline bg-background pl-10 font-mono text-sm outline-none placeholder:text-xs sm:placeholder:text-sm ${query ? 'pr-10' : 'pr-3'} transition-[border-color,box-shadow] placeholder:text-steel/70 focus:border-signal focus:ring-4 focus:ring-signal/15`}
         />
         {query && (
           <button
@@ -248,7 +248,7 @@ export function SearchPanel({
                           setHandoff('tech', [stat.id])
                           onNavigate?.()
                         }}
-                        className="flex w-24 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
+                        className="tap-target flex w-28 shrink-0 items-center gap-1.5 transition-colors hover:text-signal"
                       >
                         {stat.devicon_slug && (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -258,7 +258,7 @@ export function SearchPanel({
                             className="h-4 w-4 shrink-0"
                           />
                         )}
-                        <span className="truncate font-mono text-xs text-foreground">{stat.name}</span>
+                        <span className="font-mono text-xs leading-tight text-foreground">{stat.name}</span>
                       </Link>
                       <Tooltip>
                         <TooltipTrigger
@@ -324,7 +324,7 @@ export function SearchPanel({
                             onNavigate?.()
                           }}
                           onMouseEnter={() => setActiveIndex(index)}
-                          className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                          className={`flex items-start gap-2 rounded-lg border px-2 py-2.5 transition-colors sm:gap-3 sm:px-3 ${
                             active ? 'border-signal/50 bg-signal/5' : 'border-transparent'
                           }`}
                         >
@@ -342,7 +342,7 @@ export function SearchPanel({
                             )}
                           </span>
                           <ArrowUpRight
-                            className={`mt-1 h-4 w-4 shrink-0 text-signal transition-opacity ${active ? 'opacity-100' : 'opacity-0'}`}
+                            className={`mt-1 hidden h-4 w-4 shrink-0 text-signal transition-opacity sm:block ${active ? 'opacity-100' : 'opacity-0'}`}
                           />
                         </Link>
                       </li>

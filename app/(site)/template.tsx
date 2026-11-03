@@ -21,7 +21,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
         />
       )}
       <motion.div
-        className="flex flex-1 flex-col"
+        // w-full no main: com mx-auto num pai flex-col ele encolhia pro tamanho do conteúdo e passava da tela
+        className="flex min-w-0 flex-1 flex-col [&>main]:w-full"
         initial={enabled ? false : { opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: EASE }}

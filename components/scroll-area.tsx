@@ -33,6 +33,7 @@ export function ScrollArea({
       const { scrollHeight, clientHeight, scrollTop } = el
       const scrollable = scrollHeight - clientHeight
       t.style.display = scrollable > 1 ? '' : 'none'
+      el.dataset.more = String(scrollTop < scrollable - 1)
       const room = t.clientHeight
       const h = Math.max(MIN_THUMB, (clientHeight / scrollHeight) * room)
       th.style.height = `${h}px`
@@ -87,7 +88,7 @@ export function ScrollArea({
 
   return (
     <div className={`${className.includes('absolute') ? '' : 'relative'} ${className}`}>
-      <div ref={scroller} className={`hide-native-scroll overflow-y-auto pr-4 ${scrollerClassName}`}>
+      <div ref={scroller} className={`hide-native-scroll overflow-y-auto pr-4 data-[more=true]:[mask-image:linear-gradient(to_bottom,black_85%,transparent)] ${scrollerClassName}`}>
         {children}
       </div>
       <div ref={track} className="area-track" data-dragging={dragging} onPointerDown={jump}>

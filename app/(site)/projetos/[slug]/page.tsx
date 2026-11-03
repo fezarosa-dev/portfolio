@@ -79,7 +79,7 @@ export default async function ProjetoDetailPage({
         dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbJson) }}
       />
       <FadeIn>
-        <Link href={`/${locale}/projetos`} className="font-mono text-xs text-steel hover:text-signal">
+        <Link href={`/${locale}/projetos`} className="tap-target font-mono text-xs text-steel hover:text-signal">
           {dict.projetos.back}
         </Link>
         <Eyebrow>{dict.projetos.detailEyebrow}</Eyebrow>
@@ -138,7 +138,7 @@ export default async function ProjetoDetailPage({
                 href={`/${locale}/projetos`}
                 handoff={['tech', [lang.id]]}
                 title={`Ver projetos com ${langName(lang, locale)}`}
-                className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-mono text-xs text-steel hover:border-signal hover:text-signal"
+                className="tap-target flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-mono text-xs text-steel hover:border-signal hover:text-signal"
               >
                 {lang.devicon_slug && (
                   // eslint-disable-next-line @next/next/no-img-element

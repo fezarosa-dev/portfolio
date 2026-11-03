@@ -111,7 +111,7 @@ export function TechCard({
           <span className="h-12 w-12 shrink-0 rounded-lg bg-hairline" />
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-mono text-lg font-medium text-foreground transition-colors group-hover:text-signal">
+          <h3 className="break-words font-mono text-lg font-medium text-foreground transition-colors group-hover:text-signal">
             {langName(tech, locale as Locale)}
           </h3>
           <p className="font-mono text-xs text-steel">{tech.projects.length ? labels.projects : labels.none}</p>
@@ -171,9 +171,9 @@ export function TechCard({
                   >
                     <Link
                       href={`/${locale}/projetos/${p.id}`}
-                      className="group/row flex h-8 items-center gap-2 rounded-md border border-hairline px-2.5 text-sm text-foreground/80 transition-colors hover:border-signal hover:bg-signal/10 hover:text-signal"
+                      className="group/row flex min-h-8 items-center gap-2 rounded-md border border-hairline px-2.5 py-1.5 text-sm leading-snug text-foreground/80 transition-colors hover:border-signal hover:bg-signal/10 hover:text-signal"
                     >
-                      <span className="truncate">{p.title}</span>
+                      <span className="min-w-0 break-words">{p.title}</span>
                       <ChevronRight className="ml-auto h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all group-hover/row:translate-x-0 group-hover/row:opacity-100" />
                     </Link>
                   </motion.li>
