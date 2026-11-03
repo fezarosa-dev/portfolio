@@ -154,6 +154,13 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
           click_url: z.string().optional(),
           visible: z.boolean().optional(),
           show_on_home: z.boolean().optional(),
+          status: z
+            .enum(['producao', 'prototipo', 'encerrado'])
+            .nullable()
+            .optional()
+            .describe('Estado do projeto, mostrado no visor do servidor da home; null esconde'),
+          highlight: z.string().nullable().optional().describe('Número de destaque real e verificável (PT), ex.: "10 mi de eventos/dia"; aparece no servidor da home'),
+          highlight_en: z.string().nullable().optional(),
           position: z.number().int().optional().describe('Ordem na lista (maior aparece primeiro)'),
           company_id: z.string().uuid().nullable().optional(),
           client_id: z

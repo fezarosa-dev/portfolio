@@ -230,6 +230,34 @@ export function ProjectForm({
       </div>
 
       <fieldset className="flex flex-col gap-4 rounded-lg border border-hairline p-4">
+        <legend className="px-1 font-mono text-xs text-steel">servidor da home</legend>
+        <p className="text-xs text-muted-foreground">
+          As gavetas do servidor saem das tecnologias vinculadas, uma por categoria. Aqui vai o que aparece no visor.
+        </p>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="status">Estado</Label>
+          <select
+            id="status"
+            name="status"
+            defaultValue={project?.status ?? ''}
+            className="h-9 w-fit rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">não mostrar</option>
+            <option value="producao">em produção</option>
+            <option value="prototipo">protótipo</option>
+            <option value="encerrado">encerrado</option>
+          </select>
+        </div>
+        <BilingualField
+          name="highlight"
+          label="Número de destaque (real, ex.: 10 mi de eventos/dia)"
+          language={language}
+          defaultValuePt={project?.highlight}
+          defaultValueEn={project?.highlight_en}
+        />
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-4 rounded-lg border border-hairline p-4">
         <legend className="px-1 font-mono text-xs text-steel">currículo — não aparece no site</legend>
         <div className="flex items-center gap-2">
           <Switch id="in_resume" checked={inResume} onCheckedChange={setInResume} />

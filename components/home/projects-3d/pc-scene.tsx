@@ -6,7 +6,7 @@ import { Environment, Html, Lightformer, RoundedBox, Text } from '@react-three/d
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import type { MotionValue } from 'framer-motion'
-import { Servers, type ServerProject } from './servers'
+import { liftHeight, Servers, type ServerProject } from './servers'
 import { CARAMEL, clamp01, DISPLAY, easeInOut, Glow, GOLD, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL, type Vec3 } from './scene-kit'
 
 // Cena 3D da home: um PC que se desmonta conforme a rolagem (vista explodida) e a câmera mergulha no processador.
@@ -17,13 +17,16 @@ import { CARAMEL, clamp01, DISPLAY, easeInOut, Glow, GOLD, METAL, MONO, MONO_BOL
 export const STORY = {
   // trechos da rolagem (0..1): parado/girando, desmontando, desmontado com as etiquetas, mergulho no processador,
   // corte (a tela escurece e a cena troca) e os servidores subindo do chão
-  explodeStart: 0.08,
-  explodeEnd: 0.3,
-  diveStart: 0.36,
-  diveEnd: 0.62,
-  cut: 0.66,
-  serversStart: 0.7,
-  serversEnd: 0.9,
+  explodeStart: 0.06,
+  explodeEnd: 0.22,
+  diveStart: 0.26,
+  diveEnd: 0.44,
+  cut: 0.47,
+  serversStart: 0.5,
+  serversEnd: 0.72,
+  // os racks viram os propulsores e o foguete decola com o lema
+  rocketStart: 0.76,
+  rocketEnd: 0.97,
 }
 
 const FLOOR_CLIP = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.125)]
@@ -918,11 +921,13 @@ type Part = {
 function Pc({
   progressRef,
   serversRef,
+  rocketRef,
   stats,
   en,
 }: {
   progressRef: React.RefObject<number>
   serversRef: React.RefObject<number>
+  rocketRef: React.RefObject<number>
   stats: SceneStats
   en: boolean
 }) {
@@ -1068,6 +1073,10 @@ function Pc({
     const cut = p >= STORY.cut
     if (root.current) root.current.visible = !cut
     serversRef.current = segment(p, STORY.serversStart, STORY.serversEnd)
+    rocketRef.current = segment(p, STORY.rocketStart, STORY.rocketEnd)
+    // no foguete a câmera recua e sobe acompanhando a decolagem (só parte dela: o foguete sai de quadro no fim)
+    const rk = easeInOut(rocketRef.current)
+    const climb = liftHeight(rocketRef.current) * 0.55
     // com os servidores, tudo abaixo do chão é cortado: eles sobem "de dentro" da plataforma
     state.gl.clippingPlanes = cut ? FLOOR_CLIP : NO_CLIP
     if (cut) {
@@ -1075,11 +1084,11 @@ function Pc({
       if (narrow) {
         // tela em pé: afasta até os quatro caberem na largura (fov 38°) e desce a cena para baixo do texto
         const dist = Math.max(9.5, 2.2 / (Math.tan((19 * Math.PI) / 180) * (state.size.width / state.size.height)))
-        tmp.orbit.set(0, 1.7, dist)
-        tmp.look.set(0, 0.9, 0)
+        tmp.orbit.set(0, 1.7 + rk * 1.2 + climb, dist + rk * 2)
+        tmp.look.set(0, 0.9 + rk * 1.0 + climb, 0)
       } else {
-        tmp.orbit.set(-1.1, 1.05, 7.6)
-        tmp.look.set(-1.4, 0.1, 0)
+        tmp.orbit.set(-1.1, 1.05 + rk * 1.0 + climb, 7.6 + rk * 1.6)
+        tmp.look.set(-1.4, 0.1 + rk * 1.1 + climb, 0)
       }
     }
     const cam = state.camera
@@ -1250,6 +1259,7 @@ export default function PcScene({
 }) {
   const smoothed = useRef(progress.get())
   const serversProgress = useRef(0)
+  const rocketProgress = useRef(0)
   return (
     <Canvas
       // longe da seção desenha só sob demanda: o primeiro quadro sai (deixa tudo pronto) e depois fica parada
@@ -1270,8 +1280,8 @@ export default function PcScene({
         <Lightformer form="ring" intensity={1.2} color={CARAMEL} position={[4, 0, 2]} scale={2} />
       </Environment>
       <SmoothedProgress source={progress} targetRef={smoothed} />
-      <Pc progressRef={smoothed} serversRef={serversProgress} stats={stats} en={en} />
-      <Servers servers={servers} progressRef={serversProgress} onOpen={onOpen} en={en} />
+      <Pc progressRef={smoothed} serversRef={serversProgress} rocketRef={rocketProgress} stats={stats} en={en} />
+      <Servers servers={servers} progressRef={serversProgress} rocketRef={rocketProgress} onOpen={onOpen} en={en} />
       <Platform />
       <Dust />
       <Ready onReady={onReady} />

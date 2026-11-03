@@ -18,6 +18,9 @@ export function projectDataFromForm(formData: FormData): ProjectData {
     company_id: text(formData, 'company_id'),
     // grupo só vale junto com uma empresa
     client_id: text(formData, 'company_id') ? text(formData, 'client_id') : null,
+    status: (['producao', 'prototipo', 'encerrado'] as const).find((s) => s === formData.get('status')) ?? null,
+    highlight: parseBilingualPt(formData, 'highlight'),
+    highlight_en: parseBilingualEn(formData, 'highlight'),
     position: Number(formData.get('position') ?? 0) || 0,
     visible: formData.get('visible') === 'true',
     show_on_home: formData.get('show_on_home') === 'true',

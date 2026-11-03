@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getSiteContent, getVisibleProjects, getLanguages } from '@/lib/supabase/queries-cached'
+import { getSiteContent, getVisibleProjects, getLanguages, getLanguageCategories } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
@@ -17,10 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [content, projects, languages, { dict, locale }] = await Promise.all([
+  const [content, projects, languages, categories, { dict, locale }] = await Promise.all([
     getSiteContent(),
     getVisibleProjects(),
     getLanguages(),
+    getLanguageCategories(),
     getDictionary(),
   ])
 
@@ -59,6 +60,7 @@ export default async function HomePage() {
           technologies: languages.length,
           companies: countClients(projects),
         }}
+        categories={categories}
         projects={projects.filter((p) => p.show_on_home)}
         eyebrow={dict.home.projectsEyebrow}
         heading={dict.home.projectsHeading}

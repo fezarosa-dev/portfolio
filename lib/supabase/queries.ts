@@ -69,6 +69,8 @@ export type Article = {
   created_at: string
 }
 
+export type ProjectStatus = 'producao' | 'prototipo' | 'encerrado'
+
 export type Project = {
   id: string
   slug: string
@@ -97,6 +99,10 @@ export type Project = {
   resume_solves_en: string | null
   // grupo de cliente dentro da empresa (interno: o nome não aparece no site; serve para contar clientes)
   client_id: string | null
+  // ficha do servidor na home: estado do projeto e um número de destaque (opcionais)
+  status: ProjectStatus | null
+  highlight: string | null
+  highlight_en: string | null
   languages: Language[]
   authors: Author[]
   company: Company | null

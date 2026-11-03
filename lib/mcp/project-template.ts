@@ -10,7 +10,10 @@ Antes de criar, rode list_projetos / list_tecnologias / list_empresas / list_aut
 - repo_url, site_url: links (omita se não houver). click_mode: "detail" (padrão, abre a página do projeto) ou "link" (+ click_url).
 - company_id (empresa/contexto), language_ids (tecnologias usadas), author_ids.
 - client_id (opcional): grupo de cliente dentro da empresa (list_grupos_clientes / upsert_grupo_cliente). Use quando a mesma empresa reúne clientes diferentes (ex.: Freelancer): cada grupo conta como um cliente no número de empresas do site. O nome do grupo é interno. Guia e conferência: get_template_empresas / read_contagem_clientes.
-- visible: true pra publicar. show_on_home: true só se for destaque da home.
+- visible: true pra publicar. show_on_home: true só se for destaque da home. A home mostra 4 projetos, cada um num servidor:
+  as gavetas saem das tecnologias vinculadas (uma por categoria de tecnologia, então vincule as tecnologias certas e
+  categorize-as), e o visor mostra status ("producao" | "prototipo" | "encerrado") e highlight / highlight_en
+  (UM número real e verificável, curto: "10 mi de eventos/dia", "3 escritórios atendidos"; sem número real, deixe vazio).
 
 ## Campos OCULTOS (só alimentam o currículo; nunca aparecem no site público)
 - in_resume: true se o projeto deve entrar no currículo.

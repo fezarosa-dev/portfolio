@@ -10,7 +10,7 @@ import type { Locale } from '@/lib/i18n'
 import { SceneLoader } from './scene-loader'
 import type { ServerProject } from './servers'
 import { HOME_SERVERS } from '@/lib/home-servers'
-import type { Project } from '@/lib/supabase/queries'
+import type { LanguageCategory, Project } from '@/lib/supabase/queries'
 
 // o 3D (three + react-three-fiber) vira um pacote à parte, fora do carregamento inicial da página
 const loadScene = () => import('./pc-scene')
@@ -21,11 +21,13 @@ type Stats = { projects: number; technologies: number; companies: number }
 type TeaserProps = React.ComponentProps<typeof ProjectsTeaser>
 
 // o PC é metáfora de uma solução de software (não de trabalho com hardware): os textos deixam isso claro
-const CHAPTERS: { at: number; pt: [string, string]; en: [string, string] }[] = [
+// `nav`: nome curto no indicador de capítulos da direita (quando o título é longo demais)
+const CHAPTERS: { at: number; pt: [string, string]; en: [string, string]; nav?: [string, string] }[] = [
   { at: 0, pt: ['Como uma solução nasce', 'Todo sistema é um conjunto de peças que precisam funcionar juntas.'], en: ['How a solution comes together', 'Every system is a set of parts that have to work together.'] },
-  { at: 0.11, pt: ['Peça por peça', 'A base não é o código, é a arquitetura da solução. O código é o caminho.'], en: ['Piece by piece', "The foundation isn't the code, it's the solution architecture. Code is how you get there."] },
-  { at: 0.34, pt: ['O núcleo', 'No centro de tudo, o que já foi entregue.'], en: ['The core', "At the center of it all, what's already been delivered."] },
-  { at: 0.7, pt: ['Os projetos', 'Cada servidor ligado é um projeto no ar. Clique em um para abrir.'], en: ['The projects', 'Every server that is on is a project running. Click one to open it.'] },
+  { at: 0.07, pt: ['Peça por peça', 'A base não é o código, é a arquitetura da solução. O código é o caminho.'], en: ['Piece by piece', "The foundation isn't the code, it's the solution architecture. Code is how you get there."] },
+  { at: 0.25, pt: ['O núcleo', 'No centro de tudo, o que já foi entregue.'], en: ['The core', "At the center of it all, what's already been delivered."] },
+  { at: 0.5, pt: ['Os projetos', 'Cada servidor ligado é um projeto no ar; cada gaveta, o que ele usa. Clique em um para abrir.'], en: ['The projects', 'Every server that is on is a project running; every drawer, what it runs on. Click one to open it.'] },
+  { at: 0.8, pt: ['Juntos, rumo a um futuro mais automatizado.', 'Cada projeto é uma peça do próximo lançamento. Vamos construir o seu?'], en: ['Together, toward a more automated future.', 'Every project is a part of the next launch. Shall we build yours?'], nav: ['O lançamento', 'The launch'] },
 ]
 
 function supportsWebGL() {
@@ -41,7 +43,7 @@ const noopSubscribe = () => () => {}
 
 // número que sobe junto com o mergulho (0 → total) e fica parado no fim
 function Counter({ progress, value, label }: { progress: MotionValue<number>; value: number; label: string }) {
-  const shown = useTransform(progress, (v) => Math.round(transform(v, [0.4, 0.6], [0, value])))
+  const shown = useTransform(progress, (v) => Math.round(transform(v, [0.3, 0.42], [0, value])))
   return (
     <div>
       <motion.p className="font-display text-4xl font-medium tabular-nums text-signal sm:text-5xl">{shown}</motion.p>
@@ -91,21 +93,49 @@ function ChapterText({
 }
 
 // os projetos da home viram os servidores, sempre HOME_SERVERS deles: os que faltam ficam desligados
-function toServers(projects: Project[], locale: Locale): ServerProject[] {
+function toServers(projects: Project[], categories: LanguageCategory[], locale: Locale): ServerProject[] {
   const en = locale === 'en'
+  const pick = (pt: string | null, other: string | null) => (en ? (other ?? pt) : (pt ?? other))
   const list: ServerProject[] = projects.slice(0, HOME_SERVERS).map((p) => {
     const title = (en ? (p.title_en ?? p.title) : (p.title ?? p.title_en)) ?? ''
     const company = p.company ? ((en ? (p.company.name_en ?? p.company.name) : (p.company.name ?? p.company.name_en)) ?? null) : null
     const external = p.click_mode === 'link' && !!p.click_url
+    // uma gaveta por categoria de tecnologia do projeto (na ordem das categorias; sem categoria vai em "Outros")
+    const drawers = [...categories, null]
+      .map((c) => ({
+        label: c ? (pick(c.name, c.name_en) ?? '') : en ? 'Other' : 'Outros',
+        techs: p.languages.filter((l) => (c ? l.category_id === c.id : !categories.some((x) => x.id === l.category_id))).map((l) => pick(l.name, l.name_en) ?? l.name),
+      }))
+      .filter((d) => d.techs.length > 0)
     // no visor só o nome curto (o trecho antes do " — ")
-    return { title: title.split(' — ')[0], company, href: external ? p.click_url! : `/${locale}/projetos/${p.slug}`, external }
+    return {
+      title: title.split(' — ')[0],
+      company,
+      href: external ? p.click_url! : `/${locale}/projetos/${p.slug}`,
+      external,
+      status: p.status,
+      highlight: pick(p.highlight, p.highlight_en),
+      drawers,
+    }
   })
   return [...list, ...Array<ServerProject>(HOME_SERVERS - list.length).fill(null)]
 }
 
-function Story({ eyebrow, locale, stats, projects }: { eyebrow: string; locale: Locale; stats: Stats; projects: Project[] }) {
+function Story({
+  eyebrow,
+  locale,
+  stats,
+  projects,
+  categories,
+}: {
+  eyebrow: string
+  locale: Locale
+  stats: Stats
+  projects: Project[]
+  categories: LanguageCategory[]
+}) {
   const router = useRouter()
-  const servers = toServers(projects, locale)
+  const servers = toServers(projects, categories, locale)
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
   // a cena monta bem antes da seção (e não desmonta mais) e só anima quando está perto; até o primeiro
@@ -113,7 +143,7 @@ function Story({ eyebrow, locale, stats, projects }: { eyebrow: string; locale: 
   const mounted = useInView(ref, { margin: '1500px 0px', once: true })
   const near = useInView(ref, { margin: '400px 0px' })
   const [ready, setReady] = useState(false)
-  const cutFade = useTransform(scrollYProgress, (v) => transform(v, [0.61, 0.66, 0.71], [0, 1, 0]))
+  const cutFade = useTransform(scrollYProgress, (v) => transform(v, [0.43, 0.47, 0.51], [0, 1, 0]))
   const [chapter, setChapter] = useState(0)
   // baixa o pacote do 3D assim que o navegador fica livre, sem esperar a rolagem chegar perto
   useEffect(() => {
@@ -130,7 +160,7 @@ function Story({ eyebrow, locale, stats, projects }: { eyebrow: string; locale: 
   })
 
   return (
-    <section ref={ref} className="relative border-t border-hairline" style={{ height: '600vh' }}>
+    <section ref={ref} className="relative border-t border-hairline" style={{ height: '900vh' }}>
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0">
           {mounted && (
@@ -179,7 +209,7 @@ function Story({ eyebrow, locale, stats, projects }: { eyebrow: string; locale: 
         <ol className="pointer-events-none absolute right-6 top-1/2 hidden -translate-y-1/2 flex-col gap-3 font-mono text-[11px] sm:flex">
           {CHAPTERS.map((c, i) => (
             <li key={i} className={`flex items-center justify-end gap-2 transition-colors ${i === chapter ? 'text-foreground' : 'text-steel/60'}`}>
-              {i === chapter && <span>{c[locale === 'en' ? 'en' : 'pt'][0]}</span>}
+              {i === chapter && <span>{c.nav ? c.nav[locale === 'en' ? 1 : 0] : c[locale === 'en' ? 'en' : 'pt'][0]}</span>}
               <span>{String(i + 1).padStart(2, '0')}</span>
               <span className={`h-px transition-all ${i === chapter ? 'w-8 bg-signal' : 'w-3 bg-steel/50'}`} />
             </li>
@@ -190,14 +220,14 @@ function Story({ eyebrow, locale, stats, projects }: { eyebrow: string; locale: 
   )
 }
 
-export function ProjectsStory({ stats, ...teaser }: TeaserProps & { stats: Stats }) {
+export function ProjectsStory({ stats, categories, ...teaser }: TeaserProps & { stats: Stats; categories: LanguageCategory[] }) {
   const { enabled: reduce } = useReduceMotion()
   const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => false)
   return (
     <>
       {/* com a cena 3D os projetos viram os servidores; sem ela (reduzir movimento, sem WebGL) ficam os cards */}
       {!reduce && webgl ? (
-        <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} projects={teaser.projects} />
+        <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} projects={teaser.projects} categories={categories} />
       ) : (
         <ProjectsTeaser {...teaser} />
       )}

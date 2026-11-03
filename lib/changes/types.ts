@@ -14,6 +14,9 @@ export type ProjectData = {
   click_url: string | null
   company_id: string | null
   client_id: string | null
+  status: 'producao' | 'prototipo' | 'encerrado' | null
+  highlight: string | null
+  highlight_en: string | null
   position: number
   visible: boolean
   show_on_home: boolean
