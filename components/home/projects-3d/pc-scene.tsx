@@ -38,6 +38,8 @@ const MEANING: Record<string, { name: [string, string]; concept: [string, string
   board: { name: ['Placa-mãe', 'Motherboard'], concept: ['Integração de sistemas', 'Systems integration'] },
   fan1: { name: ['Ventoinhas', 'Fans'], concept: ['Qualidade e testes', 'Quality & testing'] },
   nvme: { name: ['SSD NVMe', 'NVMe SSD'], concept: ['Banco de dados', 'Databases'] },
+  // o gabinete guarda todas as outras peças: é a solução inteira
+  case: { name: ['Gabinete', 'Case'], concept: ['A solução completa', 'The complete solution'] },
   hdd0: { name: ['HDs', 'Hard drives'], concept: ['Nenhum dado se perde', 'No data ever lost'] },
 }
 
@@ -1094,6 +1096,18 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
               </mesh>
               <TopIo />
             </>
+          )}
+          {panel.key === 'top' && (
+            <Html position={[-1.25, 0.05, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+              <div
+                ref={(el) => { labelRefs.current.case = el }}
+                style={{ opacity: 0 }}
+                className="whitespace-nowrap rounded-lg border border-signal bg-background/85 px-3 py-1.5 text-center shadow-lg backdrop-blur"
+              >
+                <div className="font-display text-sm font-medium text-foreground">{MEANING.case.concept[en ? 1 : 0]}</div>
+                <div className="font-mono text-[10px] uppercase tracking-wide text-signal">{MEANING.case.name[en ? 1 : 0]}</div>
+              </div>
+            </Html>
           )}
           {panel.key === 'left' && (
             <>
