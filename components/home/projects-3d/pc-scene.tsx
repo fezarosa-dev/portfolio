@@ -1,28 +1,49 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Environment, Html, Lightformer, RoundedBox } from '@react-three/drei'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Environment, Html, Lightformer, RoundedBox, Text } from '@react-three/drei'
+import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import type { MotionValue } from 'framer-motion'
 
-// Cena 3D da home: um PC que se desmonta conforme a rolagem (vista explodida, cada peça com uma tecnologia).
+// Cena 3D da home: um PC que se desmonta conforme a rolagem (vista explodida) e a câmera mergulha no processador.
+// Cada peça representa uma parte do jeito de trabalhar (a fonte é a arquitetura da solução, a base de tudo).
 // A rolagem chega como progresso 0..1 da seção fixa; a cena só lê esse número a cada quadro (sem re-render).
 
 const SIGNAL = '#f2661d'
 const CARAMEL = '#b0775a'
 const METAL = '#2f2530'
-const PCB = '#1c1820'
+const GOLD = '#c99a4b'
+const MONO_BOLD = '/fonts/3d/plex-mono-700.woff'
+const MONO = '/fonts/3d/plex-mono-400.woff'
+const DISPLAY = '/fonts/3d/space-grotesk-700.woff'
 
 export const STORY = {
-  // trechos da rolagem (0..1): parado/girando, desmontando, desmontado com as etiquetas
-  explodeStart: 0.18,
-  explodeEnd: 0.62,
+  // trechos da rolagem (0..1): parado/girando, desmontando, desmontado com as etiquetas, mergulho no processador
+  explodeStart: 0.1,
+  explodeEnd: 0.38,
+  diveStart: 0.46,
+  diveEnd: 0.86,
+}
+
+export type SceneStats = { projects: number; technologies: number; companies: number }
+
+// o que cada peça representa (pt, en)
+const MEANING: Record<string, { name: [string, string]; concept: [string, string] }> = {
+  psu: { name: ['Fonte', 'Power supply'], concept: ['Arquitetura da solução', 'Solution architecture'] },
+  ram0: { name: ['Memória', 'Memory'], concept: ['Entendimento das necessidades', 'Understanding the needs'] },
+  gpu: { name: ['Placa de vídeo', 'Graphics card'], concept: ['IA aplicada', 'Applied AI'] },
+  cpu: { name: ['Processador', 'Processor'], concept: ['Código', 'Code'] },
+  board: { name: ['Placa-mãe', 'Motherboard'], concept: ['Integração de sistemas', 'Systems integration'] },
+  fan1: { name: ['Ventoinhas', 'Fans'], concept: ['Qualidade e testes', 'Quality & testing'] },
 }
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 const segment = (p: number, a: number, b: number) => clamp01((p - a) / (b - a))
-// gerador com semente: a poeira sai igual em todo render (e o render continua puro)
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+
+// gerador com semente: texturas e poeira saem iguais em todo render (e o render continua puro)
 function seeded(seed: number) {
   return () => {
     seed = (seed + 0x6d2b79f5) | 0
@@ -31,87 +52,397 @@ function seeded(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
 type Vec3 = [number, number, number]
 
-function lidTexture() {
+// metal escovado em alta resolução (a tampa do processador enche a tela no mergulho)
+function brushedTexture() {
+  const size = 2048
   const canvas = document.createElement('canvas')
-  canvas.width = canvas.height = 512
+  canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')!
-  const g = ctx.createLinearGradient(0, 0, 512, 512)
-  g.addColorStop(0, '#c9c2c6')
-  g.addColorStop(1, '#8d8489')
+  const g = ctx.createLinearGradient(0, 0, size, size)
+  g.addColorStop(0, '#d6cfd3')
+  g.addColorStop(0.5, '#b9b0b5')
+  g.addColorStop(1, '#988e94')
   ctx.fillStyle = g
-  ctx.fillRect(0, 0, 512, 512)
-  for (let y = 0; y < 512; y += 3) {
-    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`
-    ctx.fillRect(0, y, 512, 1)
+  ctx.fillRect(0, 0, size, size)
+  const random = seeded(3)
+  for (let y = 0; y < size; y++) {
+    ctx.fillStyle = `rgba(${random() > 0.5 ? '255,255,255' : '40,30,36'},${random() * 0.06})`
+    ctx.fillRect(0, y, size, 1)
   }
-  ctx.fillStyle = '#3a2c33'
-  ctx.font = 'bold 54px ui-monospace, monospace'
-  ctx.textAlign = 'center'
-  ctx.fillText('zanoni', 256, 236)
-  ctx.fillStyle = SIGNAL
-  ctx.fillText('.dev.br', 256, 300)
-  ctx.font = '22px ui-monospace, monospace'
-  ctx.fillStyle = '#5b4a52'
-  ctx.fillText('FZR-01 · ENGINEERED', 256, 360)
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
+  // nítida também vista de lado (o three limita ao máximo que a placa de vídeo aceita)
+  tex.anisotropy = 16
   return tex
 }
 
 function pcbTexture() {
+  const size = 2048
   const canvas = document.createElement('canvas')
-  canvas.width = canvas.height = 1024
+  canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')!
-  ctx.fillStyle = PCB
-  ctx.fillRect(0, 0, 1024, 1024)
-  ctx.strokeStyle = 'rgba(242,102,29,0.55)'
-  ctx.lineWidth = 3
-  for (let i = 0; i < 70; i++) {
-    let x = Math.random() * 1024
-    let y = Math.random() * 1024
+  ctx.fillStyle = '#1a1520'
+  ctx.fillRect(0, 0, size, size)
+  const random = seeded(11)
+  ctx.lineCap = 'round'
+  for (let i = 0; i < 160; i++) {
+    let x = random() * size
+    let y = random() * size
+    ctx.strokeStyle = random() > 0.7 ? 'rgba(242,102,29,0.75)' : 'rgba(176,119,90,0.45)'
+    ctx.lineWidth = 2 + random() * 4
     ctx.beginPath()
     ctx.moveTo(x, y)
-    for (let s = 0; s < 4; s++) {
-      if (Math.random() > 0.5) x += (Math.random() - 0.5) * 300
-      else y += (Math.random() - 0.5) * 300
+    for (let s = 0; s < 5; s++) {
+      // trilhas em 0°/45°/90°, como numa placa de verdade
+      const len = 40 + random() * 260
+      const dir = Math.floor(random() * 4)
+      if (dir === 0) x += len
+      else if (dir === 1) y += len
+      else if (dir === 2) { x += len * 0.7; y += len * 0.7 }
+      else { x -= len * 0.7; y += len * 0.7 }
       ctx.lineTo(x, y)
     }
     ctx.stroke()
-    ctx.fillStyle = 'rgba(242,102,29,0.8)'
-    ctx.fillRect(x - 4, y - 4, 8, 8)
+    ctx.fillStyle = GOLD
+    ctx.beginPath()
+    ctx.arc(x, y, 6, 0, Math.PI * 2)
+    ctx.fill()
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
+  // nítida também vista de lado (o three limita ao máximo que a placa de vídeo aceita)
+  tex.anisotropy = 16
   return tex
 }
 
-function Fan({ radius = 0.28 }: { radius?: number }) {
+function Glow({ color = SIGNAL, intensity = 3 }: { color?: string; intensity?: number }) {
+  return <meshStandardMaterial color={color} emissive={color} emissiveIntensity={intensity} toneMapped={false} />
+}
+
+// ventoinha de 120 mm: moldura quadrada com parafusos, anel de luz e pás inclinadas no próprio eixo,
+// girando presas ao aro (o eixo é o z local)
+function Fan({ size = 0.56 }: { size?: number }) {
   const blades = useRef<THREE.Group>(null)
   useFrame((_, dt) => {
-    if (blades.current) blades.current.rotation.z += dt * 6
+    if (blades.current) blades.current.rotation.z -= dt * 7
   })
+  const r = size * 0.44
+  const bar = size * 0.08
+  return (
+    <group>
+      {[
+        [0, size / 2 - bar / 2, size, bar],
+        [0, -size / 2 + bar / 2, size, bar],
+        [size / 2 - bar / 2, 0, bar, size],
+        [-size / 2 + bar / 2, 0, bar, size],
+      ].map(([x, y, w, h], i) => (
+        <mesh key={i} position={[x, y, 0]}>
+          <boxGeometry args={[w, h, 0.05]} />
+          <meshStandardMaterial color="#1c161a" metalness={0.3} roughness={0.55} />
+        </mesh>
+      ))}
+      {[-1, 1].flatMap((sx) =>
+        [-1, 1].map((sy) => (
+          <mesh key={`${sx}${sy}`} position={[sx * (size / 2 - bar / 2), sy * (size / 2 - bar / 2), 0.027]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.01, 12]} />
+            <meshStandardMaterial color="#8d8489" metalness={1} roughness={0.25} />
+          </mesh>
+        ))
+      )}
+      <mesh>
+        <torusGeometry args={[r + 0.012, 0.01, 12, 64]} />
+        <Glow intensity={2.4} />
+      </mesh>
+      <group ref={blades}>
+        {Array.from({ length: 9 }, (_, i) => (
+          <group key={i} rotation={[0, 0, (i / 9) * Math.PI * 2]}>
+            <mesh position={[0, r * 0.55, 0]} rotation={[0, 0.5, 0.18]}>
+              <boxGeometry args={[r * 0.42, r * 0.78, 0.006]} />
+              <meshStandardMaterial color="#241c21" metalness={0.2} roughness={0.5} side={THREE.DoubleSide} />
+            </mesh>
+          </group>
+        ))}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[r * 0.3, r * 0.3, 0.04, 32]} />
+          <meshStandardMaterial color="#1a1418" metalness={0.6} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, 0, 0.021]}>
+          <circleGeometry args={[r * 0.12, 32]} />
+          <Glow intensity={1.6} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+function Board({ pcb }: { pcb: THREE.Texture }) {
+  const caps = useMemo(() => {
+    const random = seeded(23)
+    return Array.from({ length: 14 }, () => [-0.45 + random() * 0.95, 0.05 + random() * 0.7] as [number, number])
+  }, [])
+  return (
+    <group>
+      <RoundedBox args={[1.55, 1.75, 0.04]} radius={0.01}>
+        <meshStandardMaterial map={pcb} roughness={0.65} metalness={0.25} />
+      </RoundedBox>
+      {/* soquete do processador */}
+      <mesh position={[0.12, 0.37, 0.03]}>
+        <boxGeometry args={[0.52, 0.52, 0.02]} />
+        <meshStandardMaterial color="#3a2e35" metalness={0.8} roughness={0.3} />
+      </mesh>
+      {/* slots das memórias, com travas caramelo */}
+      {[0, 1, 2, 3].map((i) => (
+        <group key={i} position={[0.5 + i * 0.075, 0.37, 0.035]}>
+          <mesh>
+            <boxGeometry args={[0.024, 0.68, 0.03]} />
+            <meshStandardMaterial color="#141016" roughness={0.6} />
+          </mesh>
+          {[-0.35, 0.35].map((y) => (
+            <mesh key={y} position={[0, y, 0.005]}>
+              <boxGeometry args={[0.03, 0.03, 0.04]} />
+              <meshStandardMaterial color={CARAMEL} roughness={0.5} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* slots PCIe (o primeiro com reforço de metal) */}
+      {[-0.27, -0.55].map((y, i) => (
+        <group key={y} position={[-0.05, y, 0.035]}>
+          <mesh>
+            <boxGeometry args={[1.05, 0.035, 0.03]} />
+            <meshStandardMaterial color={i === 0 ? '#9a9196' : '#141016'} metalness={i === 0 ? 1 : 0} roughness={0.35} />
+          </mesh>
+        </group>
+      ))}
+      {/* dissipadores dos VRMs com aletas e filete de luz */}
+      {[
+        { at: [-0.25, 0.38, 0.06] as Vec3, size: [0.14, 0.46, 0.08] as Vec3, finsAlong: 'y' },
+        { at: [0.12, 0.72, 0.06] as Vec3, size: [0.46, 0.12, 0.08] as Vec3, finsAlong: 'x' },
+      ].map((h, k) => (
+        <group key={k} position={h.at}>
+          <RoundedBox args={h.size} radius={0.01}>
+            <meshStandardMaterial color="#2a2128" metalness={0.9} roughness={0.3} />
+          </RoundedBox>
+          {Array.from({ length: 7 }, (_, i) => (
+            <mesh
+              key={i}
+              position={h.finsAlong === 'y' ? [0, -h.size[1] / 2 + 0.04 + i * 0.063, h.size[2] / 2 + 0.006] : [-h.size[0] / 2 + 0.04 + i * 0.063, 0, h.size[2] / 2 + 0.006]}
+            >
+              <boxGeometry args={h.finsAlong === 'y' ? [h.size[0] * 0.9, 0.012, 0.012] : [0.012, h.size[1] * 0.9, 0.012]} />
+              <meshStandardMaterial color="#52454d" metalness={1} roughness={0.25} />
+            </mesh>
+          ))}
+          <mesh position={h.finsAlong === 'y' ? [h.size[0] / 2 - 0.01, 0, h.size[2] / 2 + 0.01] : [0, -h.size[1] / 2 + 0.01, h.size[2] / 2 + 0.01]}>
+            <boxGeometry args={h.finsAlong === 'y' ? [0.008, h.size[1] * 0.85, 0.008] : [h.size[0] * 0.85, 0.008, 0.008]} />
+            <Glow intensity={2.5} />
+          </mesh>
+        </group>
+      ))}
+      {/* chipset */}
+      <group position={[0.38, -0.75, 0.04]}>
+        <RoundedBox args={[0.3, 0.22, 0.04]} radius={0.01}>
+          <meshStandardMaterial color="#2a2128" metalness={0.9} roughness={0.3} />
+        </RoundedBox>
+        <Text font={MONO_BOLD} fontSize={0.035} position={[0, 0, 0.022]} color={SIGNAL} anchorX="center" anchorY="middle">
+          FZR
+        </Text>
+      </group>
+      {/* capacitores */}
+      {caps.map(([x, y], i) => (
+        <group key={i} position={[x, y, 0.045]} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh>
+            <cylinderGeometry args={[0.022, 0.022, 0.06, 16]} />
+            <meshStandardMaterial color="#3b3036" metalness={0.8} roughness={0.3} />
+          </mesh>
+          <mesh position={[0, 0.031, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.002, 16]} />
+            <meshStandardMaterial color="#9a9196" metalness={1} roughness={0.2} />
+          </mesh>
+        </group>
+      ))}
+      {/* espelho de I/O e conector de 24 pinos */}
+      <mesh position={[-0.62, 0.55, 0.07]}>
+        <boxGeometry args={[0.16, 0.5, 0.12]} />
+        <meshStandardMaterial color="#8d8489" metalness={1} roughness={0.35} />
+      </mesh>
+      <mesh position={[0.74, 0.0, 0.05]}>
+        <boxGeometry args={[0.05, 0.3, 0.06]} />
+        <meshStandardMaterial color="#141016" roughness={0.6} />
+      </mesh>
+    </group>
+  )
+}
+
+// o processador em detalhe: base verde com contatos e capacitores, tampa metálica escovada e chanfrada,
+// gravação em texto vetorial (nítida em qualquer zoom: é o que vai virar tela)
+function Cpu({ brushed, stats, en }: { brushed: THREE.Texture; stats: SceneStats; en: boolean }) {
+  const pads = useMemo(() => {
+    const list: [number, number][] = []
+    for (let i = 0; i < 18; i++) {
+      const t = -0.2 + (i / 17) * 0.4
+      list.push([t, 0.213], [t, -0.213], [0.213, t], [-0.213, t])
+    }
+    return list
+  }, [])
+  return (
+    <group>
+      <RoundedBox args={[0.46, 0.46, 0.03]} radius={0.006}>
+        <meshStandardMaterial color="#1e5641" roughness={0.45} metalness={0.2} />
+      </RoundedBox>
+      {pads.map(([x, y], i) => (
+        <mesh key={i} position={[x, y, 0.016]}>
+          <boxGeometry args={[0.008, 0.008, 0.002]} />
+          <meshStandardMaterial color={GOLD} metalness={1} roughness={0.25} />
+        </mesh>
+      ))}
+      {[-0.18, 0.18].flatMap((x) =>
+        [-0.18, 0.18].map((y) => (
+          <mesh key={`${x}${y}`} position={[x, y, 0.02]}>
+            <boxGeometry args={[0.03, 0.012, 0.008]} />
+            <meshStandardMaterial color="#6b4b3a" metalness={0.6} roughness={0.4} />
+          </mesh>
+        ))
+      )}
+      <RoundedBox args={[0.37, 0.37, 0.035]} radius={0.012} smoothness={6} position={[0, 0, 0.033]}>
+        <meshPhysicalMaterial map={brushed} metalness={0.9} roughness={0.32} clearcoat={0.25} clearcoatRoughness={0.4} />
+      </RoundedBox>
+      <group position={[0, 0, 0.0515]}>
+        <Text font={MONO_BOLD} fontSize={0.016} position={[-0.034, 0.142, 0]} color="#2b2024" anchorX="center" anchorY="middle" sdfGlyphSize={128}>
+          zanoni
+        </Text>
+        <Text font={MONO_BOLD} fontSize={0.016} position={[0.052, 0.142, 0]} color={SIGNAL} anchorX="center" anchorY="middle" sdfGlyphSize={128}>
+          .dev.br
+        </Text>
+        <Text font={DISPLAY} fontSize={0.15} position={[0, 0.018, 0]} color="#2b2024" anchorX="center" anchorY="middle" letterSpacing={-0.04} sdfGlyphSize={128}>
+          {String(stats.projects)}
+        </Text>
+        <Text font={MONO_BOLD} fontSize={0.024} position={[0, -0.075, 0]} color={SIGNAL} anchorX="center" anchorY="middle" letterSpacing={0.2} sdfGlyphSize={128}>
+          {en ? 'PROJECTS' : 'PROJETOS'}
+        </Text>
+        <Text font={MONO} fontSize={0.011} position={[0, -0.112, 0]} color="#5b4a52" anchorX="center" anchorY="middle" sdfGlyphSize={128}>
+          {`${stats.technologies} TECH · ${stats.companies} ${en ? 'COMPANIES' : 'EMPRESAS'}`}
+        </Text>
+        <Text font={MONO} fontSize={0.009} position={[0, -0.143, 0]} color="#5b4a52" anchorX="center" anchorY="middle" sdfGlyphSize={128}>
+          FZR-01 · BRASIL
+        </Text>
+        <mesh position={[-0.155, -0.155, 0]}>
+          <circleGeometry args={[0.008, 3]} />
+          <meshStandardMaterial color="#2b2024" />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+function Ram({ accent }: { accent: string }) {
   return (
     <group>
       <mesh>
-        <torusGeometry args={[radius, 0.025, 12, 48]} />
-        <meshStandardMaterial color={SIGNAL} emissive={SIGNAL} emissiveIntensity={2.2} toneMapped={false} />
+        <boxGeometry args={[0.012, 0.6, 0.1]} />
+        <meshStandardMaterial color="#1e5641" roughness={0.5} />
       </mesh>
-      <group ref={blades}>
-        {Array.from({ length: 7 }, (_, i) => (
-          <mesh key={i} rotation={[0.35, 0, (i / 7) * Math.PI * 2]} position={[0, 0, 0]}>
-            <boxGeometry args={[0.04, radius * 1.7, 0.01]} />
-            <meshStandardMaterial color="#1a1418" metalness={0.3} roughness={0.6} />
+      {[-1, 1].map((side) => (
+        <RoundedBox key={side} args={[0.012, 0.6, 0.11]} radius={0.004} position={[side * 0.012, 0.01, 0]}>
+          <meshStandardMaterial color="#2a2128" metalness={0.9} roughness={0.3} />
+        </RoundedBox>
+      ))}
+      <mesh position={[0, 0.315, 0]}>
+        <boxGeometry args={[0.03, 0.03, 0.11]} />
+        <Glow color={accent} intensity={3} />
+      </mesh>
+      <mesh position={[0, -0.305, 0]}>
+        <boxGeometry args={[0.014, 0.02, 0.095]} />
+        <meshStandardMaterial color={GOLD} metalness={1} roughness={0.25} />
+      </mesh>
+    </group>
+  )
+}
+
+function Gpu({ brushed }: { brushed: THREE.Texture }) {
+  return (
+    <group>
+      <RoundedBox args={[1.25, 0.12, 0.5]} radius={0.03}>
+        <meshStandardMaterial color="#231b21" metalness={0.75} roughness={0.3} />
+      </RoundedBox>
+      {/* backplate escovado em cima, com a marca */}
+      <RoundedBox args={[1.2, 0.012, 0.46]} radius={0.004} position={[0, 0.066, 0]}>
+        <meshStandardMaterial map={brushed} color="#6b6166" metalness={1} roughness={0.3} />
+      </RoundedBox>
+      <Text font={MONO_BOLD} fontSize={0.05} position={[-0.25, 0.074, 0]} rotation={[-Math.PI / 2, 0, 0]} color={SIGNAL} anchorX="center" anchorY="middle">
+        FZR · AI
+      </Text>
+      {/* aletas do dissipador entre a carcaça e as ventoinhas */}
+      {Array.from({ length: 26 }, (_, i) => (
+        <mesh key={i} position={[-0.58 + i * 0.046, -0.085, 0]}>
+          <boxGeometry args={[0.006, 0.05, 0.46]} />
+          <meshStandardMaterial color="#8d8489" metalness={1} roughness={0.3} />
+        </mesh>
+      ))}
+      {[-0.32, 0.32].map((x) => (
+        <group key={x} position={[x, -0.13, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <Fan size={0.4} />
+        </group>
+      ))}
+      <mesh position={[0, 0.0, 0.252]}>
+        <boxGeometry args={[1.1, 0.012, 0.006]} />
+        <Glow intensity={3} />
+      </mesh>
+      {/* espelho PCIe e contatos dourados */}
+      <mesh position={[-0.64, -0.02, 0]}>
+        <boxGeometry args={[0.02, 0.26, 0.5]} />
+        <meshStandardMaterial color="#9a9196" metalness={1} roughness={0.3} />
+      </mesh>
+      <mesh position={[-0.05, -0.08, -0.2]}>
+        <boxGeometry args={[0.6, 0.03, 0.012]} />
+        <meshStandardMaterial color={GOLD} metalness={1} roughness={0.25} />
+      </mesh>
+    </group>
+  )
+}
+
+function Psu() {
+  return (
+    <group>
+      <RoundedBox args={[1.0, 0.32, 0.75]} radius={0.03}>
+        <meshStandardMaterial color="#1b1519" metalness={0.6} roughness={0.45} />
+      </RoundedBox>
+      {/* grade de ventilação em cima */}
+      <group position={[-0.15, 0.161, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh>
+          <ringGeometry args={[0.22, 0.235, 64]} />
+          <meshStandardMaterial color="#5b4a52" metalness={1} roughness={0.3} side={THREE.DoubleSide} />
+        </mesh>
+        {Array.from({ length: 9 }, (_, i) => (
+          <mesh key={i} position={[0, -0.2 + i * 0.05, 0.001]}>
+            <planeGeometry args={[0.44 * Math.sqrt(1 - Math.pow((-0.2 + i * 0.05) / 0.23, 2)), 0.008]} />
+            <meshStandardMaterial color="#5b4a52" metalness={1} roughness={0.3} side={THREE.DoubleSide} />
           </mesh>
         ))}
+      </group>
+      {/* etiqueta: é a base de tudo */}
+      <group position={[0.32, 0.162, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <mesh>
-          <cylinderGeometry args={[0.07, 0.07, 0.04, 24]} />
-          <meshStandardMaterial color="#120e11" />
+          <planeGeometry args={[0.3, 0.4]} />
+          <meshStandardMaterial color="#2b2024" roughness={0.8} />
+        </mesh>
+        <Text font={MONO_BOLD} fontSize={0.05} position={[0, 0.1, 0.001]} color={SIGNAL} anchorX="center" anchorY="middle">
+          850W
+        </Text>
+        <Text font={MONO} fontSize={0.022} position={[0, 0.02, 0.001]} color="#f6eae3" anchorX="center" anchorY="middle" maxWidth={0.26} textAlign="center">
+          ARCHITECTURE FIRST
+        </Text>
+        <mesh position={[0, -0.07, 0.001]}>
+          <planeGeometry args={[0.22, 0.005]} />
+          <Glow intensity={2} />
         </mesh>
       </group>
+      <mesh position={[0.502, 0, 0]}>
+        <boxGeometry args={[0.01, 0.2, 0.5]} />
+        <Glow intensity={1.2} color={CARAMEL} />
+      </mesh>
     </group>
   )
 }
@@ -127,110 +458,60 @@ const SHELL: { key: string; at: Vec3; size: Vec3; out: Vec3 }[] = [
 
 type Part = {
   key: string
-  name: string
   assembled: Vec3
   offset: Vec3
-  labelOffset?: Vec3
+  // giro (em radianos) que a peça dá enquanto se afasta, e o atraso dela na sequência (0..0.4)
+  spin: Vec3
+  delay: number
+  labelAt?: Vec3
   node: React.ReactNode
 }
 
-function Pc({ progressRef, labels }: { progressRef: React.RefObject<number>; labels: string[] }) {
-  const lid = useMemo(() => lidTexture(), [])
+function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; stats: SceneStats; en: boolean }) {
+  const brushed = useMemo(() => brushedTexture(), [])
   const pcb = useMemo(() => pcbTexture(), [])
+  const tmp = useMemo(
+    () => ({ cpu: new THREE.Vector3(), normal: new THREE.Vector3(), orbit: new THREE.Vector3(), look: new THREE.Vector3(), close: new THREE.Vector3() }),
+    []
+  )
+  const cpuLight = useRef<THREE.PointLight>(null)
   const root = useRef<THREE.Group>(null)
   const glass = useRef<THREE.Mesh>(null)
   const partRefs = useRef<Record<string, THREE.Group | null>>({})
   const shellRefs = useRef<Record<string, THREE.Group | null>>({})
   const labelRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const { projects, technologies, companies } = stats
 
   const parts: Part[] = useMemo(
     () => [
-      {
-        key: 'board',
-        name: 'Placa-mãe',
-        assembled: [0, 0.05, -0.42],
-        offset: [0, 0.1, -1.1],
-        node: (
-          <mesh>
-            <boxGeometry args={[1.55, 1.75, 0.05]} />
-            <meshStandardMaterial map={pcb} roughness={0.7} metalness={0.2} emissive={SIGNAL} emissiveMap={pcb} emissiveIntensity={0.35} />
-          </mesh>
-        ),
-      },
+      { key: 'board', assembled: [0, 0.05, -0.42], offset: [0, 0.1, -1.1], spin: [0, 0, 0], delay: 0, labelAt: [-0.4, -0.2, 0.15], node: <Board pcb={pcb} /> },
       {
         key: 'cpu',
-        name: 'Processador',
-        assembled: [0.12, 0.42, -0.36],
+        assembled: [0.12, 0.42, -0.375],
         offset: [0.2, 0.75, 1.5],
-        node: (
-          <group>
-            <mesh>
-              <boxGeometry args={[0.42, 0.42, 0.05]} />
-              <meshStandardMaterial color="#1d4a3a" roughness={0.6} />
-            </mesh>
-            <mesh position={[0, 0, 0.04]}>
-              <boxGeometry args={[0.34, 0.34, 0.04]} />
-              <meshStandardMaterial map={lid} metalness={0.85} roughness={0.32} />
-            </mesh>
-          </group>
-        ),
+        spin: [0, 0, 0],
+        delay: 0.2,
+        labelAt: [0, 0.32, 0.1],
+        node: <Cpu brushed={brushed} stats={{ projects, technologies, companies }} en={en} />,
       },
       ...[0, 1, 2, 3].map<Part>((i) => ({
         key: `ram${i}`,
-        name: 'Memória',
-        assembled: [0.5 + i * 0.075, 0.42, -0.3],
+        assembled: [0.5 + i * 0.075, 0.42, -0.33],
         offset: [0.35 + i * 0.28, 1.15, 0.9],
-        node: (
-          <group>
-            <mesh>
-              <boxGeometry args={[0.035, 0.62, 0.11]} />
-              <meshStandardMaterial color="#251c22" metalness={0.6} roughness={0.35} />
-            </mesh>
-            <mesh position={[0, 0.33, 0]}>
-              <boxGeometry args={[0.04, 0.04, 0.115]} />
-              <meshStandardMaterial color={i % 2 ? CARAMEL : SIGNAL} emissive={i % 2 ? CARAMEL : SIGNAL} emissiveIntensity={2} toneMapped={false} />
-            </mesh>
-          </group>
-        ),
+        spin: [0, 0, (i - 1.5) * 0.12],
+        delay: 0.26 + i * 0.03,
+        labelAt: [0, 0.42, 0.1],
+        node: <Ram accent={i % 2 ? CARAMEL : SIGNAL} />,
       })),
-      {
-        key: 'gpu',
-        name: 'Placa de vídeo',
-        assembled: [-0.05, -0.2, -0.12],
-        offset: [0.15, -0.35, 1.45],
-        node: (
-          <group>
-            <RoundedBox args={[1.25, 0.16, 0.5]} radius={0.03}>
-              <meshStandardMaterial color="#231b21" metalness={0.75} roughness={0.3} />
-            </RoundedBox>
-            {[-0.33, 0.33].map((x) => (
-              <group key={x} position={[x, -0.085, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <Fan radius={0.17} />
-              </group>
-            ))}
-            <mesh position={[0, 0.085, 0.24]}>
-              <boxGeometry args={[1.1, 0.012, 0.02]} />
-              <meshStandardMaterial color={SIGNAL} emissive={SIGNAL} emissiveIntensity={2.5} toneMapped={false} />
-            </mesh>
-          </group>
-        ),
-      },
-      {
-        key: 'psu',
-        name: 'Fonte',
-        assembled: [-0.15, -0.86, 0],
-        offset: [-0.2, -1.05, 0.7],
-        node: (
-          <RoundedBox args={[1.0, 0.32, 0.75]} radius={0.03}>
-            <meshStandardMaterial color="#1b1519" metalness={0.5} roughness={0.5} />
-          </RoundedBox>
-        ),
-      },
+      { key: 'gpu', assembled: [-0.05, -0.2, -0.12], offset: [0.15, -0.35, 1.45], spin: [-0.5, 0.15, 0], delay: 0.12, labelAt: [0, 0.3, 0.1], node: <Gpu brushed={brushed} /> },
+      { key: 'psu', assembled: [-0.15, -0.86, 0], offset: [-0.2, -1.05, 0.7], spin: [0.15, -0.3, 0], delay: 0.06, labelAt: [0, -0.32, 0.3], node: <Psu /> },
       ...[0.55, 0, -0.55].map<Part>((y, i) => ({
         key: `fan${i}`,
-        name: 'Ventoinha',
         assembled: [0.92, y + 0.15, 0],
         offset: [1.6, (1 - i) * 0.45, 0.5],
+        spin: [0, -0.5, 0],
+        delay: 0.08 + i * 0.04,
+        labelAt: [0, 0, 0.4],
         node: (
           <group rotation={[0, Math.PI / 2, 0]}>
             <Fan />
@@ -238,30 +519,30 @@ function Pc({ progressRef, labels }: { progressRef: React.RefObject<number>; lab
         ),
       })),
     ],
-    [lid, pcb]
+    [pcb, brushed, projects, technologies, companies, en]
   )
-
-  // cada etiqueta recebe uma tecnologia (a ordem da home); peças sem tecnologia mostram só o nome
-  const labelled = parts.filter((p) => !p.key.startsWith('ram') || p.key === 'ram0').filter((p) => !p.key.startsWith('fan') || p.key === 'fan1')
-  const techOf = Object.fromEntries(labelled.map((p, i) => [p.key, labels[i]]))
 
   useFrame((state, dt) => {
     const p = progressRef.current ?? 0
-    const e = easeInOut(segment(p, STORY.explodeStart, STORY.explodeEnd))
+    const raw = segment(p, STORY.explodeStart, STORY.explodeEnd)
+    const e = easeInOut(raw)
+    const d = easeInOut(segment(p, STORY.diveStart, STORY.diveEnd))
     if (root.current) {
-      // gira para mostrar o lado de vidro e continua girando devagar sozinho
-      root.current.rotation.y = -0.55 + e * 0.75 + Math.sin(state.clock.elapsedTime * 0.25) * 0.06
-      root.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.03
+      // gira para mostrar o lado de vidro e continua girando devagar sozinho; no mergulho para de balançar
+      root.current.rotation.y = -0.55 + e * 0.75 + Math.sin(state.clock.elapsedTime * 0.25) * 0.06 * (1 - d)
+      root.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.03 * (1 - d)
     }
     for (const part of parts) {
       const g = partRefs.current[part.key]
       if (!g) continue
+      // cada peça sai na sua vez (atraso) e gira um pouco no ar
+      const k = easeInOut(clamp01((raw - part.delay) / (1 - 0.4)))
       g.position.set(
-        part.assembled[0] + part.offset[0] * e,
-        part.assembled[1] + part.offset[1] * e,
-        part.assembled[2] + part.offset[2] * e
+        part.assembled[0] + part.offset[0] * k,
+        part.assembled[1] + part.offset[1] * k,
+        part.assembled[2] + part.offset[2] * k
       )
-      g.rotation.x = part.key === 'gpu' ? -e * 0.5 : 0
+      g.rotation.set(part.spin[0] * k, part.spin[1] * k, part.spin[2] * k)
     }
     for (const panel of SHELL) {
       const g = shellRefs.current[panel.key]
@@ -272,15 +553,27 @@ function Pc({ progressRef, labels }: { progressRef: React.RefObject<number>; lab
       glass.current.position.x = e * 0.9
       ;(glass.current.material as THREE.MeshPhysicalMaterial).opacity = 0.22 * (1 - e)
     }
-    const labelAlpha = clamp01((e - 0.75) / 0.25)
+    const labelAlpha = clamp01((e - 0.8) / 0.2) * (1 - clamp01(d * 4))
     for (const key in labelRefs.current) {
       const el = labelRefs.current[key]
       if (el) el.style.opacity = String(labelAlpha)
     }
-    // a câmera recua um pouco para caber a vista explodida
+    // órbita (montado → desmontado) e, no mergulho, voo até a tampa do processador, de frente para ela
+    tmp.orbit.set(3.1 - e * 0.3, 1.0 + e * 0.6, 5.3 + e * 3.2)
+    tmp.look.set(0, -0.05 + e * 0.3, 0)
+    const cpu = partRefs.current.cpu
+    if (cpu && root.current && d > 0) {
+      cpu.getWorldPosition(tmp.cpu)
+      tmp.normal.set(0, 0, 1).applyQuaternion(root.current.quaternion)
+      // começa a uns 1,4 de distância e termina perto da tampa (ela enche a tela)
+      tmp.close.copy(tmp.cpu).addScaledVector(tmp.normal, 1.4 - 0.95 * clamp01((d - 0.5) / 0.5))
+      tmp.orbit.lerp(tmp.close, clamp01(d * 1.6))
+      tmp.look.lerp(tmp.cpu, clamp01(d * 1.6))
+    }
     const cam = state.camera
-    cam.position.lerp(new THREE.Vector3(3.1 - e * 0.3, 1.0 + e * 0.6, 5.3 + e * 3.2), 1 - Math.exp(-dt * 4))
-    cam.lookAt(0, -0.05 + e * 0.3, 0)
+    cam.position.lerp(tmp.orbit, 1 - Math.exp(-dt * 5))
+    cam.lookAt(tmp.look)
+    if (cpuLight.current) cpuLight.current.intensity = 1.4 * d
   })
 
   return (
@@ -294,7 +587,13 @@ function Pc({ progressRef, labels }: { progressRef: React.RefObject<number>; lab
           {panel.key === 'bottom' && (
             <mesh position={[0, 0.03, 0.53]}>
               <boxGeometry args={[2.0, 0.015, 0.015]} />
-              <meshStandardMaterial color={SIGNAL} emissive={SIGNAL} emissiveIntensity={3} toneMapped={false} />
+              <Glow />
+            </mesh>
+          )}
+          {panel.key === 'top' && (
+            <mesh position={[0, 0.032, 0]}>
+              <boxGeometry args={[1.7, 0.004, 0.7]} />
+              <meshStandardMaterial color="#1a1418" metalness={0.5} roughness={0.7} />
             </mesh>
           )}
         </group>
@@ -306,21 +605,23 @@ function Pc({ progressRef, labels }: { progressRef: React.RefObject<number>; lab
       {parts.map((part) => (
         <group key={part.key} ref={(g) => { partRefs.current[part.key] = g }} position={part.assembled}>
           {part.node}
-          {part.key in techOf && (
-            <Html position={[0, 0.32, 0.1]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+          {part.key in MEANING && (
+            <Html position={part.labelAt} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
               <div
                 ref={(el) => { labelRefs.current[part.key] = el }}
                 style={{ opacity: 0 }}
-                className="whitespace-nowrap rounded-full border border-signal/50 bg-background/80 px-2.5 py-1 font-mono text-[11px] text-foreground shadow-lg backdrop-blur"
+                className="whitespace-nowrap rounded-lg border border-signal/50 bg-background/85 px-3 py-1.5 text-center shadow-lg backdrop-blur"
               >
-                <span className="text-steel">{part.name}</span>
-                {techOf[part.key] && <span className="text-signal"> · {techOf[part.key]}</span>}
+                <div className="font-display text-sm font-medium text-foreground">{MEANING[part.key].concept[en ? 1 : 0]}</div>
+                <div className="font-mono text-[10px] uppercase tracking-wide text-signal">{MEANING[part.key].name[en ? 1 : 0]}</div>
               </div>
             </Html>
           )}
         </group>
       ))}
       <pointLight position={[0.2, 0.2, 0]} intensity={4} distance={3} color={SIGNAL} />
+      {/* luz que acende sobre a tampa no mergulho, para a gravação ficar legível */}
+      <pointLight ref={cpuLight} position={[-0.6, 2.0, 1.6]} intensity={0} distance={3} color="#fff1e6" />
     </group>
   )
 }
@@ -329,15 +630,15 @@ function Platform() {
   return (
     <group position={[0, -1.12, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[2.4, 64]} />
-        <meshStandardMaterial color="#241b20" metalness={0.6} roughness={0.5} />
+        <circleGeometry args={[2.4, 96]} />
+        <meshStandardMaterial color="#241b20" metalness={0.7} roughness={0.4} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
-        <ringGeometry args={[2.32, 2.4, 96]} />
+        <ringGeometry args={[2.32, 2.4, 128]} />
         <meshBasicMaterial color={SIGNAL} toneMapped={false} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>
-        <ringGeometry args={[1.5, 1.52, 96]} />
+        <ringGeometry args={[1.5, 1.52, 128]} />
         <meshBasicMaterial color={CARAMEL} transparent opacity={0.6} />
       </mesh>
     </group>
@@ -372,47 +673,52 @@ function Dust() {
 
 // a rolagem chega a cada 1/60 s em degraus; a cena persegue o valor com atraso suave
 function SmoothedProgress({ source, targetRef }: { source: MotionValue<number>; targetRef: React.RefObject<number> }) {
-  const invalidate = useThree((s) => s.invalidate)
   useFrame((_, dt) => {
     const goal = source.get()
     targetRef.current += (goal - targetRef.current) * (1 - Math.exp(-dt * 7))
-    if (Math.abs(goal - targetRef.current) > 1e-4) invalidate()
   })
   return null
 }
 
 export default function PcScene({
   progress,
-  labels,
   active,
+  stats,
+  en,
 }: {
   progress: MotionValue<number>
-  labels: string[]
   active: boolean
+  stats: SceneStats
+  en: boolean
 }) {
   const smoothed = useRef(progress.get())
   return (
     <Canvas
       frameloop={active ? 'always' : 'never'}
-      dpr={[1, 1.75]}
+      dpr={[1, 1.5]}
       camera={{ position: [3.1, 1.0, 5.3], fov: 38 }}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: false, powerPreference: 'high-performance' }}
       aria-hidden
     >
       <color attach="background" args={['#2b2024']} />
       <fog attach="fog" args={['#2b2024', 9, 26]} />
-      <hemisphereLight args={['#f6eae3', '#2b2024', 0.6]} />
-      <directionalLight position={[4, 6, 5]} intensity={2.2} color="#fff1e6" />
+      <hemisphereLight args={['#f6eae3', '#2b2024', 0.5]} />
+      <directionalLight position={[4, 6, 5]} intensity={2.0} color="#fff1e6" />
       <directionalLight position={[-5, 2, -4]} intensity={1.2} color={CARAMEL} />
-      <Environment resolution={128}>
-        <Lightformer form="rect" intensity={2.2} color="#fff1e6" position={[0, 4, 3]} scale={[6, 2, 1]} />
+      <Environment resolution={256}>
+        <Lightformer form="rect" intensity={2.4} color="#fff1e6" position={[0, 4, 3]} scale={[6, 2, 1]} />
         <Lightformer form="rect" intensity={1.6} color={SIGNAL} position={[-4, 1, -2]} scale={[2, 4, 1]} />
         <Lightformer form="ring" intensity={1.2} color={CARAMEL} position={[4, 0, 2]} scale={2} />
       </Environment>
       <SmoothedProgress source={progress} targetRef={smoothed} />
-      <Pc progressRef={smoothed} labels={labels} />
+      <Pc progressRef={smoothed} stats={stats} en={en} />
       <Platform />
       <Dust />
+      {/* brilho real nas luzes (só o que passa de 1 brilha) e vinheta nas bordas */}
+      <EffectComposer multisampling={4}>
+        <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.2} intensity={0.9} />
+        <Vignette offset={0.25} darkness={0.6} />
+      </EffectComposer>
     </Canvas>
   )
 }

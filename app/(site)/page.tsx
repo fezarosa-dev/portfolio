@@ -53,7 +53,11 @@ export default async function HomePage() {
         eyebrow={dict.home.aboutEyebrow}
       />
       <ProjectsStory
-        labels={languages.filter((lang) => lang.show_on_home).map((lang) => resolveText(lang.name, lang.name_en, locale))}
+        stats={{
+          projects: projects.length,
+          technologies: languages.length,
+          companies: new Set(projects.flatMap((p) => (p.company ? [p.company.id] : []))).size,
+        }}
         projects={projects.filter((p) => p.show_on_home)}
         eyebrow={dict.home.projectsEyebrow}
         heading={dict.home.projectsHeading}
