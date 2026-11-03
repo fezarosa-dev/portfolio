@@ -435,12 +435,44 @@ function Gpu({ brushed }: { brushed: THREE.Texture }) {
   )
 }
 
+// saída de ar da fonte: posição no eixo da largura da traseira (u = z do mundo) e raio. A fonte e a chapa
+// de trás do gabinete usam o mesmo valor, então a furação da chapa fica alinhada com a ventoinha da fonte
+const PSU_EXHAUST = { u: 0.12, r: 0.13 }
+
+// grade em colmeia recortada num círculo (furinhos hexagonais escuros)
+function Honeycomb({ radius, cell, z }: { radius: number; cell: number; z: number }) {
+  const holes = useMemo(() => {
+    const out: [number, number][] = []
+    const step = cell * 2.1
+    const n = Math.ceil(radius / step) + 1
+    for (let row = -n; row <= n; row++)
+      for (let col = -n; col <= n; col++) {
+        const x = col * step + (row % 2 ? step / 2 : 0)
+        const y = row * step * 0.87
+        if (Math.hypot(x, y) < radius - cell) out.push([x, y])
+      }
+    return out
+  }, [radius, cell])
+  return (
+    <group position={[0, 0, z]}>
+      {holes.map(([x, y]) => (
+        <mesh key={`${x}-${y}`} position={[x, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[cell, cell, 0.003, 6]} />
+          <meshStandardMaterial color="#3a2f37" metalness={0.8} roughness={0.4} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 // fonte modular: carcaça preta, ventoinha de 135 mm com grade em cima, placa escovada com a marca na
 // lateral, colmeia de ventilação + tomada e chave atrás, painel de conectores modulares na frente
 function Psu({ brushed }: { brushed: THREE.Texture }) {
   const blades = useRef<THREE.Group>(null)
+  const exhaust = useRef<THREE.Group>(null)
   useFrame((_, dt) => {
     if (blades.current) blades.current.rotation.y -= dt * 5
+    if (exhaust.current) exhaust.current.rotation.z -= dt * 8
   })
   const grille = { color: '#6b6166', metalness: 1, roughness: 0.3 } as const
   return (
@@ -511,21 +543,39 @@ function Psu({ brushed }: { brushed: THREE.Texture }) {
           <Glow intensity={2.4} />
         </mesh>
       </group>
-      {/* traseira: colmeia de ventilação, tomada e chave */}
+      {/* traseira (encostada na chapa de trás do gabinete): ventoinha de exaustão que joga o ar para fora,
+          atrás de uma grade em colmeia, mais a tomada e a chave. Mesmo desenho da saída na chapa (PSU_EXHAUST) */}
       <group position={[-0.502, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        {Array.from({ length: 4 }, (_, row) =>
-          Array.from({ length: 8 }, (_, col) => (
-            <mesh key={`${row}-${col}`} position={[-0.06 + col * 0.045 + (row % 2) * 0.0225, -0.09 + row * 0.04, 0]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.019, 0.019, 0.006, 6]} />
-              <meshStandardMaterial color="#0a0708" roughness={0.9} />
+        <group position={[PSU_EXHAUST.u, 0, 0]}>
+          <mesh>
+            <circleGeometry args={[PSU_EXHAUST.r, 48]} />
+            <meshStandardMaterial color="#0a0708" roughness={0.9} />
+          </mesh>
+          <group ref={exhaust} position={[0, 0, 0.003]}>
+            {Array.from({ length: 7 }, (_, i) => (
+              <group key={i} rotation={[0, 0, (i / 7) * Math.PI * 2]}>
+                <mesh position={[0, PSU_EXHAUST.r * 0.5, 0]} rotation={[0, 0.5, 0.15]}>
+                  <boxGeometry args={[PSU_EXHAUST.r * 0.38, PSU_EXHAUST.r * 0.7, 0.003]} />
+                  <meshStandardMaterial color="#2a2126" metalness={0.2} roughness={0.5} side={THREE.DoubleSide} />
+                </mesh>
+              </group>
+            ))}
+            <mesh>
+              <circleGeometry args={[PSU_EXHAUST.r * 0.28, 24]} />
+              <meshStandardMaterial color="#1a1418" metalness={0.6} roughness={0.35} />
             </mesh>
-          ))
-        )}
-        <mesh position={[-0.24, 0.03, 0.004]}>
+          </group>
+          <Honeycomb radius={PSU_EXHAUST.r} cell={0.022} z={0.008} />
+          <mesh position={[0, 0, 0.008]}>
+            <ringGeometry args={[PSU_EXHAUST.r, PSU_EXHAUST.r + 0.012, 48]} />
+            <Glow intensity={1.6} />
+          </mesh>
+        </group>
+        <mesh position={[-0.25, 0.04, 0.004]}>
           <boxGeometry args={[0.09, 0.06, 0.008]} />
           <meshStandardMaterial color="#0f0b0d" roughness={0.7} />
         </mesh>
-        <mesh position={[-0.24, -0.06, 0.006]}>
+        <mesh position={[-0.25, -0.06, 0.006]}>
           <boxGeometry args={[0.04, 0.05, 0.012]} />
           <Glow intensity={1.6} />
         </mesh>
@@ -554,12 +604,14 @@ function Psu({ brushed }: { brushed: THREE.Texture }) {
 }
 
 // traseira do gabinete (o lado x = -1): espelho de I/O da placa-mãe, saída da ventoinha com grade em
-// colmeia, tampas dos slots PCIe e a abertura da fonte. Grupo virado para fora: u = z do mundo, v = y
-function RearPanel() {
+// colmeia, tampas dos slots PCIe e a abertura da fonte. Grupo virado para fora: u = z do mundo, v = y.
+// A furação atravessa a chapa: por dentro (visível com o PC aberto) é o mesmo desenho espelhado no x,
+// alinhado com o de fora (o three inverte a face dos triângulos sozinho com a escala negativa)
+function RearPanel({ inner = false }: { inner?: boolean }) {
   const dark = { color: '#0f0b0d', roughness: 0.8 } as const
   const steel = { color: '#8d8489', metalness: 1, roughness: 0.3 } as const
   return (
-    <group position={[-0.027, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+    <group position={[inner ? 0.027 : -0.027, 0, 0]} rotation={[0, -Math.PI / 2, 0]} scale={[1, 1, inner ? -1 : 1]}>
       {/* espelho de I/O com as portas */}
       <mesh position={[-0.3, 0.62, 0]}>
         <boxGeometry args={[0.2, 0.44, 0.006]} />
@@ -628,17 +680,38 @@ function RearPanel() {
         <boxGeometry args={[0.012, 0.6, 0.004]} />
         <Glow color={CARAMEL} intensity={1.2} />
       </mesh>
-      {/* abertura da fonte */}
-      <mesh position={[0, -0.86, 0.003]}>
-        <boxGeometry args={[0.72, 0.3, 0.004]} />
-        <meshStandardMaterial {...dark} />
-      </mesh>
-      {[-0.26, 0.26].map((x) => (
-        <mesh key={x} position={[x, -0.86, 0.006]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.012, 0.012, 0.006, 12]} />
-          <meshStandardMaterial {...steel} />
+      {/* abertura da fonte: moldura, saída de ar em colmeia alinhada com a ventoinha da fonte e o recorte
+          da tomada */}
+      <group position={[0, -0.86, 0.003]}>
+        {[
+          [0, 0.15, 0.76, 0.02],
+          [0, -0.15, 0.76, 0.02],
+          [-0.37, 0, 0.02, 0.32],
+          [0.37, 0, 0.02, 0.32],
+        ].map(([x, y, w, h], i) => (
+          <mesh key={i} position={[x, y, 0]}>
+            <boxGeometry args={[w, h, 0.004]} />
+            <meshStandardMaterial {...steel} />
+          </mesh>
+        ))}
+        <mesh position={[PSU_EXHAUST.u, 0, 0]}>
+          <circleGeometry args={[PSU_EXHAUST.r + 0.01, 48]} />
+          <meshStandardMaterial {...dark} />
         </mesh>
-      ))}
+        <group position={[PSU_EXHAUST.u, 0, 0]}>
+          <Honeycomb radius={PSU_EXHAUST.r} cell={0.02} z={0.003} />
+        </group>
+        <mesh position={[-0.25, 0.01, 0]}>
+          <boxGeometry args={[0.13, 0.18, 0.004]} />
+          <meshStandardMaterial {...dark} />
+        </mesh>
+        {[-0.33, 0.33].map((x) => (
+          <mesh key={x} position={[x, 0.12, 0.003]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.006, 12]} />
+            <meshStandardMaterial {...steel} />
+          </mesh>
+        ))}
+      </group>
     </group>
   )
 }
@@ -734,11 +807,12 @@ function TopIo() {
 }
 
 // placas do gabinete: onde ficam montadas e para onde vão na vista explodida
-const SHELL: { key: string; at: Vec3; size: Vec3; out: Vec3 }[] = [
+// `turn`: giro no y ao abrir; a traseira vira a face de dentro para a câmera (senão fica de perfil e a furação some)
+const SHELL: { key: string; at: Vec3; size: Vec3; out: Vec3; turn?: number }[] = [
   { key: 'back', at: [0, 0, -0.5], size: [2.0, 2.15, 0.06], out: [0, 0, -1.6] },
   { key: 'top', at: [0, 1.05, 0], size: [2.0, 0.06, 1.06], out: [0, 1.5, 0] },
   { key: 'bottom', at: [0, -1.05, 0], size: [2.0, 0.06, 1.06], out: [0, -0.35, 0] },
-  { key: 'left', at: [-1.0, 0, 0], size: [0.05, 2.15, 1.06], out: [-1.5, 0, 0] },
+  { key: 'left', at: [-1.0, 0, 0], size: [0.05, 2.15, 1.06], out: [-1.3, 0, -0.5], turn: -0.85 },
   { key: 'front', at: [1.0, 0, 0], size: [0.05, 2.15, 1.06], out: [2.3, 0, 0] },
 ]
 
@@ -794,7 +868,7 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
       })),
       { key: 'gpu', assembled: [-0.05, -0.2, -0.12], offset: [0.15, -0.35, 1.45], spin: [-0.5, 0.15, 0], delay: 0.12, labelAt: [0, 0.3, 0.1], node: <Gpu brushed={brushed} /> },
       // a fonte sai para a frente e para a esquerda, sem descer (antes afundava na plataforma)
-      { key: 'psu', assembled: [-0.15, -0.86, 0], offset: [-0.6, 0.02, 2.2], spin: [0, 0.35, 0], delay: 0.06, labelAt: [0, 0.34, 0.2], node: <Psu brushed={brushed} /> },
+      { key: 'psu', assembled: [-0.47, -0.86, 0], offset: [-0.3, 0.02, 2.2], spin: [0, 0.35, 0], delay: 0.06, labelAt: [0, 0.34, 0.2], node: <Psu brushed={brushed} /> },
       ...[0.55, 0, -0.55].map<Part>((y, i) => ({
         key: `fan${i}`,
         assembled: [0.92, y + 0.15, 0],
@@ -851,7 +925,9 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
     }
     for (const panel of SHELL) {
       const g = shellRefs.current[panel.key]
-      if (g) g.position.set(panel.at[0] + panel.out[0] * e, panel.at[1] + panel.out[1] * e, panel.at[2] + panel.out[2] * e)
+      if (!g) continue
+      g.position.set(panel.at[0] + panel.out[0] * e, panel.at[1] + panel.out[1] * e, panel.at[2] + panel.out[2] * e)
+      g.rotation.y = (panel.turn ?? 0) * e
     }
     if (glass.current) {
       glass.current.position.z = 0.51 + e * 2.2
@@ -904,7 +980,12 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
               <TopIo />
             </>
           )}
-          {panel.key === 'left' && <RearPanel />}
+          {panel.key === 'left' && (
+            <>
+              <RearPanel />
+              <RearPanel inner />
+            </>
+          )}
           {panel.key === 'back' && (
             <>
               <SidePanel inner />
