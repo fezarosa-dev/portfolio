@@ -55,6 +55,7 @@ ${pageTexts}
 - SEO: seo_<página>_title, seo_<página>_description (+ _en) para as páginas: ${seoPages}; seo_home_keywords (+ _en)
 - Identidade: site_icon, sobre_foto (nome de arquivo do Drive), drive_folder_url, status_color
 - Busca: search_rate_limit_max, search_rate_limit_window_minutes, search_max_query_length, search_semantic_timeout_ms, search_results_limit
+- Cards de projeto: projetos_linhas_tecnologias (número inteiro >= 1, padrão 3) = quantas linhas de tecnologias o card mostra antes de o resto virar um chip "+N"
 - Flags: easter_eggs_ativo, tecnologias_ativo, mascote_ativo ("true"/"false" — prefira set_visibilidade_site), nav_hidden_links (CSV)
 `
 }

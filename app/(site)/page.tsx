@@ -4,6 +4,7 @@ import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
 import { pageText } from '@/lib/page-texts'
+import { projectTechRows } from '@/lib/site-keys'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
@@ -59,6 +60,7 @@ export default async function HomePage() {
         withLabel={dict.projetos.with}
         atLabel={dict.projetos.at}
         locale={locale}
+        maxTechRows={projectTechRows(content)}
       />
       <SearchTeaser
         locale={locale}

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { numberFromContent } from '@/lib/site-keys'
 import { countRecentSearchesFromIp, logSearchRequest } from '@/lib/supabase/queries'
 import { getLanguages, getSiteContent, getVisibleProjects } from '@/lib/supabase/queries-cached'
 import { searchFullText, searchSemantic, type SearchResult } from '@/lib/supabase/search-queries'
@@ -12,11 +13,6 @@ const DEFAULTS = {
   maxQueryLength: 200,
   semanticTimeoutMs: 4000,
   resultsLimit: 8,
-}
-
-function numberFromContent(content: Record<string, string>, key: string, fallback: number): number {
-  const parsed = Number(content[key])
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {

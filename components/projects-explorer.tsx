@@ -14,10 +14,12 @@ export function ProjectsExplorer({
   projects,
   dict,
   locale,
+  maxTechRows,
 }: {
   projects: Project[]
   dict: Dictionary['projetos']
   locale: Locale
+  maxTechRows?: number
 }) {
   const { enabled: reduceMotion } = useReduceMotion()
 
@@ -127,6 +129,7 @@ export function ProjectsExplorer({
                 className="mb-6 break-inside-avoid"
               >
                 <ProjectCard
+                  maxTechRows={maxTechRows}
                   project={project}
                   withLabel={dict.with}
                   atLabel={dict.at}
