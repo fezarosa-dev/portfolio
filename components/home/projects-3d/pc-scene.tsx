@@ -680,21 +680,36 @@ function SmoothedProgress({ source, targetRef }: { source: MotionValue<number>; 
   return null
 }
 
+// monta junto com o resto da cena: o Canvas só mostra os filhos quando tudo (fontes do texto 3D etc.)
+// terminou de carregar, então o primeiro quadro aqui significa cena pronta e shaders compilados
+function Ready({ onReady }: { onReady: () => void }) {
+  const done = useRef(false)
+  useFrame(() => {
+    if (done.current) return
+    done.current = true
+    onReady()
+  })
+  return null
+}
+
 export default function PcScene({
   progress,
   active,
   stats,
   en,
+  onReady,
 }: {
   progress: MotionValue<number>
   active: boolean
   stats: SceneStats
   en: boolean
+  onReady: () => void
 }) {
   const smoothed = useRef(progress.get())
   return (
     <Canvas
-      frameloop={active ? 'always' : 'never'}
+      // longe da seção desenha só sob demanda: o primeiro quadro sai (deixa tudo pronto) e depois fica parada
+      frameloop={active ? 'always' : 'demand'}
       dpr={[1, 1.5]}
       camera={{ position: [3.1, 1.0, 5.3], fov: 38 }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
@@ -714,6 +729,7 @@ export default function PcScene({
       <Pc progressRef={smoothed} stats={stats} en={en} />
       <Platform />
       <Dust />
+      <Ready onReady={onReady} />
       {/* brilho real nas luzes (só o que passa de 1 brilha) e vinheta nas bordas */}
       <EffectComposer multisampling={4}>
         <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.2} intensity={0.9} />

@@ -865,3 +865,99 @@ html:not(.reduce-motion) [data-tilt] {
     opacity: 0;
   }
 }
+
+/* loader da cena 3D da home (components/home/projects-3d/scene-loader.tsx): bolha de "líquido" com as
+   cores da paleta. Sem o hue-rotate do original, que puxava as cores para fora da paleta */
+.scene-loader {
+  --loader-one: #f2661d;
+  --loader-two: #b0775a;
+  --loader-three: #f2661d80;
+  --loader-four: #b0775a80;
+  --loader-five: #f2661d40;
+  --loader-time: 2s;
+  position: relative;
+  border-radius: 50%;
+  box-shadow:
+    0 0 25px 0 var(--loader-three),
+    0 20px 50px 0 var(--loader-four);
+}
+.scene-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border-top: solid 1px var(--loader-one);
+  border-bottom: solid 1px var(--loader-two);
+  background: linear-gradient(180deg, var(--loader-five), var(--loader-four));
+  box-shadow:
+    inset 0 10px 10px 0 var(--loader-three),
+    inset 0 -10px 10px 0 var(--loader-four);
+}
+.scene-loader svg {
+  position: absolute;
+}
+.scene-loader-box {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(180deg, var(--loader-one) 30%, var(--loader-two) 70%);
+}
+.scene-loader-mask {
+  filter: contrast(15);
+  animation: scene-loader-roundness calc(var(--loader-time) / 2) linear infinite;
+}
+.scene-loader-mask polygon {
+  filter: blur(7px);
+}
+.scene-loader-mask polygon:nth-child(1) {
+  transform-origin: 75% 25%;
+  transform: rotate(90deg);
+}
+.scene-loader-mask polygon:nth-child(2) {
+  transform-origin: 50% 50%;
+  animation: scene-loader-rotation var(--loader-time) linear infinite reverse;
+}
+.scene-loader-mask polygon:nth-child(3) {
+  transform-origin: 50% 60%;
+  animation: scene-loader-rotation var(--loader-time) linear infinite;
+  animation-delay: calc(var(--loader-time) / -3);
+}
+.scene-loader-mask polygon:nth-child(4) {
+  transform-origin: 40% 40%;
+  animation: scene-loader-rotation var(--loader-time) linear infinite reverse;
+}
+.scene-loader-mask polygon:nth-child(5) {
+  transform-origin: 40% 40%;
+  animation: scene-loader-rotation var(--loader-time) linear infinite reverse;
+  animation-delay: calc(var(--loader-time) / -2);
+}
+.scene-loader-mask polygon:nth-child(6) {
+  transform-origin: 60% 40%;
+  animation: scene-loader-rotation var(--loader-time) linear infinite;
+}
+.scene-loader-mask polygon:nth-child(7) {
+  transform-origin: 60% 40%;
+  animation: scene-loader-rotation var(--loader-time) linear infinite;
+  animation-delay: calc(var(--loader-time) / -1.5);
+}
+@keyframes scene-loader-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes scene-loader-roundness {
+  0%,
+  60%,
+  100% {
+    filter: contrast(15);
+  }
+  20%,
+  40% {
+    filter: contrast(3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-loader-mask,
+  .scene-loader-mask polygon {
+    animation: none;
+  }
+}

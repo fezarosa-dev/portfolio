@@ -1,14 +1,16 @@
 'use client'
 
-import { useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import dynamic from 'next/dynamic'
-import { motion, transform, useInView, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { AnimatePresence, motion, transform, useInView, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
 import type { Locale } from '@/lib/i18n'
+import { SceneLoader } from './scene-loader'
 
-// o 3D (three + react-three-fiber) vira um pacote à parte, baixado só quando esta seção vai ser mostrada
-const PcScene = dynamic(() => import('./pc-scene'), { ssr: false })
+// o 3D (three + react-three-fiber) vira um pacote à parte, fora do carregamento inicial da página
+const loadScene = () => import('./pc-scene')
+const PcScene = dynamic(loadScene, { ssr: false })
 
 type Stats = { projects: number; technologies: number; companies: number }
 
@@ -87,8 +89,21 @@ function ChapterText({
 function Story({ eyebrow, locale, stats }: { eyebrow: string; locale: Locale; stats: Stats }) {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
+  // a cena monta bem antes da seção (e não desmonta mais) e só anima quando está perto; até o primeiro
+  // quadro sair, um loader translúcido cobre a seção para ela não aparecer vazia ao rolar rápido
+  const mounted = useInView(ref, { margin: '1500px 0px', once: true })
   const near = useInView(ref, { margin: '400px 0px' })
+  const [ready, setReady] = useState(false)
   const [chapter, setChapter] = useState(0)
+  // baixa o pacote do 3D assim que o navegador fica livre, sem esperar a rolagem chegar perto
+  useEffect(() => {
+    if (!('requestIdleCallback' in window)) {
+      const t = setTimeout(loadScene, 2000)
+      return () => clearTimeout(t)
+    }
+    const id = requestIdleCallback(() => void loadScene(), { timeout: 4000 })
+    return () => cancelIdleCallback(id)
+  }, [])
   useMotionValueEvent(scrollYProgress, 'change', (p) => {
     const current = CHAPTERS.reduce((acc, c, i) => (p >= c.at - 0.02 ? i : acc), 0)
     if (current !== chapter) setChapter(current)
@@ -97,7 +112,22 @@ function Story({ eyebrow, locale, stats }: { eyebrow: string; locale: Locale; st
   return (
     <section ref={ref} className="relative border-t border-hairline" style={{ height: '480vh' }}>
       <div className="sticky top-0 h-screen overflow-hidden">
-        <div className="absolute inset-0">{near && <PcScene progress={scrollYProgress} active={near} stats={stats} en={locale === 'en'} />}</div>
+        <div className="absolute inset-0">
+          {mounted && <PcScene progress={scrollYProgress} active={near} stats={stats} en={locale === 'en'} onReady={() => setReady(true)} />}
+        </div>
+        <AnimatePresence>
+          {!ready && (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              className="absolute inset-0 flex items-end justify-center bg-background/45 pb-[18vh] backdrop-blur-xl sm:items-center sm:pb-0"
+            >
+              <SceneLoader label={locale === 'en' ? 'loading the scene' : 'carregando a cena'} />
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* degradê para o texto ficar legível sobre a cena */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-transparent sm:bg-gradient-to-r sm:from-background/90 sm:via-background/20" />
         <div className="pointer-events-none relative mx-auto flex h-full max-w-6xl px-6 pt-24 sm:items-center sm:pt-0">
