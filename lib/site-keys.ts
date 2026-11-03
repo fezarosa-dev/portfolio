@@ -23,11 +23,6 @@ export const SITE_KEYS = [
   'rickroll_video_filename',
   'rickroll_clicks',
   'projetos_linhas_tecnologias',
-  // ponto de onde o foguete sai no globo do contato (o painel e o MCP resolvem o CEP em coordenadas)
-  'launch_cep',
-  'launch_lat',
-  'launch_lon',
-  'launch_place',
 ] as const
 
 export const SITE_BILINGUAL_KEYS = [

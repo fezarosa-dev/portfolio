@@ -10,7 +10,7 @@ import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsStory } from '@/components/home/projects-3d/projects-story'
 import { ContactTeaser } from '@/components/home/contact-teaser'
-import { launchFrom, launchPoint } from '@/lib/globe'
+import { DEFAULT_LAUNCH, launchPoint } from '@/lib/globe'
 import { jsonLd } from '@/lib/json-ld'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -73,7 +73,7 @@ export default async function HomePage() {
         maxTechRows={projectTechRows(content)}
       />
       {/* o foguete termina com "Vamos construir o seu?": o contato vem logo em seguida (a busca segue em /busca) */}
-      <ContactTeaser links={links} content={content} dict={dict} locale={locale} launch={launchFrom(content)} launchPoint={launchPoint(launchFrom(content))} />
+      <ContactTeaser links={links} content={content} dict={dict} locale={locale} launchPoint={launchPoint(DEFAULT_LAUNCH)} />
     </>
   )
 }

@@ -15,10 +15,8 @@ export function ContactTeaser({
   content,
   dict,
   locale,
-  launch,
   launchPoint,
 }: {
-  launch: { lat: number; lon: number }
   launchPoint: { x: number; y: number }
   links: ContactLink[]
   content: Record<string, string>
@@ -27,8 +25,8 @@ export function ContactTeaser({
 }) {
   const en = locale === 'en'
   return (
-    // o globo é gerado no servidor para o ponto salvo; a versão na URL troca quando o ponto muda
-    <ContactSpace globeSrc={`/api/globe?v=${launch.lat},${launch.lon}`} base={launchPoint}>
+    // o globo é gerado no servidor, com o foguete saindo do meio do Brasil
+    <ContactSpace globeSrc="/api/globe" base={launchPoint}>
       <section id="contato" className="mx-auto max-w-4xl scroll-mt-20 px-6 pb-24 pt-[26rem] sm:pt-[32rem]">
         <FadeIn>
           <Eyebrow>{dict.contato.eyebrow}</Eyebrow>

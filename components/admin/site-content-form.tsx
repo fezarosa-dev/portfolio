@@ -12,7 +12,6 @@ import { DriveImagePicker } from '@/components/drive-image-picker'
 import { IconUpload } from '@/components/admin/icon-upload'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
-import { LaunchCepField } from '@/components/admin/launch-cep-field'
 import { PAGE_TEXTS, defaultPageText } from '@/lib/page-texts'
 
 const NAV_ITEMS: { href: string; label: string }[] = [
@@ -292,14 +291,6 @@ export function SiteContentForm({
                 rows={'multiline' in t ? 3 : undefined}
               />
             ))}
-          </Section>
-
-          <Section title="globo do contato (de onde o foguete sai)">
-            <p className="text-xs text-muted-foreground">
-              O CEP da sua localização de trabalho. O globo gira para esse lugar, destaca o país e o foguete sai desse
-              ponto. No site aparece só o ponto, sem o nome da cidade.
-            </p>
-            <LaunchCepField content={content} />
           </Section>
 
           <Section title="redes">

@@ -47,7 +47,6 @@ import { registerSiteTools } from './site-tools'
 import { PROJECT_TEMPLATE } from './project-template'
 import { CLIENTS_TEMPLATE } from './clients-template'
 import { homeWarningFor } from './home-check'
-import { lookupCep } from '@/lib/cep'
 import { clientBreakdown } from '@/lib/company-count'
 
 function textResult(value: unknown) {
@@ -476,26 +475,6 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       async ({ key, value }) => {
         await upsertSiteContent(key, value, client)
         return textResult({ key, value })
-      }
-    )
-    server.registerTool(
-      'set_local_lancamento',
-      {
-        title: 'Definir de onde o foguete sai (CEP)',
-        description:
-          'CEP da localização de trabalho: confere o CEP (BrasilAPI, reserva ViaCEP), pega cidade e coordenadas e salva. O globo do contato gira para esse ponto, destaca o país e o foguete sai dali (no site só o ponto, sem o nome da cidade). Erro legível se o CEP não existir.',
-        inputSchema: { cep: z.string().describe('8 dígitos, com ou sem hífen (ex.: 37500-903)') },
-      },
-      async ({ cep }) => {
-        const place = await lookupCep(cep)
-        const values = {
-          launch_cep: place.cep,
-          launch_lat: String(place.lat),
-          launch_lon: String(place.lon),
-          launch_place: `${place.city} – ${place.state}`,
-        }
-        for (const [key, value] of Object.entries(values)) await upsertSiteContent(key, value, client)
-        return textResult({ salvo: values })
       }
     )
     server.registerTool(

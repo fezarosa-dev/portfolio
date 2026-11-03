@@ -19,7 +19,7 @@ const GLOBE_TOP = 160
 
 /**
  * O espaço onde o foguete chegou: a Terra em contornos com o Brasil no meio, estrelas com parallax e a trajetória
- * do lançamento saindo do ponto salvo no painel até a chama do foguete da cena de cima. Só decoração (aria-hidden).
+ * do lançamento saindo do meio do Brasil até a chama do foguete da cena de cima. Só decoração (aria-hidden).
  */
 export function ContactSpace({
   children,

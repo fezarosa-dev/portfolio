@@ -9,7 +9,7 @@ import countries50 from 'world-atlas/countries-50m.json'
 /** Tamanho do quadro do SVG do globo (o disco ocupa o quadro todo). */
 export const GLOBE_BOX = 2000
 
-/** Onde o foguete sai quando ainda não há CEP salvo: o meio do Brasil. */
+/** De onde o foguete sai: o meio do Brasil. */
 export const DEFAULT_LAUNCH = { lat: -14.2, lon: -51.9 }
 
 // a parte de cima do disco é o que aparece como horizonte na seção de contato: o centro do disco fica ao sul do
@@ -59,17 +59,4 @@ export function buildGlobe(launch: { lat: number; lon: number }) {
 </svg>
 `
   return svg
-}
-
-// privacidade: a coordenada do CEP é de rua; no site (desenho e URL do globo) vai só no nível da cidade
-// (1 casa decimal, uns 10 km). No globo isso nem aparece: cada pixel dele já vale uns 20 km
-const coarse = (v: number) => Math.round(v * 10) / 10
-
-/** Ponto de lançamento salvo no painel (CEP → coordenadas em site_content), arredondado; sem CEP, o meio do Brasil. */
-export function launchFrom(content: Record<string, string>) {
-  const lat = Number(content.launch_lat)
-  const lon = Number(content.launch_lon)
-  return Number.isFinite(lat) && Number.isFinite(lon) && content.launch_lat && content.launch_lon
-    ? { lat: coarse(lat), lon: coarse(lon) }
-    : DEFAULT_LAUNCH
 }
