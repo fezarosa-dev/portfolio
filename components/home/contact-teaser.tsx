@@ -24,7 +24,7 @@ export function ContactTeaser({
   const en = locale === 'en'
   return (
     <ContactSpace>
-      <section id="contato" className="mx-auto max-w-4xl scroll-mt-20 px-6 pb-24 pt-[34rem] sm:pt-[40rem]">
+      <section id="contato" className="mx-auto max-w-4xl scroll-mt-20 px-6 pb-24 pt-[26rem] sm:pt-[32rem]">
         <FadeIn>
           <Eyebrow>{dict.contato.eyebrow}</Eyebrow>
           <h2 className="mt-3 max-w-2xl text-4xl font-medium tracking-tight sm:text-6xl">
