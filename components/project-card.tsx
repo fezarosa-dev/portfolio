@@ -181,6 +181,16 @@ export function ProjectCard({
               +{hiddenLanguages.length}
             </button>
           )}
+          {showAllTechs && (
+            <button
+              type="button"
+              onClick={() => setShowAllTechs(false)}
+              title={locale === 'en' ? 'Show less' : 'Mostrar menos'}
+              className={PILL_CLASS_NAME}
+            >
+              {locale === 'en' ? '− less' : '− menos'}
+            </button>
+          )}
         </div>
       )}
     </div>
