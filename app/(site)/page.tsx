@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getSiteContent, getVisibleProjects, getLanguages, getLanguageCategories } from '@/lib/supabase/queries-cached'
+import { getSiteContent, getVisibleProjects, getLanguages, getLanguageCategories, getContactLinks } from '@/lib/supabase/queries-cached'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { resolveText } from '@/lib/bilingual'
 import { localizedAlternates } from '@/lib/seo'
@@ -9,7 +9,7 @@ import { countClients } from '@/lib/company-count'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
 import { ProjectsStory } from '@/components/home/projects-3d/projects-story'
-import { SearchTeaser } from '@/components/home/search-teaser'
+import { ContactTeaser } from '@/components/home/contact-teaser'
 import { jsonLd } from '@/lib/json-ld'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,11 +17,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [content, projects, languages, categories, { dict, locale }] = await Promise.all([
+  const [content, projects, languages, categories, links, { dict, locale }] = await Promise.all([
     getSiteContent(),
     getVisibleProjects(),
     getLanguages(),
     getLanguageCategories(),
+    getContactLinks(),
     getDictionary(),
   ])
 
@@ -70,14 +71,8 @@ export default async function HomePage() {
         locale={locale}
         maxTechRows={projectTechRows(content)}
       />
-      <SearchTeaser
-        locale={locale}
-        eyebrow={dict.busca.eyebrow}
-        title={dict.busca.title}
-        subtitle={dict.busca.subtitle}
-        placeholder={dict.busca.placeholder}
-        noResultsLabel={dict.busca.noResults}
-      />
+      {/* o foguete termina com "Vamos construir o seu?": o contato vem logo em seguida (a busca segue em /busca) */}
+      <ContactTeaser links={links} content={content} dict={dict} locale={locale} />
     </>
   )
 }

@@ -17,15 +17,17 @@ import { CARAMEL, clamp01, DISPLAY, RBox, easeInOut, Glow, GOLD, METAL, MONO, MO
 export const STORY = {
   // trechos da rolagem (0..1): parado/girando, desmontando, desmontado com as etiquetas, mergulho no processador,
   // corte (a tela escurece e a cena troca) e os servidores subindo do chão
-  explodeStart: 0.06,
-  explodeEnd: 0.22,
-  diveStart: 0.26,
-  diveEnd: 0.44,
-  cut: 0.47,
-  serversStart: 0.5,
-  serversEnd: 0.72,
+  // entre os trechos há pausas (a cena fica parada enquanto a rolagem continua) nos momentos com informação para
+  // ler: PC aberto com as etiquetas, núcleo com os contadores, servidores de pé e o lema
+  explodeStart: 0.05,
+  explodeEnd: 0.17,
+  diveStart: 0.3,
+  diveEnd: 0.42,
+  cut: 0.52,
+  serversStart: 0.55,
+  serversEnd: 0.7,
   // os racks viram os propulsores e o foguete decola com o lema
-  rocketStart: 0.76,
+  rocketStart: 0.8,
   rocketEnd: 0.97,
 }
 

@@ -25,10 +25,10 @@ type TeaserProps = React.ComponentProps<typeof ProjectsTeaser>
 // `nav`: nome curto no indicador de capítulos da direita (quando o título é longo demais)
 const CHAPTERS: { at: number; pt: [string, string]; en: [string, string]; nav?: [string, string] }[] = [
   { at: 0, pt: ['Como uma solução nasce', 'Todo sistema é um conjunto de peças que precisam funcionar juntas.'], en: ['How a solution comes together', 'Every system is a set of parts that have to work together.'] },
-  { at: 0.07, pt: ['Peça por peça', 'A base não é o código, é a arquitetura da solução. O código é o caminho.'], en: ['Piece by piece', "The foundation isn't the code, it's the solution architecture. Code is how you get there."] },
-  { at: 0.25, pt: ['O núcleo', 'No centro de tudo, o que já foi entregue.'], en: ['The core', "At the center of it all, what's already been delivered."] },
-  { at: 0.5, pt: ['Os projetos', 'Cada servidor ligado é um projeto no ar; cada gaveta, o que ele usa. Clique em um para abrir.'], en: ['The projects', 'Every server that is on is a project running; every drawer, what it runs on. Click one to open it.'] },
-  { at: 0.8, pt: ['Juntos, rumo a um futuro mais automatizado.', 'Cada projeto é uma peça do próximo lançamento. Vamos construir o seu?'], en: ['Together, toward a more automated future.', 'Every project is a part of the next launch. Shall we build yours?'], nav: ['O lançamento', 'The launch'] },
+  { at: 0.05, pt: ['Peça por peça', 'A base não é o código, é a arquitetura da solução. O código é o caminho.'], en: ['Piece by piece', "The foundation isn't the code, it's the solution architecture. Code is how you get there."] },
+  { at: 0.33, pt: ['O núcleo', 'No centro de tudo, o que já foi entregue.'], en: ['The core', "At the center of it all, what's already been delivered."] },
+  { at: 0.55, pt: ['Os projetos', 'Cada servidor ligado é um projeto no ar; cada gaveta, o que ele usa. Clique em um para abrir.'], en: ['The projects', 'Every server that is on is a project running; every drawer, what it runs on. Click one to open it.'] },
+  { at: 0.84, pt: ['Juntos, rumo a um futuro mais automatizado.', 'Cada projeto é uma peça do próximo lançamento. Vamos construir o seu?'], en: ['Together, toward a more automated future.', 'Every project is a part of the next launch. Shall we build yours?'], nav: ['O lançamento', 'The launch'] },
 ]
 
 function supportsWebGL() {
@@ -44,7 +44,7 @@ const noopSubscribe = () => () => {}
 
 // número que sobe junto com o mergulho (0 → total) e fica parado no fim
 function Counter({ progress, value, label }: { progress: MotionValue<number>; value: number; label: string }) {
-  const shown = useTransform(progress, (v) => Math.round(transform(v, [0.3, 0.42], [0, value])))
+  const shown = useTransform(progress, (v) => Math.round(transform(v, [0.36, 0.44], [0, value])))
   return (
     <div>
       <motion.p className="font-display text-4xl font-medium tabular-nums text-signal sm:text-5xl">{shown}</motion.p>
@@ -146,7 +146,7 @@ function Story({
   const mounted = useInView(ref, { margin: '1500px 0px', once: true })
   const near = useInView(ref, { margin: '400px 0px' })
   const [ready, setReady] = useState(false)
-  const cutFade = useTransform(scrollYProgress, (v) => transform(v, [0.43, 0.47, 0.51], [0, 1, 0]))
+  const cutFade = useTransform(scrollYProgress, (v) => transform(v, [0.48, 0.52, 0.56], [0, 1, 0]))
   const [chapter, setChapter] = useState(0)
   // baixa o pacote do 3D assim que o navegador fica livre, sem esperar a rolagem chegar perto
   useEffect(() => {
@@ -163,7 +163,7 @@ function Story({
   })
 
   return (
-    <section ref={ref} className="relative border-t border-hairline" style={{ height: '900vh' }}>
+    <section ref={ref} className="relative border-t border-hairline" style={{ height: '1300vh' }}>
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0">
           {mounted && (
