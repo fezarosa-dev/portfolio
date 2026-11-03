@@ -7,7 +7,7 @@ import { pageText } from '@/lib/page-texts'
 import { projectTechRows } from '@/lib/site-keys'
 import { HeroSection } from '@/components/home/hero-section'
 import { AboutTeaser } from '@/components/home/about-teaser'
-import { ProjectsTeaser } from '@/components/home/projects-teaser'
+import { ProjectsStory } from '@/components/home/projects-3d/projects-story'
 import { SearchTeaser } from '@/components/home/search-teaser'
 import { jsonLd } from '@/lib/json-ld'
 
@@ -52,7 +52,8 @@ export default async function HomePage() {
         text={resolveText(content.sobre_texto ?? '', content.sobre_texto_en, locale)}
         eyebrow={dict.home.aboutEyebrow}
       />
-      <ProjectsTeaser
+      <ProjectsStory
+        labels={languages.filter((lang) => lang.show_on_home).map((lang) => resolveText(lang.name, lang.name_en, locale))}
         projects={projects.filter((p) => p.show_on_home)}
         eyebrow={dict.home.projectsEyebrow}
         heading={dict.home.projectsHeading}
