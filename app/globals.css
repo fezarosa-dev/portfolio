@@ -538,7 +538,8 @@
       background-color 0.2s ease-out;
   }
   .motion-switch input:checked + .motion-switch-slider .motion-switch-thumb {
-    left: 23px;
+    /* encosta na direita com a mesma folga de 3px da esquerda (18px de bolinha + 3px), dentro do trilho */
+    left: calc(100% - 21px);
     background-color: #d7062a;
   }
   .motion-switch-icon {
