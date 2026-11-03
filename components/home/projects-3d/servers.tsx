@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Html, Text } from '@react-three/drei'
 import * as THREE from 'three'
-import { CARAMEL, clamp01, RBox, DISPLAY, easeInOut, Glow, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL } from './scene-kit'
+import { CARAMEL, clamp01, RBox, easeInOut, Glow, METAL, MONO_BOLD, seeded, segment, SIGNAL } from './scene-kit'
 
 /** Uma gaveta do servidor: uma categoria de tecnologia do projeto e as tecnologias dela. */
 export type Drawer = { label: string; techs: string[] }
@@ -84,6 +84,30 @@ function faceplateTexture(blank: boolean) {
   return tex
 }
 
+// texto HTML posto em 3D: 1 px do CSS = HTML_DF / 400 unidades da cena. Com 0,4, 1 px = 0,001: dá para escrever com
+// letra grande (o navegador desenha nítido) e o drei reduz para o tamanho da peça
+const HTML_DF = 0.4
+
+/** Tamanho de letra (px) para o texto caber em `lines` linhas de `width` px, até `max`. */
+function fitPx(text: string, lines: number, max: number, width: number) {
+  const words = text.split(' ')
+  // linha mais comprida quando o texto é dividido em `lines` linhas o mais parecidas possível
+  let longest = text.length
+  if (lines > 1 && words.length > 1) {
+    const target = text.length / lines
+    let line = ''
+    longest = 0
+    for (const w of words) {
+      if (line && (line + ' ' + w).length > target + 2) {
+        longest = Math.max(longest, line.length)
+        line = w
+      } else line = line ? `${line} ${w}` : w
+    }
+    longest = Math.max(longest, line.length)
+  }
+  return Math.min(max, Math.floor(width / (longest * 0.6)))
+}
+
 type Faces = { full: THREE.Texture; blank: THREE.Texture }
 
 // uma gaveta: chega voando pela frente e encaixa no slot; depois pode deslizar um pouco para fora
@@ -118,9 +142,9 @@ function DrawerUnit({
   const group = useRef<THREE.Group>(null)
   const pull = useRef(0)
   const card = useRef<HTMLDivElement>(null)
-  const text = useRef<THREE.Mesh>(null)
+  const text = useRef<HTMLDivElement>(null)
   useFrame((_, dt) => {
-    if (text.current) text.current.visible = readableRef.current ?? true
+    if (text.current) text.current.style.opacity = readableRef.current && (arriveRef.current?.[index] ?? 0) > 0.02 ? '1' : '0'
     const on = hovered && engagedRef.current
     pull.current += ((on ? 1 : 0) - pull.current) * (1 - Math.exp(-dt * 10))
     if (card.current) card.current.style.opacity = String(on ? clamp01(pull.current * 1.5) : 0)
@@ -161,24 +185,16 @@ function DrawerUnit({
               <meshStandardMaterial clippingPlanes={FLOOR_CLIP} ref={(m) => ledRef(index * 2 + j, m)} color="#1a1418" emissive={j ? CARAMEL : SIGNAL} emissiveIntensity={0} toneMapped={false} />
             </mesh>
           ))}
-          {/* só o nome da categoria, grande o bastante para ler de longe; as tecnologias aparecem no cartão do mouse.
-              No foguete o texto some (ninguém lê ali) */}
-          <Text
-            ref={text}
-            sdfGlyphSize={128}
-            font={MONO_BOLD}
-            // mesma letra em todas as gavetas; nome comprido quebra em duas linhas dentro da altura da gaveta
-            fontSize={0.04}
-            maxWidth={0.4}
-            lineHeight={1}
-            position={[0.03, 0, 0.002]}
-            color="#f6eae3"
-            anchorX="left"
-            anchorY="middle"
-            letterSpacing={0.04}
-          >
-            {drawer.label.toUpperCase()}
-          </Text>
+          {/* nome da categoria em texto HTML posto em 3D (o navegador desenha nítido, o texto 3D nesse tamanho
+              virava borrão); letra grande, nome comprido em duas linhas. Some no foguete */}
+          {/* preso pelo centro da frente da gaveta; o recuo à esquerda deixa o lugar dos LEDs */}
+          <Html transform center distanceFactor={HTML_DF} position={[W / 2 - 0.07, 0, 0.002]} zIndexRange={[10, 0]} pointerEvents="none">
+            <div ref={text} style={{ width: 600, height: 140, paddingLeft: 70 }} className="flex items-center">
+              <p className="font-mono font-bold uppercase leading-none text-[#f6eae3]" style={{ fontSize: fitPx(drawer.label, 2, 64, 460) }}>
+                {drawer.label}
+              </p>
+            </div>
+          </Html>
         </group>
       )}
       {drawer && hovered && (
@@ -222,6 +238,7 @@ function Rack({
 }) {
   const group = useRef<THREE.Group>(null)
   const label = useRef<HTMLDivElement>(null)
+  const visor = useRef<HTMLDivElement>(null)
   const summary = useRef<HTMLDivElement>(null)
   const slot = useRef<THREE.MeshBasicMaterial>(null)
   const bar = useRef<THREE.MeshStandardMaterial>(null)
@@ -290,6 +307,8 @@ function Rack({
       const flick = 0.85 + 0.15 * Math.sin(t * 40 + index * 2)
       flame.current.scale.set(1, ig * flick * (1 + segment(r, LIFTOFF[0], LIFTOFF[1]) * 0.8), 1)
     }
+    // visor só com o rack encostado no chão e fora do foguete (o HTML não é cortado pelo chão)
+    if (visor.current) visor.current.style.opacity = k > 0.97 && r < 0.12 ? '1' : '0'
     const labelAlpha = String(clamp01((s - 0.78) / 0.12) * (1 - clamp01(r / 0.08)))
     if (label.current) label.current.style.opacity = labelAlpha
     if (summary.current) summary.current.style.opacity = labelAlpha
@@ -365,51 +384,31 @@ function Rack({
             <planeGeometry args={[W - 0.08, 0.28]} />
             <meshStandardMaterial clippingPlanes={FLOOR_CLIP} ref={screen} color="#120e10" emissive="#2b2024" emissiveIntensity={0} toneMapped={false} />
           </mesh>
-          <Text
-            sdfGlyphSize={128}
-            font={project ? DISPLAY : MONO}
-            fontSize={project ? Math.min(0.05, (W - 0.14) / (project.title.length * 0.56)) : 0.035}
-            position={[-W / 2 + 0.07, 0.085, 0.002]}
-            color={project ? '#f6eae3' : '#5b4a52'}
-            anchorX="left"
-            anchorY="middle"
-            whiteSpace="nowrap"
-          >
-            {project ? project.title : en ? 'free slot' : 'livre'}
-          </Text>
-          {project?.company && (
-            <Text sdfGlyphSize={128} font={MONO} fontSize={0.02} position={[-W / 2 + 0.07, 0.04, 0.002]} color="#8d8489" anchorX="left" anchorY="middle" letterSpacing={0.08}>
-              {project.company.toUpperCase()}
-            </Text>
-          )}
-          {project?.highlight && (
-            <Text
-              font={DISPLAY}
-              fontSize={Math.min(0.045, (W - 0.14) / (project.highlight.length * 0.55))}
-              position={[-W / 2 + 0.07, -0.025, 0.002]}
-              color={SIGNAL}
-              anchorX="left"
-              anchorY="middle"
-              whiteSpace="nowrap"
-            >
-              {project.highlight}
-            </Text>
-          )}
-          <Text
-            sdfGlyphSize={128}
-            font={MONO_BOLD}
-            fontSize={0.02}
-            position={[-W / 2 + 0.07, -0.09, 0.002]}
-            color={project ? (status?.[2] ?? SIGNAL) : '#3d3036'}
-            anchorX="left"
-            anchorY="middle"
-            letterSpacing={0.12}
-          >
-            {project ? (status ? status[en ? 1 : 0] : '● ONLINE') : '○ OFFLINE'}
-          </Text>
-          <Text sdfGlyphSize={128} font={MONO} fontSize={0.018} position={[W / 2 - 0.07, -0.09, 0.002]} color="#5b4a52" anchorX="right" anchorY="middle" letterSpacing={0.1}>
-            {`SRV-0${index + 1}`}
-          </Text>
+          {/* texto do visor em HTML posto em 3D (nítido); só aparece com o rack de pé (abaixo do chão não é cortado) */}
+          <Html transform center distanceFactor={HTML_DF} position={[0, 0, 0.003]} zIndexRange={[10, 0]} pointerEvents="none">
+            <div ref={visor} style={{ width: 560, height: 280, opacity: 0 }} className="flex flex-col justify-between px-7 py-6">
+              <div>
+                <p
+                  className={`font-display font-semibold leading-[1.05] ${project ? 'text-[#f6eae3]' : 'font-mono text-[#5b4a52]'}`}
+                  style={{ fontSize: project ? fitPx(project.title, 2, 54, 490) : 34 }}
+                >
+                  {project ? project.title : en ? 'free slot' : 'livre'}
+                </p>
+                {project?.company && <p className="mt-2 font-mono text-[20px] uppercase tracking-[0.1em] text-[#8d8489]">{project.company}</p>}
+              </div>
+              {project?.highlight && (
+                <p className="font-display font-semibold leading-none text-[#f2661d]" style={{ fontSize: fitPx(project.highlight, 1, 40, 490) }}>
+                  {project.highlight}
+                </p>
+              )}
+              <div className="flex items-center justify-between font-mono text-[20px] uppercase tracking-[0.12em]">
+                <span style={{ color: project ? (status?.[2] ?? SIGNAL) : '#3d3036' }} className="font-bold">
+                  {project ? (status ? status[en ? 1 : 0] : '● ONLINE') : '○ OFFLINE'}
+                </span>
+                <span className="text-[#5b4a52]">{`SRV-0${index + 1}`}</span>
+              </div>
+            </div>
+          </Html>
         </group>
         <mesh position={[0, H / 2 + 0.004, D / 2 - 0.05]}>
           <boxGeometry args={[W - 0.06, 0.008, 0.02]} />
