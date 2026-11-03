@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { takeHandoff } from '@/lib/handoff'
+import { HOUSTON } from '@/lib/houston'
 import type { Dictionary } from '@/lib/i18n'
 
 const CATEGORIES = ['vaga', 'projeto', 'duvida', 'outro'] as const
@@ -385,7 +386,12 @@ export function ContactForm({ dict }: { dict: Dictionary['contato'] }) {
           </motion.span>
         </span>
       </Button>
-      {status === 'error' && <p className="font-mono text-sm text-destructive">{errorMessage}</p>}
+      {status === 'error' && (
+        <p className="font-mono text-sm text-destructive">
+          {errorMessage}
+          <span className="mt-1 block text-xs uppercase tracking-[0.14em] text-signal">“{HOUSTON}”</span>
+        </p>
+      )}
     </form>
   )
 }

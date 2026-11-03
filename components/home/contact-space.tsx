@@ -36,10 +36,11 @@ export function ContactSpace({ children }: { children: React.ReactNode }) {
             ))}
           </motion.div>
         ))}
-        {/* rastro do foguete: continua a chama da cena de cima (no desktop o foguete fica à direita do texto) */}
+        {/* rastro do foguete: continua a chama da cena de cima, saindo do meio do bocal */}
         <motion.div
-          className="absolute left-1/2 top-0 h-72 w-px -translate-x-1/2 bg-gradient-to-b sm:left-[61%] from-[#f2661d] via-[#b0775a]/60 to-transparent"
-          style={{ opacity: trail }}
+          className="absolute top-0 h-72 w-px -translate-x-1/2 bg-gradient-to-b from-[#f2661d] via-[#b0775a]/60 to-transparent"
+          // --rocket-x vem da cena 3D (onde a ponta da chama do foguete cai na tela); sem ela, o lugar de costume
+          style={{ opacity: trail, left: 'var(--rocket-x, 61%)' }}
         />
         {/* horizonte do planeta: arco aceso no alto, subindo com a rolagem */}
         <motion.div

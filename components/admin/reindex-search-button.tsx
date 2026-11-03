@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { toastError } from '@/lib/toast-error'
 
 export function ReindexSearchButton({
   action,
@@ -19,7 +20,7 @@ export function ReindexSearchButton({
         `Reindexado: ${result.projects} projetos, ${result.articles} artigos, ${result.languages} tecnologias.`
       )
     } catch {
-      toast.error('Não deu pra reindexar. Tenta de novo.')
+      toastError('Não deu pra reindexar. Tenta de novo.')
     } finally {
       setLoading(false)
     }

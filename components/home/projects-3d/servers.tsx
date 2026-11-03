@@ -491,6 +491,8 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3))
     return g
   }, [])
+  const tip = useMemo(() => new THREE.Vector3(), [])
+  const lastX = useRef(-1)
   useFrame((state) => {
     const r = rocketRef.current ?? 0
     const a = easeInOut(segment(r, ASSEMBLE[0] + 0.1, ASSEMBLE[1]))
@@ -511,6 +513,15 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
       exhaust.current.scale.set(1 + ig, 1 + segment(r, LIFTOFF[0], LIFTOFF[1]), 1 + ig)
     }
     if (exhaustMat.current) exhaustMat.current.opacity = 0.75 * ig
+    // onde a ponta da chama cai na tela (em % da largura): o rastro da seção de contato continua dali
+    if (flame.current && ig > 0.5) {
+      flame.current.localToWorld(tip.set(0, -1.8, 0)).project(state.camera)
+      const x = ((tip.x + 1) / 2) * 100
+      if (Math.abs(x - lastX.current) > 0.05) {
+        lastX.current = x
+        document.documentElement.style.setProperty('--rocket-x', `${x.toFixed(2)}%`)
+      }
+    }
   })
   return (
     <group ref={group} visible={false}>

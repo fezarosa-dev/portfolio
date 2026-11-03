@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { HOUSTON } from '@/lib/houston'
 
 // Tela de erro (404/500) com o cachorro mascote: acordado ("não achei") ou dormindo no teclado ("quebrou").
 export function ErrorScreen({
@@ -28,7 +29,9 @@ export function ErrorScreen({
         className={dog === 'awake' ? 'h-44 w-auto' : 'h-64 w-auto -my-16'}
       />
       <p className="mt-2 text-7xl text-signal [font-family:var(--font-hero)] sm:text-9xl">{code}</p>
-      <h1 className="mt-4 font-display text-2xl font-medium tracking-tight sm:text-3xl">{title}</h1>
+      {/* a frase da Apollo 13 em toda tela de erro (a home conta a história de um lançamento) */}
+      <p className="mt-4 font-mono text-xs uppercase tracking-[0.14em] text-signal">“{HOUSTON}”</p>
+      <h1 className="mt-2 font-display text-2xl font-medium tracking-tight sm:text-3xl">{title}</h1>
       <p className="mt-3 max-w-md text-steel">{text}</p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">{children}</div>
       {footer}
