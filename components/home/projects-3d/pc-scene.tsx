@@ -6,26 +6,28 @@ import { Environment, Html, Lightformer, RoundedBox, Text } from '@react-three/d
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import type { MotionValue } from 'framer-motion'
+import { Servers, type ServerProject } from './servers'
+import { CARAMEL, clamp01, DISPLAY, easeInOut, Glow, GOLD, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL, type Vec3 } from './scene-kit'
 
 // Cena 3D da home: um PC que se desmonta conforme a rolagem (vista explodida) e a câmera mergulha no processador.
 // Cada peça representa uma parte do jeito de trabalhar (a fonte é a arquitetura da solução, a base de tudo).
 // A rolagem chega como progresso 0..1 da seção fixa; a cena só lê esse número a cada quadro (sem re-render).
 
-const SIGNAL = '#f2661d'
-const CARAMEL = '#b0775a'
-const METAL = '#2f2530'
-const GOLD = '#c99a4b'
-const MONO_BOLD = '/fonts/3d/plex-mono-700.woff'
-const MONO = '/fonts/3d/plex-mono-400.woff'
-const DISPLAY = '/fonts/3d/space-grotesk-700.woff'
 
 export const STORY = {
-  // trechos da rolagem (0..1): parado/girando, desmontando, desmontado com as etiquetas, mergulho no processador
-  explodeStart: 0.1,
-  explodeEnd: 0.38,
-  diveStart: 0.46,
-  diveEnd: 0.86,
+  // trechos da rolagem (0..1): parado/girando, desmontando, desmontado com as etiquetas, mergulho no processador,
+  // corte (a tela escurece e a cena troca) e os servidores subindo do chão
+  explodeStart: 0.08,
+  explodeEnd: 0.3,
+  diveStart: 0.36,
+  diveEnd: 0.62,
+  cut: 0.66,
+  serversStart: 0.7,
+  serversEnd: 0.9,
 }
+
+const FLOOR_CLIP = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.125)]
+const NO_CLIP: THREE.Plane[] = []
 
 export type SceneStats = { projects: number; technologies: number; companies: number }
 
@@ -43,21 +45,7 @@ const MEANING: Record<string, { name: [string, string]; concept: [string, string
   hdd0: { name: ['HDs', 'Hard drives'], concept: ['Nenhum dado se perde', 'No data ever lost'] },
 }
 
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
-const segment = (p: number, a: number, b: number) => clamp01((p - a) / (b - a))
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
-// gerador com semente: texturas e poeira saem iguais em todo render (e o render continua puro)
-function seeded(seed: number) {
-  return () => {
-    seed = (seed + 0x6d2b79f5) | 0
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-type Vec3 = [number, number, number]
 
 // metal escovado em alta resolução (a tampa do processador enche a tela no mergulho)
 function brushedTexture() {
@@ -122,9 +110,6 @@ function pcbTexture() {
   return tex
 }
 
-function Glow({ color = SIGNAL, intensity = 3 }: { color?: string; intensity?: number }) {
-  return <meshStandardMaterial color={color} emissive={color} emissiveIntensity={intensity} toneMapped={false} />
-}
 
 // ventoinha de 120 mm: moldura quadrada com parafusos, anel de luz e pás inclinadas no próprio eixo,
 // girando presas ao aro (o eixo é o z local)
@@ -930,7 +915,17 @@ type Part = {
   node: React.ReactNode
 }
 
-function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; stats: SceneStats; en: boolean }) {
+function Pc({
+  progressRef,
+  serversRef,
+  stats,
+  en,
+}: {
+  progressRef: React.RefObject<number>
+  serversRef: React.RefObject<number>
+  stats: SceneStats
+  en: boolean
+}) {
   const brushed = useMemo(() => brushedTexture(), [])
   const pcb = useMemo(() => pcbTexture(), [])
   const tmp = useMemo(
@@ -1068,8 +1063,27 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
       tmp.orbit.lerp(tmp.close, clamp01(d * 1.6))
       tmp.look.lerp(tmp.cpu, clamp01(d * 1.6))
     }
+    // depois do corte o PC some e a câmera vai para os servidores (no escuro, ninguém vê a troca). Em tela
+    // estreita os servidores ficam no centro; larga, à direita do texto do capítulo
+    const cut = p >= STORY.cut
+    if (root.current) root.current.visible = !cut
+    serversRef.current = segment(p, STORY.serversStart, STORY.serversEnd)
+    // com os servidores, tudo abaixo do chão é cortado: eles sobem "de dentro" da plataforma
+    state.gl.clippingPlanes = cut ? FLOOR_CLIP : NO_CLIP
+    if (cut) {
+      const narrow = state.size.width < 640
+      if (narrow) {
+        // tela em pé: afasta até os quatro caberem na largura (fov 38°) e desce a cena para baixo do texto
+        const dist = Math.max(9.5, 2.2 / (Math.tan((19 * Math.PI) / 180) * (state.size.width / state.size.height)))
+        tmp.orbit.set(0, 1.7, dist)
+        tmp.look.set(0, 0.9, 0)
+      } else {
+        tmp.orbit.set(-1.1, 1.05, 7.6)
+        tmp.look.set(-1.4, 0.1, 0)
+      }
+    }
     const cam = state.camera
-    cam.position.lerp(tmp.orbit, 1 - Math.exp(-dt * 5))
+    cam.position.lerp(tmp.orbit, 1 - Math.exp(-dt * (cut ? 3 : 5)))
     cam.lookAt(tmp.look)
     if (cpuLight.current) cpuLight.current.intensity = 1.4 * d
   })
@@ -1222,15 +1236,20 @@ export default function PcScene({
   active,
   stats,
   en,
+  servers,
+  onOpen,
   onReady,
 }: {
   progress: MotionValue<number>
   active: boolean
   stats: SceneStats
   en: boolean
+  servers: ServerProject[]
+  onOpen: (project: NonNullable<ServerProject>) => void
   onReady: () => void
 }) {
   const smoothed = useRef(progress.get())
+  const serversProgress = useRef(0)
   return (
     <Canvas
       // longe da seção desenha só sob demanda: o primeiro quadro sai (deixa tudo pronto) e depois fica parada
@@ -1251,7 +1270,8 @@ export default function PcScene({
         <Lightformer form="ring" intensity={1.2} color={CARAMEL} position={[4, 0, 2]} scale={2} />
       </Environment>
       <SmoothedProgress source={progress} targetRef={smoothed} />
-      <Pc progressRef={smoothed} stats={stats} en={en} />
+      <Pc progressRef={smoothed} serversRef={serversProgress} stats={stats} en={en} />
+      <Servers servers={servers} progressRef={serversProgress} onOpen={onOpen} en={en} />
       <Platform />
       <Dust />
       <Ready onReady={onReady} />

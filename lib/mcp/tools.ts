@@ -46,6 +46,7 @@ import { registerResumeTools } from './resume-tools'
 import { registerSiteTools } from './site-tools'
 import { PROJECT_TEMPLATE } from './project-template'
 import { CLIENTS_TEMPLATE } from './clients-template'
+import { homeWarningFor } from './home-check'
 import { clientBreakdown } from '@/lib/company-count'
 
 function textResult(value: unknown) {
@@ -184,7 +185,8 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
         if (author_ids) await setProjectAuthors(saved.id, author_ids, client)
         const full = await reloadProject(saved.id, client)
         await reindexProject(full, client)
-        return textResult(full)
+        const aviso_home = await homeWarningFor(client)
+        return textResult(aviso_home ? { aviso_home, projeto: full } : full)
       }
     )
     server.registerTool(
@@ -192,6 +194,8 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       { title: 'Excluir projeto', description: 'Remove um projeto permanentemente.', inputSchema: { id: z.string().uuid() } },
       async ({ id }) => {
         await deleteProject(id, client)
+        const aviso_home = await homeWarningFor(client)
+        if (aviso_home) return textResult({ deleted: id, aviso_home })
         return textResult({ deleted: id })
       }
     )

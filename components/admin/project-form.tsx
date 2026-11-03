@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { HOME_SERVERS } from '@/lib/home-servers'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
@@ -225,6 +226,7 @@ export function ProjectForm({
         <Switch id="show_on_home" checked={showOnHome} onCheckedChange={setShowOnHome} />
         <input type="hidden" name="show_on_home" value={showOnHome ? 'true' : 'false'} />
         <Label htmlFor="show_on_home">Aparecer na tela inicial</Label>
+        <span className="text-xs text-muted-foreground">(a home mostra {HOME_SERVERS}, um por servidor)</span>
       </div>
 
       <fieldset className="flex flex-col gap-4 rounded-lg border border-hairline p-4">

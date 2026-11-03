@@ -16,6 +16,7 @@ import { getLanguages, getContactLinks, getSiteContent, mapProjectRow, PROJECT_S
 import { reindexProject, reindexArticle, reindexLanguage, reindexSobreTexto } from '@/lib/supabase/search-index'
 import { canRead, canWrite, MCP_RESOURCES, type McpPermissions } from './resources'
 import { buildSiteTemplate, NAV_PAGES } from './site-template'
+import { homeWarningFor } from './home-check'
 
 function textResult(value: unknown) {
   return { content: [{ type: 'text' as const, text: typeof value === 'string' ? value : JSON.stringify(value, null, 2) }] }
@@ -48,7 +49,7 @@ export function registerSiteTools(server: McpServer, permissions: McpPermissions
       {
         title: 'Mostrar/esconder projeto, artigo ou tecnologia',
         description:
-          'projeto: visible (aparece no site) e show_on_home (destaque na home); artigo: visible; tecnologia: show_on_home. Campos omitidos não mudam.',
+          'projeto: visible (aparece no site) e show_on_home (destaque na home: ela mostra sempre 4 projetos, um por servidor; com menos, a resposta traz aviso_home e sobram servidores desligados); artigo: visible; tecnologia: show_on_home. Campos omitidos não mudam.',
         inputSchema: {
           entity: z.enum(['projeto', 'artigo', 'tecnologia']),
           id: z.string().uuid(),
@@ -65,7 +66,8 @@ export function registerSiteTools(server: McpServer, permissions: McpPermissions
           if (error) throw error
           const full = mapProjectRow(data as unknown as ProjectRow)
           await reindexProject(full, client)
-          return textResult({ id, visible: full.visible, show_on_home: full.show_on_home })
+          const aviso_home = await homeWarningFor(client)
+          return textResult({ id, visible: full.visible, show_on_home: full.show_on_home, ...(aviso_home && { aviso_home }) })
         }
         if (entity === 'artigo') {
           if (visible === undefined) throw new Error('artigo só tem "visible"')

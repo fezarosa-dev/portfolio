@@ -2,11 +2,15 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion, transform, useInView, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
 import type { Locale } from '@/lib/i18n'
 import { SceneLoader } from './scene-loader'
+import type { ServerProject } from './servers'
+import { HOME_SERVERS } from '@/lib/home-servers'
+import type { Project } from '@/lib/supabase/queries'
 
 // o 3D (three + react-three-fiber) vira um pacote à parte, fora do carregamento inicial da página
 const loadScene = () => import('./pc-scene')
@@ -19,9 +23,9 @@ type TeaserProps = React.ComponentProps<typeof ProjectsTeaser>
 // o PC é metáfora de uma solução de software (não de trabalho com hardware): os textos deixam isso claro
 const CHAPTERS: { at: number; pt: [string, string]; en: [string, string] }[] = [
   { at: 0, pt: ['Como uma solução nasce', 'Todo sistema é um conjunto de peças que precisam funcionar juntas.'], en: ['How a solution comes together', 'Every system is a set of parts that have to work together.'] },
-  { at: 0.16, pt: ['Peça por peça', 'A base não é o código, é a arquitetura da solução. O código é o caminho.'], en: ['Piece by piece', "The foundation isn't the code, it's the solution architecture. Code is how you get there."] },
-  { at: 0.46, pt: ['O núcleo', 'No centro de tudo, o que já foi entregue.'], en: ['The core', "At the center of it all, what's already been delivered."] },
-  { at: 0.94, pt: ['Os projetos', 'Em breve: os servidores sobem do chão com cada projeto.'], en: ['The projects', 'Coming soon: servers rise from the ground with each project.'] },
+  { at: 0.11, pt: ['Peça por peça', 'A base não é o código, é a arquitetura da solução. O código é o caminho.'], en: ['Piece by piece', "The foundation isn't the code, it's the solution architecture. Code is how you get there."] },
+  { at: 0.34, pt: ['O núcleo', 'No centro de tudo, o que já foi entregue.'], en: ['The core', "At the center of it all, what's already been delivered."] },
+  { at: 0.7, pt: ['Os projetos', 'Cada servidor ligado é um projeto no ar. Clique em um para abrir.'], en: ['The projects', 'Every server that is on is a project running. Click one to open it.'] },
 ]
 
 function supportsWebGL() {
@@ -37,7 +41,7 @@ const noopSubscribe = () => () => {}
 
 // número que sobe junto com o mergulho (0 → total) e fica parado no fim
 function Counter({ progress, value, label }: { progress: MotionValue<number>; value: number; label: string }) {
-  const shown = useTransform(progress, (v) => Math.round(transform(v, [0.5, 0.8], [0, value])))
+  const shown = useTransform(progress, (v) => Math.round(transform(v, [0.4, 0.6], [0, value])))
   return (
     <div>
       <motion.p className="font-display text-4xl font-medium tabular-nums text-signal sm:text-5xl">{shown}</motion.p>
@@ -86,7 +90,22 @@ function ChapterText({
   )
 }
 
-function Story({ eyebrow, locale, stats }: { eyebrow: string; locale: Locale; stats: Stats }) {
+// os projetos da home viram os servidores, sempre HOME_SERVERS deles: os que faltam ficam desligados
+function toServers(projects: Project[], locale: Locale): ServerProject[] {
+  const en = locale === 'en'
+  const list: ServerProject[] = projects.slice(0, HOME_SERVERS).map((p) => {
+    const title = (en ? (p.title_en ?? p.title) : (p.title ?? p.title_en)) ?? ''
+    const company = p.company ? ((en ? (p.company.name_en ?? p.company.name) : (p.company.name ?? p.company.name_en)) ?? null) : null
+    const external = p.click_mode === 'link' && !!p.click_url
+    // no visor só o nome curto (o trecho antes do " — ")
+    return { title: title.split(' — ')[0], company, href: external ? p.click_url! : `/${locale}/projetos/${p.slug}`, external }
+  })
+  return [...list, ...Array<ServerProject>(HOME_SERVERS - list.length).fill(null)]
+}
+
+function Story({ eyebrow, locale, stats, projects }: { eyebrow: string; locale: Locale; stats: Stats; projects: Project[] }) {
+  const router = useRouter()
+  const servers = toServers(projects, locale)
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
   // a cena monta bem antes da seção (e não desmonta mais) e só anima quando está perto; até o primeiro
@@ -94,6 +113,7 @@ function Story({ eyebrow, locale, stats }: { eyebrow: string; locale: Locale; st
   const mounted = useInView(ref, { margin: '1500px 0px', once: true })
   const near = useInView(ref, { margin: '400px 0px' })
   const [ready, setReady] = useState(false)
+  const cutFade = useTransform(scrollYProgress, (v) => transform(v, [0.61, 0.66, 0.71], [0, 1, 0]))
   const [chapter, setChapter] = useState(0)
   // baixa o pacote do 3D assim que o navegador fica livre, sem esperar a rolagem chegar perto
   useEffect(() => {
@@ -110,11 +130,27 @@ function Story({ eyebrow, locale, stats }: { eyebrow: string; locale: Locale; st
   })
 
   return (
-    <section ref={ref} className="relative border-t border-hairline" style={{ height: '480vh' }}>
+    <section ref={ref} className="relative border-t border-hairline" style={{ height: '600vh' }}>
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0">
-          {mounted && <PcScene progress={scrollYProgress} active={near} stats={stats} en={locale === 'en'} onReady={() => setReady(true)} />}
+          {mounted && (
+            <PcScene
+              progress={scrollYProgress}
+              active={near}
+              stats={stats}
+              en={locale === 'en'}
+              servers={servers}
+              onOpen={(p) => (p.external ? window.open(p.href, '_blank', 'noopener,noreferrer') : router.push(p.href))}
+              onReady={() => setReady(true)}
+            />
+          )}
         </div>
+        {/* corte do processador para os servidores: escurece, a cena troca no escuro e clareia de novo */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[#2b2024]"
+          style={{ opacity: cutFade }}
+        />
         <AnimatePresence>
           {!ready && (
             <motion.div
@@ -159,8 +195,12 @@ export function ProjectsStory({ stats, ...teaser }: TeaserProps & { stats: Stats
   const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => false)
   return (
     <>
-      {!reduce && webgl && <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} />}
-      <ProjectsTeaser {...teaser} />
+      {/* com a cena 3D os projetos viram os servidores; sem ela (reduzir movimento, sem WebGL) ficam os cards */}
+      {!reduce && webgl ? (
+        <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} projects={teaser.projects} />
+      ) : (
+        <ProjectsTeaser {...teaser} />
+      )}
     </>
   )
 }
