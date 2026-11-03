@@ -172,7 +172,9 @@
 /* Mesma paleta (rust/caramelo/malva do mascote), versão escura -- entra
    quando o usuário liga o modo escuro (.dark no <html>), sem trocar pro
    cinza genérico do tema .dark padrão. */
-.dark .site-warm {
+/* .scene-night: o fundo da cena 3D da home (noite com estrelas) continuando em seções do site, nos dois temas */
+.dark .site-warm,
+.site-warm .scene-night {
   --background: #2b2024;
   --foreground: #f6eae3;
   --card: #453646;
@@ -194,7 +196,8 @@
   --steel: #b1a0a7;
   --hairline: #684a4c;
 }
-.dark .site-warm [data-slot="card"] {
+.dark .site-warm [data-slot="card"],
+.site-warm .scene-night [data-slot="card"] {
   background-image:
     repeating-linear-gradient(45deg, rgba(246, 234, 227, 0.045) 0 1px, transparent 1px 4px),
     repeating-linear-gradient(-45deg, rgba(246, 234, 227, 0.045) 0 1px, transparent 1px 4px);
@@ -960,4 +963,18 @@ html:not(.reduce-motion) [data-tilt] {
   .scene-loader-mask polygon {
     animation: none;
   }
+}
+
+/* a mesma noite da cena 3D (fundo #2b2024 com estrelinhas), para a seção seguinte não "cortar" a cena */
+.scene-night {
+  color: var(--foreground);
+  background-color: #2b2024;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(246, 234, 227, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 68% 8%, rgba(246, 234, 227, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 42% 64%, rgba(246, 234, 227, 0.35), transparent 60%),
+    radial-gradient(1px 1px at 86% 42%, rgba(246, 234, 227, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 27% 88%, rgba(246, 234, 227, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 93% 82%, rgba(176, 119, 90, 0.5), transparent 60%);
+  background-size: 360px 360px;
 }

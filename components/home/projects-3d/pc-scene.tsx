@@ -1076,7 +1076,8 @@ function Pc({
     rocketRef.current = segment(p, STORY.rocketStart, STORY.rocketEnd)
     // no foguete a câmera recua e sobe acompanhando a decolagem (só parte dela: o foguete sai de quadro no fim)
     const rk = easeInOut(rocketRef.current)
-    const climb = liftHeight(rocketRef.current) * 0.55
+    // segue o foguete inteiro (com o fogo): ele fica no quadro e é a plataforma que vai ficando para trás
+    const climb = liftHeight(rocketRef.current)
     // com os servidores, tudo abaixo do chão é cortado: eles sobem "de dentro" da plataforma
     state.gl.clippingPlanes = cut ? FLOOR_CLIP : NO_CLIP
     if (cut) {
@@ -1084,11 +1085,11 @@ function Pc({
       if (narrow) {
         // tela em pé: afasta até os quatro caberem na largura (fov 38°) e desce a cena para baixo do texto
         const dist = Math.max(9.5, 2.2 / (Math.tan((19 * Math.PI) / 180) * (state.size.width / state.size.height)))
-        tmp.orbit.set(0, 1.7 + rk * 1.2 + climb, dist + rk * 2)
-        tmp.look.set(0, 0.9 + rk * 1.0 + climb, 0)
+        tmp.orbit.set(0, 1.7 + rk * 0.6 + climb, dist + rk * 3)
+        tmp.look.set(0, 0.9 + rk * 0.3 + climb, 0)
       } else {
-        tmp.orbit.set(-1.1, 1.05 + rk * 1.0 + climb, 7.6 + rk * 1.6)
-        tmp.look.set(-1.4, 0.1 + rk * 1.1 + climb, 0)
+        tmp.orbit.set(-1.1, 1.05 + rk * 0.6 + climb, 7.6 + rk * 4)
+        tmp.look.set(-1.4, 0.1 + rk * 0.4 + climb, 0)
       }
     }
     const cam = state.camera
@@ -1264,7 +1265,8 @@ export default function PcScene({
     <Canvas
       // longe da seção desenha só sob demanda: o primeiro quadro sai (deixa tudo pronto) e depois fica parada
       frameloop={active ? 'always' : 'demand'}
-      dpr={[1, 1.5]}
+      // até 2x no desktop (texto 3D nítido); no celular segura em 1,5x pelo desempenho
+      dpr={[1, typeof window !== 'undefined' && window.innerWidth < 640 ? 1.5 : 2]}
       camera={{ position: [3.1, 1.0, 5.3], fov: 38 }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
       aria-hidden

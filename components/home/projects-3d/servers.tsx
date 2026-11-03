@@ -17,6 +17,7 @@ export type ServerProject = {
   external: boolean
   status: string | null
   highlight: string | null
+  summary: string | null
   drawers: Drawer[]
 } | null
 
@@ -90,6 +91,11 @@ function DrawerUnit({
   arriveRef,
   openRef,
   ledRef,
+  hovered,
+  engagedRef,
+  readableRef,
+  onHover,
+  side,
 }: {
   index: number
   drawer: Drawer | null
@@ -97,21 +103,44 @@ function DrawerUnit({
   arriveRef: React.RefObject<number[]>
   openRef: React.RefObject<number>
   ledRef: (i: number, m: THREE.MeshStandardMaterial | null) => void
+  /** a gaveta sob o mouse sai mais para fora e mostra o que tem dentro */
+  hovered: boolean
+  engagedRef: React.RefObject<boolean>
+  /** false no foguete: o texto da gaveta não precisa ser desenhado */
+  readableRef: React.RefObject<boolean>
+  onHover: (index: number | null) => void
+  /** lado do cartão: o rack da ponta direita abre o cartão para a esquerda */
+  side: 1 | -1
 }) {
   const group = useRef<THREE.Group>(null)
-  useFrame(() => {
+  const pull = useRef(0)
+  const card = useRef<HTMLDivElement>(null)
+  const text = useRef<THREE.Mesh>(null)
+  useFrame((_, dt) => {
+    if (text.current) text.current.visible = readableRef.current ?? true
+    const on = hovered && engagedRef.current
+    pull.current += ((on ? 1 : 0) - pull.current) * (1 - Math.exp(-dt * 10))
+    if (card.current) card.current.style.opacity = String(on ? clamp01(pull.current * 1.5) : 0)
     const a = easeInOut(arriveRef.current?.[index] ?? 0)
     if (!group.current) return
     group.current.visible = a > 0.001
     // vem de frente e de lado, girando, e entra reta no slot
     const away = 1 - a
-    const open = (openRef.current ?? 0) * (0.06 + index * 0.025)
+    const open = (openRef.current ?? 0) * (0.03 + index * 0.012) + pull.current * 0.3
     group.current.position.set(away * (index % 2 ? 0.9 : -0.9), unitY(index) + away * 0.5, D / 2 - 0.36 + away * 1.8 + open)
     group.current.rotation.set(0, away * (index % 2 ? -0.9 : 0.9), away * 0.4)
   })
-  const techs = drawer?.techs.join(' · ') ?? ''
   return (
-    <group ref={group} visible={false}>
+    <group
+      ref={group}
+      visible={false}
+      onPointerOver={(e) => {
+        if (!drawer) return
+        e.stopPropagation()
+        onHover(index)
+      }}
+      onPointerOut={() => onHover(null)}
+    >
       {/* corpo da gaveta (aparece quando ela está para fora) e a frente */}
       <mesh>
         <boxGeometry args={[W - 0.1, UNIT_H - 0.01, 0.72]} />
@@ -124,27 +153,42 @@ function DrawerUnit({
       {drawer && (
         <group position={[-W / 2 + 0.07, 0, 0.364]}>
           {[0, 1].map((j) => (
-            <mesh key={j} position={[0, j ? -0.03 : 0.03, 0]}>
-              <boxGeometry args={[0.016, j ? 0.008 : 0.016, 0.006]} />
+            <mesh key={j} position={[0, j ? -0.035 : 0.035, 0]}>
+              <boxGeometry args={[0.014, j ? 0.008 : 0.014, 0.006]} />
               <meshStandardMaterial ref={(m) => ledRef(index * 2 + j, m)} color="#1a1418" emissive={j ? CARAMEL : SIGNAL} emissiveIntensity={0} toneMapped={false} />
             </mesh>
           ))}
-          <Text font={MONO_BOLD} fontSize={0.022} position={[0.03, 0.03, 0.002]} color={SIGNAL} anchorX="left" anchorY="middle" letterSpacing={0.1}>
-            {drawer.label.toUpperCase()}
-          </Text>
+          {/* só o nome da categoria, grande o bastante para ler de longe; as tecnologias aparecem no cartão do mouse.
+              No foguete o texto some (ninguém lê ali) */}
           <Text
-            font={MONO}
-            // uma linha: muita tecnologia diminui a letra para caber antes das baias
-            fontSize={Math.min(0.026, 0.36 / Math.max(1, techs.length * 0.6))}
-            position={[0.03, -0.022, 0.002]}
+            ref={text}
+            sdfGlyphSize={128}
+            font={MONO_BOLD}
+            // mesma letra em todas as gavetas; nome comprido quebra em duas linhas dentro da altura da gaveta
+            fontSize={0.04}
+            maxWidth={0.4}
+            lineHeight={1}
+            position={[0.03, 0, 0.002]}
             color="#f6eae3"
             anchorX="left"
             anchorY="middle"
-            whiteSpace="nowrap"
+            letterSpacing={0.04}
           >
-            {techs}
+            {drawer.label.toUpperCase()}
           </Text>
         </group>
+      )}
+      {drawer && hovered && (
+        <Html position={[side * (W / 2 + 0.04), 0, 0.36]} zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+          <div
+            ref={card}
+            style={{ opacity: 0, transform: side > 0 ? 'translate(0, -50%)' : 'translate(-100%, -50%)' }}
+            className="w-52 rounded-lg border border-signal bg-background/90 px-3 py-2 shadow-lg backdrop-blur"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-wide text-signal">{drawer.label}</p>
+            <p className="mt-0.5 text-xs leading-snug text-foreground">{drawer.techs.join(', ')}</p>
+          </div>
+        </Html>
       )}
     </group>
   )
@@ -175,6 +219,7 @@ function Rack({
 }) {
   const group = useRef<THREE.Group>(null)
   const label = useRef<HTMLDivElement>(null)
+  const summary = useRef<HTMLDivElement>(null)
   const slot = useRef<THREE.MeshBasicMaterial>(null)
   const bar = useRef<THREE.MeshStandardMaterial>(null)
   const screen = useRef<THREE.MeshStandardMaterial>(null)
@@ -184,7 +229,11 @@ function Rack({
   const arrive = useRef<number[]>(Array(UNITS).fill(0))
   const open = useRef(0)
   const [hover, setHover] = useState(false)
+  const [hoverDrawer, setHoverDrawer] = useState<number | null>(null)
   const hoverOpen = useRef(0)
+  // servidores de pé e ainda sem foguete: só aí mouse e clique fazem algo
+  const engagedRef = useRef(false)
+  const readableRef = useRef(true)
   const drawers = project?.drawers.slice(0, UNITS) ?? []
   // as gavetas com dados vão de baixo para cima; o resto são tampas cegas (rack de verdade também tem)
   const units: (Drawer | null)[] = Array.from({ length: UNITS }, (_, i) => drawers[i] ?? null)
@@ -198,9 +247,11 @@ function Rack({
     for (let i = 0; i < UNITS; i++) arrive.current[i] = clamp01((segment(s, SLOT[0], SLOT[1]) - index * 0.06 - i * 0.07) / 0.35)
     const power = project ? segment(s, POWER[0], POWER[1]) : 0
     const engaged = s >= 0.8 && r < 0.1
+    engagedRef.current = engaged
+    readableRef.current = r < 0.12
     hoverOpen.current += ((hover && engaged ? 1 : 0) - hoverOpen.current) * (1 - Math.exp(-dt * 6))
     // abre um pouco com a rolagem (em escada) e mais um tanto no rack sob o mouse; recolhe antes do foguete
-    open.current = (easeInOut(segment(s, OPEN[0], OPEN[1])) * 0.7 + hoverOpen.current * 0.6) * (1 - segment(r, RETRACT[0], RETRACT[1]))
+    open.current = (easeInOut(segment(s, OPEN[0], OPEN[1])) * 0.7 + hoverOpen.current * 0.4) * (1 - segment(r, RETRACT[0], RETRACT[1]))
     const a = easeInOut(segment(r, ASSEMBLE[0], ASSEMBLE[1]))
     const lift = liftHeight(r)
     if (group.current) {
@@ -234,9 +285,11 @@ function Rack({
     if (flame.current) {
       flame.current.visible = ig > 0.01
       const flick = 0.85 + 0.15 * Math.sin(t * 40 + index * 2)
-      flame.current.scale.set(1, ig * flick * (1 + segment(r, LIFTOFF[0], LIFTOFF[1]) * 1.5), 1)
+      flame.current.scale.set(1, ig * flick * (1 + segment(r, LIFTOFF[0], LIFTOFF[1]) * 0.8), 1)
     }
-    if (label.current) label.current.style.opacity = String(clamp01((s - 0.78) / 0.12) * (1 - clamp01(r / 0.08)))
+    const labelAlpha = String(clamp01((s - 0.78) / 0.12) * (1 - clamp01(r / 0.08)))
+    if (label.current) label.current.style.opacity = labelAlpha
+    if (summary.current) summary.current.style.opacity = labelAlpha
   })
 
   const pointer = {
@@ -296,6 +349,11 @@ function Rack({
             ledRef={(n, m) => {
               leds.current[n] = m
             }}
+            hovered={hoverDrawer === i}
+            engagedRef={engagedRef}
+            readableRef={readableRef}
+            onHover={(n) => setHoverDrawer((cur) => (n === null && cur !== i ? cur : n))}
+            side={index === 3 ? -1 : 1}
           />
         ))}
         {/* visor no alto: nome, empresa, estado e o número de destaque */}
@@ -305,6 +363,7 @@ function Rack({
             <meshStandardMaterial ref={screen} color="#120e10" emissive="#2b2024" emissiveIntensity={0} toneMapped={false} />
           </mesh>
           <Text
+            sdfGlyphSize={128}
             font={project ? DISPLAY : MONO}
             fontSize={project ? Math.min(0.05, (W - 0.14) / (project.title.length * 0.56)) : 0.035}
             position={[-W / 2 + 0.07, 0.085, 0.002]}
@@ -316,7 +375,7 @@ function Rack({
             {project ? project.title : en ? 'free slot' : 'livre'}
           </Text>
           {project?.company && (
-            <Text font={MONO} fontSize={0.02} position={[-W / 2 + 0.07, 0.04, 0.002]} color="#8d8489" anchorX="left" anchorY="middle" letterSpacing={0.08}>
+            <Text sdfGlyphSize={128} font={MONO} fontSize={0.02} position={[-W / 2 + 0.07, 0.04, 0.002]} color="#8d8489" anchorX="left" anchorY="middle" letterSpacing={0.08}>
               {project.company.toUpperCase()}
             </Text>
           )}
@@ -334,6 +393,7 @@ function Rack({
             </Text>
           )}
           <Text
+            sdfGlyphSize={128}
             font={MONO_BOLD}
             fontSize={0.02}
             position={[-W / 2 + 0.07, -0.09, 0.002]}
@@ -344,7 +404,7 @@ function Rack({
           >
             {project ? (status ? status[en ? 1 : 0] : '● ONLINE') : '○ OFFLINE'}
           </Text>
-          <Text font={MONO} fontSize={0.018} position={[W / 2 - 0.07, -0.09, 0.002]} color="#5b4a52" anchorX="right" anchorY="middle" letterSpacing={0.1}>
+          <Text sdfGlyphSize={128} font={MONO} fontSize={0.018} position={[W / 2 - 0.07, -0.09, 0.002]} color="#5b4a52" anchorX="right" anchorY="middle" letterSpacing={0.1}>
             {`SRV-0${index + 1}`}
           </Text>
         </group>
@@ -364,6 +424,17 @@ function Rack({
             <meshBasicMaterial color={SIGNAL} transparent opacity={0.85} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
           </mesh>
         </group>
+        {/* resumo do projeto em cima do rack (presa pela base, cresce para cima) */}
+        {project?.summary && (
+          <Html position={[0, H / 2 + 0.06, D / 2]} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
+            <div ref={summary} style={{ opacity: 0, transform: 'translate(-50%, -100%)' }} className="hidden w-40 sm:block">
+              {/* o resumo inteiro, sem cortar: pode ficar mais alto */}
+              <div className="rounded-lg border border-hairline bg-background/85 px-3 py-2 shadow-lg backdrop-blur">
+                <p className="text-xs leading-snug text-foreground/90">{project.summary}</p>
+              </div>
+            </div>
+          </Html>
+        )}
         {/* etiqueta clicável (também funciona por teclado e leitor de tela) */}
         <Html position={[0, -H / 2 - 0.08, D / 2]} zIndexRange={[20, 0]}>
           {/* presa pelo topo no pé do rack: a ficha cresce para baixo, sem cobrir o servidor */}
@@ -378,20 +449,10 @@ function Rack({
                 className={`block w-[23vw] rounded-lg border bg-background/85 px-1.5 py-1 text-center shadow-lg backdrop-blur transition-colors sm:w-44 sm:px-3 sm:py-1.5 ${hover ? 'border-signal' : 'border-signal/50'}`}
               >
                 <span className="line-clamp-2 block font-display text-[11px] font-medium leading-tight text-foreground sm:text-sm">{project.title}</span>
-                {/* a ficha do servidor em texto de verdade (o 3D de longe não dá para ler): estado, número e gavetas */}
+                {/* estado e número em texto de verdade (o 3D de longe é pequeno); as tecnologias ficam nas gavetas */}
                 {(status || project.highlight) && (
                   <span className="mt-0.5 hidden font-mono text-[10px] sm:block" style={{ color: status?.[2] ?? SIGNAL }}>
                     {[status?.[en ? 1 : 0].slice(2).toLowerCase(), project.highlight].filter(Boolean).join(' · ')}
-                  </span>
-                )}
-                {project.drawers.length > 0 && (
-                  <span className="mt-1 hidden flex-col gap-0.5 border-t border-hairline pt-1 text-left sm:flex">
-                    {project.drawers.slice(0, UNITS).map((d) => (
-                      <span key={d.label} className="truncate text-[10px] leading-tight text-steel">
-                        <span className="mr-1 font-mono uppercase text-signal/80">{d.label}</span>
-                        {d.techs.join(', ')}
-                      </span>
-                    ))}
                   </span>
                 )}
                 <span className="mt-1 hidden font-mono text-[10px] uppercase tracking-wide text-signal sm:block">
@@ -439,7 +500,7 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
     const ig = segment(r, IGNITE[0], IGNITE[1])
     if (flame.current) {
       flame.current.visible = ig > 0.01
-      flame.current.scale.set(1, ig * (0.9 + 0.1 * Math.sin(t * 45)) * (1 + segment(r, LIFTOFF[0], LIFTOFF[1]) * 2), 1)
+      flame.current.scale.set(1, ig * (0.9 + 0.1 * Math.sin(t * 45)) * (1 + segment(r, LIFTOFF[0], LIFTOFF[1]) * 1), 1)
     }
     // faíscas descendo do bocal: a nuvem inteira escorre e volta ao topo (sem mexer em cada ponto)
     if (exhaust.current) {
@@ -468,7 +529,7 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
           <Glow color="#f6eae3" intensity={1.4} />
         </mesh>
       ))}
-      <Text font={MONO_BOLD} fontSize={0.09} position={[0, 0.85, 0.452]} color={SIGNAL} anchorX="center" anchorY="middle" letterSpacing={0.18}>
+      <Text sdfGlyphSize={128} font={MONO_BOLD} fontSize={0.09} position={[0, 0.85, 0.452]} color={SIGNAL} anchorX="center" anchorY="middle" letterSpacing={0.18}>
         FZR
       </Text>
       {/* ponta */}

@@ -10,6 +10,7 @@ import type { Locale } from '@/lib/i18n'
 import { SceneLoader } from './scene-loader'
 import type { ServerProject } from './servers'
 import { HOME_SERVERS } from '@/lib/home-servers'
+import { firstSentences } from '@/lib/short-text'
 import type { LanguageCategory, Project } from '@/lib/supabase/queries'
 
 // o 3D (three + react-three-fiber) vira um pacote à parte, fora do carregamento inicial da página
@@ -115,6 +116,8 @@ function toServers(projects: Project[], categories: LanguageCategory[], locale: 
       external,
       status: p.status,
       highlight: pick(p.highlight, p.highlight_en),
+      // em cima do rack cabe pouco: as primeiras frases inteiras (o resumo completo está na página do projeto)
+      summary: firstSentences(pick(p.summary, p.summary_en) ?? '', 190) || null,
       drawers,
     }
   })
@@ -194,6 +197,8 @@ function Story({
             </motion.div>
           )}
         </AnimatePresence>
+        {/* pé da cena funde no fundo da seção seguinte (a busca usa a mesma noite): sem a borda da vinheta */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-b from-transparent to-[#2b2024]" />
         {/* degradê para o texto ficar legível sobre a cena */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-transparent sm:bg-gradient-to-r sm:from-background/90 sm:via-background/20" />
         <div className="pointer-events-none relative mx-auto flex h-full max-w-6xl px-6 pt-24 sm:items-center sm:pt-0">
