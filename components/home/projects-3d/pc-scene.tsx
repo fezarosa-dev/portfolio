@@ -337,26 +337,58 @@ function Cpu({ brushed, stats, en }: { brushed: THREE.Texture; stats: SceneStats
   )
 }
 
-function Ram({ accent }: { accent: string }) {
+// pente DDR5 em pé na placa-mãe: comprimento no y, altura no z (os contatos entram no slot pelo -z) e
+// espessura no x. Dissipador de alumínio escovado dos dois lados, barra de luz difusa em cima
+function Ram({ accent, brushed }: { accent: string; brushed: THREE.Texture }) {
   return (
     <group>
       <mesh>
-        <boxGeometry args={[0.012, 0.6, 0.1]} />
-        <meshStandardMaterial color="#1e5641" roughness={0.5} />
+        <boxGeometry args={[0.006, 0.6, 0.1]} />
+        <meshStandardMaterial color="#16241d" roughness={0.6} />
       </mesh>
+      {/* contatos dourados na borda de baixo, com o chanfro de encaixe fora do centro */}
+      {Array.from({ length: 34 }, (_, i) => -0.28 + i * 0.017)
+        .filter((y) => Math.abs(y + 0.06) > 0.012)
+        .map((y) => (
+          <mesh key={y} position={[0, y, -0.048]}>
+            <boxGeometry args={[0.008, 0.011, 0.012]} />
+            <meshStandardMaterial color={GOLD} metalness={1} roughness={0.2} />
+          </mesh>
+        ))}
       {[-1, 1].map((side) => (
-        <RoundedBox key={side} args={[0.012, 0.6, 0.11]} radius={0.004} position={[side * 0.012, 0.01, 0]}>
-          <meshStandardMaterial color="#2a2128" metalness={0.9} roughness={0.3} />
-        </RoundedBox>
+        <group key={side} position={[side * 0.007, 0, 0.006]}>
+          <RoundedBox args={[0.006, 0.6, 0.086]} radius={0.002}>
+            <meshStandardMaterial map={brushed} color="#5a5056" metalness={1} roughness={0.32} />
+          </RoundedBox>
+          {/* recortes em degrau no alto do dissipador */}
+          {[-0.21, -0.07, 0.07, 0.21].map((y) => (
+            <mesh key={y} position={[side * 0.0035, y, 0.03]} rotation={[0.5, 0, 0]}>
+              <boxGeometry args={[0.002, 0.1, 0.006]} />
+              <meshStandardMaterial color="#1b1519" metalness={0.6} roughness={0.5} />
+            </mesh>
+          ))}
+          {/* faixa de cor e a marca, viradas para fora e correndo ao longo do pente (y), dentro da altura dele */}
+          <group position={[side * 0.0032, 0, 0.012]} rotation={[0, side * (Math.PI / 2), 0]}>
+            <mesh>
+              <planeGeometry args={[0.01, 0.5]} />
+              <meshStandardMaterial color={accent} metalness={0.4} roughness={0.4} />
+            </mesh>
+          </group>
+          <group position={[side * 0.0032, 0, -0.018]} rotation={[0, side * (Math.PI / 2), 0]}>
+            <Text font={MONO_BOLD} fontSize={0.016} rotation={[0, 0, Math.PI / 2]} color="#f6eae3" anchorX="center" anchorY="middle" letterSpacing={0.12}>
+              FZR · DDR5-6000
+            </Text>
+          </group>
+        </group>
       ))}
-      <mesh position={[0, 0.315, 0]}>
-        <boxGeometry args={[0.03, 0.03, 0.11]} />
-        <Glow color={accent} intensity={3} />
+      {/* barra de luz: base escura e difusor aceso */}
+      <mesh position={[0, 0, 0.054]}>
+        <boxGeometry args={[0.022, 0.6, 0.008]} />
+        <meshStandardMaterial color="#1b1519" metalness={0.7} roughness={0.4} />
       </mesh>
-      <mesh position={[0, -0.305, 0]}>
-        <boxGeometry args={[0.014, 0.02, 0.095]} />
-        <meshStandardMaterial color={GOLD} metalness={1} roughness={0.25} />
-      </mesh>
+      <RoundedBox args={[0.016, 0.57, 0.014]} radius={0.004} position={[0, 0, 0.064]}>
+        <Glow color={accent} intensity={2.2} />
+      </RoundedBox>
     </group>
   )
 }
@@ -403,45 +435,284 @@ function Gpu({ brushed }: { brushed: THREE.Texture }) {
   )
 }
 
-function Psu() {
+// fonte modular: carcaça preta, ventoinha de 135 mm com grade em cima, placa escovada com a marca na
+// lateral, colmeia de ventilação + tomada e chave atrás, painel de conectores modulares na frente
+function Psu({ brushed }: { brushed: THREE.Texture }) {
+  const blades = useRef<THREE.Group>(null)
+  useFrame((_, dt) => {
+    if (blades.current) blades.current.rotation.y -= dt * 5
+  })
+  const grille = { color: '#6b6166', metalness: 1, roughness: 0.3 } as const
   return (
     <group>
-      <RoundedBox args={[1.0, 0.32, 0.75]} radius={0.03}>
-        <meshStandardMaterial color="#1b1519" metalness={0.6} roughness={0.45} />
+      <RoundedBox args={[1.0, 0.32, 0.75]} radius={0.035} smoothness={4}>
+        <meshStandardMaterial color="#1b1519" metalness={0.5} roughness={0.55} />
       </RoundedBox>
-      {/* grade de ventilação em cima */}
-      <group position={[-0.15, 0.161, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <mesh>
-          <ringGeometry args={[0.22, 0.235, 64]} />
-          <meshStandardMaterial color="#5b4a52" metalness={1} roughness={0.3} side={THREE.DoubleSide} />
+      {/* ventoinha: fundo escuro, pás girando e grade de anéis por cima */}
+      <group position={[-0.08, 0.161, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.3, 64]} />
+          <meshStandardMaterial color="#0f0b0d" roughness={0.8} />
         </mesh>
-        {Array.from({ length: 9 }, (_, i) => (
-          <mesh key={i} position={[0, -0.2 + i * 0.05, 0.001]}>
-            <planeGeometry args={[0.44 * Math.sqrt(1 - Math.pow((-0.2 + i * 0.05) / 0.23, 2)), 0.008]} />
-            <meshStandardMaterial color="#5b4a52" metalness={1} roughness={0.3} side={THREE.DoubleSide} />
+        <group ref={blades} position={[0, 0.006, 0]}>
+          {Array.from({ length: 7 }, (_, i) => (
+            <group key={i} rotation={[0, (i / 7) * Math.PI * 2, 0]}>
+              <mesh position={[0.16, 0, 0]} rotation={[0.45, 0, 0.12]}>
+                <boxGeometry args={[0.24, 0.004, 0.1]} />
+                <meshStandardMaterial color="#2a2126" metalness={0.2} roughness={0.5} />
+              </mesh>
+            </group>
+          ))}
+          <mesh>
+            <cylinderGeometry args={[0.07, 0.07, 0.012, 32]} />
+            <meshStandardMaterial color="#1a1418" metalness={0.6} roughness={0.35} />
+          </mesh>
+          <mesh position={[0, 0.0065, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.045, 32]} />
+            <Glow intensity={1.8} />
+          </mesh>
+        </group>
+        {[0.1, 0.17, 0.24, 0.3].map((r) => (
+          <mesh key={r} position={[0, 0.016, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[r, 0.005, 8, 96]} />
+            <meshStandardMaterial {...grille} />
           </mesh>
         ))}
-      </group>
-      {/* etiqueta: é a base de tudo */}
-      <group position={[0.32, 0.162, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <mesh>
-          <planeGeometry args={[0.3, 0.4]} />
-          <meshStandardMaterial color="#2b2024" roughness={0.8} />
+        {[0, Math.PI / 2].map((rot) => (
+          <mesh key={rot} position={[0, 0.016, 0]} rotation={[0, rot, 0]}>
+            <boxGeometry args={[0.6, 0.008, 0.008]} />
+            <meshStandardMaterial {...grille} />
+          </mesh>
+        ))}
+        <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.305, 0.315, 96]} />
+          <Glow intensity={2.2} />
         </mesh>
-        <Text font={MONO_BOLD} fontSize={0.05} position={[0, 0.1, 0.001]} color={SIGNAL} anchorX="center" anchorY="middle">
-          850W
+      </group>
+      {/* lateral virada para a câmera: placa escovada com a marca (é a base de tudo) */}
+      <group position={[0, 0, 0.378]}>
+        <RoundedBox args={[0.88, 0.24, 0.008]} radius={0.003}>
+          <meshStandardMaterial map={brushed} color="#6b6166" metalness={1} roughness={0.3} />
+        </RoundedBox>
+        <Text font={DISPLAY} fontSize={0.085} position={[-0.38, 0.035, 0.005]} color="#2b2024" anchorX="left" anchorY="middle" letterSpacing={-0.03}>
+          FZR
         </Text>
-        <Text font={MONO} fontSize={0.022} position={[0, 0.02, 0.001]} color="#f6eae3" anchorX="center" anchorY="middle" maxWidth={0.26} textAlign="center">
+        <Text font={MONO_BOLD} fontSize={0.026} position={[-0.38, -0.045, 0.005]} color="#2b2024" anchorX="left" anchorY="middle" letterSpacing={0.14}>
           ARCHITECTURE FIRST
         </Text>
-        <mesh position={[0, -0.07, 0.001]}>
-          <planeGeometry args={[0.22, 0.005]} />
-          <Glow intensity={2} />
+        <Text font={MONO_BOLD} fontSize={0.05} position={[0.38, 0.03, 0.005]} color={SIGNAL} anchorX="right" anchorY="middle">
+          850W
+        </Text>
+        <Text font={MONO} fontSize={0.019} position={[0.38, -0.03, 0.005]} color="#3d3036" anchorX="right" anchorY="middle" letterSpacing={0.1}>
+          80+ PLATINUM · MODULAR
+        </Text>
+        <mesh position={[0, -0.095, 0.005]}>
+          <boxGeometry args={[0.8, 0.006, 0.002]} />
+          <Glow intensity={2.4} />
         </mesh>
       </group>
-      <mesh position={[0.502, 0, 0]}>
-        <boxGeometry args={[0.01, 0.2, 0.5]} />
-        <Glow intensity={1.2} color={CARAMEL} />
+      {/* traseira: colmeia de ventilação, tomada e chave */}
+      <group position={[-0.502, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        {Array.from({ length: 4 }, (_, row) =>
+          Array.from({ length: 8 }, (_, col) => (
+            <mesh key={`${row}-${col}`} position={[-0.06 + col * 0.045 + (row % 2) * 0.0225, -0.09 + row * 0.04, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.019, 0.019, 0.006, 6]} />
+              <meshStandardMaterial color="#0a0708" roughness={0.9} />
+            </mesh>
+          ))
+        )}
+        <mesh position={[-0.24, 0.03, 0.004]}>
+          <boxGeometry args={[0.09, 0.06, 0.008]} />
+          <meshStandardMaterial color="#0f0b0d" roughness={0.7} />
+        </mesh>
+        <mesh position={[-0.24, -0.06, 0.006]}>
+          <boxGeometry args={[0.04, 0.05, 0.012]} />
+          <Glow intensity={1.6} />
+        </mesh>
+      </group>
+      {/* frente: conectores modulares em fileiras e a luz de status */}
+      <group position={[0.502, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <mesh>
+          <boxGeometry args={[0.66, 0.24, 0.004]} />
+          <meshStandardMaterial color="#120e10" roughness={0.7} />
+        </mesh>
+        {Array.from({ length: 3 }, (_, row) =>
+          Array.from({ length: 6 }, (_, col) => (
+            <mesh key={`${row}-${col}`} position={[-0.25 + col * 0.1, 0.07 - row * 0.07, 0.006]}>
+              <boxGeometry args={[0.075, 0.045, 0.01]} />
+              <meshStandardMaterial color={row === 0 ? '#2f2530' : '#241c21'} metalness={0.3} roughness={0.6} />
+            </mesh>
+          ))
+        )}
+        <mesh position={[0, -0.11, 0.006]}>
+          <boxGeometry args={[0.6, 0.006, 0.004]} />
+          <Glow color={CARAMEL} intensity={1.6} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+// traseira do gabinete (o lado x = -1): espelho de I/O da placa-mãe, saída da ventoinha com grade em
+// colmeia, tampas dos slots PCIe e a abertura da fonte. Grupo virado para fora: u = z do mundo, v = y
+function RearPanel() {
+  const dark = { color: '#0f0b0d', roughness: 0.8 } as const
+  const steel = { color: '#8d8489', metalness: 1, roughness: 0.3 } as const
+  return (
+    <group position={[-0.027, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+      {/* espelho de I/O com as portas */}
+      <mesh position={[-0.3, 0.62, 0]}>
+        <boxGeometry args={[0.2, 0.44, 0.006]} />
+        <meshStandardMaterial color="#4a4046" metalness={0.9} roughness={0.35} />
+      </mesh>
+      {[0.8, 0.74, 0.68, 0.6, 0.54].map((y, i) => (
+        <mesh key={y} position={[-0.33, y, 0.005]}>
+          <boxGeometry args={[0.07, 0.035, 0.006]} />
+          <meshStandardMaterial color={i < 2 ? '#2b4a8c' : '#0f0b0d'} roughness={0.6} />
+        </mesh>
+      ))}
+      <mesh position={[-0.26, 0.78, 0.005]}>
+        <boxGeometry args={[0.05, 0.05, 0.006]} />
+        <meshStandardMaterial {...dark} />
+      </mesh>
+      {[0.66, 0.6, 0.54, 0.48].map((y, i) => (
+        <mesh key={y} position={[-0.26, y, 0.005]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.011, 0.011, 0.006, 16]} />
+          <meshStandardMaterial color={i === 0 ? SIGNAL : i === 1 ? CARAMEL : '#5b4a52'} roughness={0.5} />
+        </mesh>
+      ))}
+      {/* ventoinha de saída: aro com parafusos e grade em colmeia */}
+      <group position={[0.17, 0.6, 0]}>
+        <mesh>
+          <ringGeometry args={[0.2, 0.22, 64]} />
+          <meshStandardMaterial {...steel} side={THREE.DoubleSide} />
+        </mesh>
+        {Array.from({ length: 7 }, (_, row) =>
+          Array.from({ length: 7 }, (_, col) => {
+            const x = -0.15 + col * 0.05 + (row % 2) * 0.025
+            const y = -0.15 + row * 0.05
+            if (Math.hypot(x, y) > 0.18) return null
+            return (
+              <mesh key={`${row}-${col}`} position={[x, y, 0.002]} rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.021, 0.021, 0.004, 6]} />
+                <meshStandardMaterial {...dark} />
+              </mesh>
+            )
+          })
+        )}
+        {[-1, 1].flatMap((sx) =>
+          [-1, 1].map((sy) => (
+            <mesh key={`${sx}${sy}`} position={[sx * 0.2, sy * 0.2, 0.004]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.012, 0.012, 0.008, 12]} />
+              <meshStandardMaterial {...steel} />
+            </mesh>
+          ))
+        )}
+      </group>
+      {/* tampas dos slots PCIe com furinhos de ventilação */}
+      {Array.from({ length: 7 }, (_, i) => (
+        <group key={i} position={[-0.12, 0.2 - i * 0.075, 0.003]}>
+          <mesh>
+            <boxGeometry args={[0.42, 0.055, 0.004]} />
+            <meshStandardMaterial color={i < 2 ? '#4a4046' : '#2f2530'} metalness={0.9} roughness={0.35} />
+          </mesh>
+          {Array.from({ length: 6 }, (_, j) => (
+            <mesh key={j} position={[-0.12 + j * 0.05, 0, 0.003]}>
+              <boxGeometry args={[0.03, 0.012, 0.002]} />
+              <meshStandardMaterial {...dark} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      <mesh position={[0.22, -0.1, 0.003]}>
+        <boxGeometry args={[0.012, 0.6, 0.004]} />
+        <Glow color={CARAMEL} intensity={1.2} />
+      </mesh>
+      {/* abertura da fonte */}
+      <mesh position={[0, -0.86, 0.003]}>
+        <boxGeometry args={[0.72, 0.3, 0.004]} />
+        <meshStandardMaterial {...dark} />
+      </mesh>
+      {[-0.26, 0.26].map((x) => (
+        <mesh key={x} position={[x, -0.86, 0.006]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.012, 0.012, 0.006, 12]} />
+          <meshStandardMaterial {...steel} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+// lateral atrás da placa-mãe: borda estampada e fendas de ventilação nas duas faces; por dentro (virada
+// para a câmera) também os passa-cabos de borracha e dois SSDs presos
+function SidePanel({ inner }: { inner: boolean }) {
+  const rim = { color: '#3a2f37', metalness: 0.85, roughness: 0.35 } as const
+  return (
+    <group position={[0, 0, inner ? 0.032 : -0.032]} rotation={[0, inner ? 0 : Math.PI, 0]}>
+      {[
+        [0, 1.0, 1.9, 0.04],
+        [0, -1.0, 1.9, 0.04],
+        [-0.93, 0, 0.04, 2.0],
+        [0.93, 0, 0.04, 2.0],
+      ].map(([x, y, w, h], i) => (
+        <mesh key={i} position={[x, y, 0]}>
+          <boxGeometry args={[w, h, 0.012]} />
+          <meshStandardMaterial {...rim} />
+        </mesh>
+      ))}
+      {inner && [0.55, 0.1, -0.35].map((y) => (
+        <RoundedBox key={y} args={[0.07, 0.22, 0.01]} radius={0.02} position={[0.72, y, 0]}>
+          <meshStandardMaterial color="#0f0b0d" roughness={0.9} />
+        </RoundedBox>
+      ))}
+      {Array.from({ length: 12 }, (_, i) => (
+        <mesh key={i} position={[-0.6 + i * 0.1, 0.88, 0]}>
+          <boxGeometry args={[0.05, 0.12, 0.006]} />
+          <meshStandardMaterial color="#120e10" roughness={0.8} />
+        </mesh>
+      ))}
+      {inner && [-0.55, -0.75].map((y) => (
+        <group key={y} position={[-0.3, y, 0.008]}>
+          <RoundedBox args={[0.5, 0.14, 0.012]} radius={0.004}>
+            <meshStandardMaterial color="#1b1519" metalness={0.6} roughness={0.45} />
+          </RoundedBox>
+          <Text font={MONO_BOLD} fontSize={0.03} position={[-0.21, 0, 0.007]} color="#f6eae3" anchorX="left" anchorY="middle" letterSpacing={0.1}>
+            NVMe · 2TB
+          </Text>
+          <mesh position={[0.2, 0, 0.007]}>
+            <boxGeometry args={[0.04, 0.012, 0.002]} />
+            <Glow intensity={2} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
+// painel frontal no alto do gabinete: botão de ligar com anel aceso, USB-A, USB-C e P2
+function TopIo() {
+  return (
+    <group position={[0.8, 0.032, 0]}>
+      <mesh position={[0, 0.006, 0.32]}>
+        <cylinderGeometry args={[0.045, 0.045, 0.012, 32]} />
+        <meshStandardMaterial color="#1b1519" metalness={0.8} roughness={0.3} />
+      </mesh>
+      <mesh position={[0, 0.013, 0.32]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.03, 0.038, 48]} />
+        <Glow intensity={3} />
+      </mesh>
+      {[0.16, 0.06].map((z) => (
+        <mesh key={z} position={[0, 0.003, z]}>
+          <boxGeometry args={[0.03, 0.006, 0.07]} />
+          <meshStandardMaterial color="#2b4a8c" roughness={0.6} />
+        </mesh>
+      ))}
+      <RoundedBox args={[0.02, 0.006, 0.045]} radius={0.002} position={[0, 0.003, -0.03]}>
+        <meshStandardMaterial color="#0f0b0d" roughness={0.6} />
+      </RoundedBox>
+      <mesh position={[0, 0.003, -0.1]}>
+        <cylinderGeometry args={[0.011, 0.011, 0.006, 16]} />
+        <meshStandardMaterial color="#0f0b0d" roughness={0.6} />
       </mesh>
     </group>
   )
@@ -475,6 +746,9 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
     []
   )
   const cpuLight = useRef<THREE.PointLight>(null)
+  // parado na seção, o PC gira sozinho no sentido anti-horário (visto de cima) para mostrar as peças;
+  // voltou a rolar (ou começou o mergulho), ele volta para a volta inteira mais próxima
+  const idle = useRef({ last: -1, still: 0, speed: 0, spin: 0 })
   const root = useRef<THREE.Group>(null)
   const glass = useRef<THREE.Mesh>(null)
   const partRefs = useRef<Record<string, THREE.Group | null>>({})
@@ -501,10 +775,11 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
         spin: [0, 0, (i - 1.5) * 0.12],
         delay: 0.26 + i * 0.03,
         labelAt: [0, 0.42, 0.1],
-        node: <Ram accent={i % 2 ? CARAMEL : SIGNAL} />,
+        node: <Ram accent={i % 2 ? CARAMEL : SIGNAL} brushed={brushed} />,
       })),
       { key: 'gpu', assembled: [-0.05, -0.2, -0.12], offset: [0.15, -0.35, 1.45], spin: [-0.5, 0.15, 0], delay: 0.12, labelAt: [0, 0.3, 0.1], node: <Gpu brushed={brushed} /> },
-      { key: 'psu', assembled: [-0.15, -0.86, 0], offset: [-0.2, -1.05, 0.7], spin: [0.15, -0.3, 0], delay: 0.06, labelAt: [0, -0.32, 0.3], node: <Psu /> },
+      // a fonte sai para a frente e para a esquerda, sem descer (antes afundava na plataforma)
+      { key: 'psu', assembled: [-0.15, -0.86, 0], offset: [-0.6, 0.02, 2.2], spin: [0, 0.35, 0], delay: 0.06, labelAt: [0, 0.34, 0.2], node: <Psu brushed={brushed} /> },
       ...[0.55, 0, -0.55].map<Part>((y, i) => ({
         key: `fan${i}`,
         assembled: [0.92, y + 0.15, 0],
@@ -527,9 +802,17 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
     const raw = segment(p, STORY.explodeStart, STORY.explodeEnd)
     const e = easeInOut(raw)
     const d = easeInOut(segment(p, STORY.diveStart, STORY.diveEnd))
+    const it = idle.current
+    if (Math.abs(p - it.last) > 1e-4) it.still = 0
+    else it.still += dt
+    it.last = p
+    const spinning = it.still > 1.2 && d === 0
+    it.speed += ((spinning ? 0.4 : 0) - it.speed) * (1 - Math.exp(-dt * 1.5))
+    if (spinning || it.speed > 0.02) it.spin += it.speed * dt
+    else it.spin += (Math.round(it.spin / (Math.PI * 2)) * Math.PI * 2 - it.spin) * (1 - Math.exp(-dt * 3))
     if (root.current) {
-      // gira para mostrar o lado de vidro e continua girando devagar sozinho; no mergulho para de balançar
-      root.current.rotation.y = -0.55 + e * 0.75 + Math.sin(state.clock.elapsedTime * 0.25) * 0.06 * (1 - d)
+      // gira para mostrar o lado de vidro e continua balançando devagar; no mergulho para de balançar
+      root.current.rotation.y = -0.55 + e * 0.75 + it.spin + Math.sin(state.clock.elapsedTime * 0.25) * 0.06 * (1 - d)
       root.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.03 * (1 - d)
     }
     for (const part of parts) {
@@ -591,10 +874,20 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
             </mesh>
           )}
           {panel.key === 'top' && (
-            <mesh position={[0, 0.032, 0]}>
-              <boxGeometry args={[1.7, 0.004, 0.7]} />
-              <meshStandardMaterial color="#1a1418" metalness={0.5} roughness={0.7} />
-            </mesh>
+            <>
+              <mesh position={[-0.1, 0.032, 0]}>
+                <boxGeometry args={[1.5, 0.004, 0.7]} />
+                <meshStandardMaterial color="#1a1418" metalness={0.5} roughness={0.7} />
+              </mesh>
+              <TopIo />
+            </>
+          )}
+          {panel.key === 'left' && <RearPanel />}
+          {panel.key === 'back' && (
+            <>
+              <SidePanel inner />
+              <SidePanel inner={false} />
+            </>
           )}
         </group>
       ))}
