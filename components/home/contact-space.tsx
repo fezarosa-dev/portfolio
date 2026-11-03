@@ -42,11 +42,15 @@ export function ContactSpace({ children }: { children: React.ReactNode }) {
           // --rocket-x vem da cena 3D (onde a ponta da chama do foguete cai na tela); sem ela, o lugar de costume
           style={{ opacity: trail, left: 'var(--rocket-x, 61%)' }}
         />
-        {/* horizonte do planeta: arco aceso no alto, subindo com a rolagem */}
+        {/* a Terra vista do espaço, só em contornos no laranja do site, com o Brasil no meio (SVG gerado de dados
+            abertos do Natural Earth, sem imagem). Sobe devagar com a rolagem */}
         <motion.div
-          className="absolute left-1/2 top-40 h-[160vw] w-[160vw] -translate-x-1/2 rounded-full border-t border-[#f2661d]/70 shadow-[0_-30px_120px_-20px_rgba(242,102,29,0.45)]"
-          style={{ y: reduce ? 0 : horizon, background: 'radial-gradient(closest-side, rgba(43,32,36,0) 92%, rgba(242,102,29,0.08) 100%)' }}
-        />
+          className="absolute left-1/2 top-40 w-[120vw] -translate-x-1/2 rounded-full shadow-[0_-30px_120px_-20px_rgba(242,102,29,0.45)]"
+          style={{ y: reduce ? 0 : horizon }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- SVG estático decorativo, o otimizador de imagem não ajuda */}
+          <img src="/img/globo-brasil.svg" alt="" width={2000} height={2000} loading="lazy" decoding="async" className="h-auto w-full" />
+        </motion.div>
       </div>
       <div className="relative">{children}</div>
     </div>
