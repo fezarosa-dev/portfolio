@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { DEFAULT_PROJECT_TECH_ROWS } from '@/lib/site-keys'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -429,6 +430,25 @@ export function SiteContentForm({
                 name="drive_folder_url"
                 defaultValue={content.drive_folder_url}
               />
+            </div>
+          </Section>
+
+          <Section title="cards de projeto">
+            <div>
+              <Label htmlFor="projetos_linhas_tecnologias">Linhas de tecnologias no card</Label>
+              <Input
+                id="projetos_linhas_tecnologias"
+                name="projetos_linhas_tecnologias"
+                type="number"
+                min={1}
+                step={1}
+                placeholder={String(DEFAULT_PROJECT_TECH_ROWS)}
+                defaultValue={content.projetos_linhas_tecnologias ?? ''}
+              />
+              <p className="mt-1 font-mono text-xs text-steel">
+                quantas linhas de tecnologias aparecem no card (Projetos e home) antes de o resto virar um chip
+                &quot;+N&quot; — padrão: {DEFAULT_PROJECT_TECH_ROWS}
+              </p>
             </div>
           </Section>
 

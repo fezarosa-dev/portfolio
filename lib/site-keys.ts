@@ -22,6 +22,7 @@ export const SITE_KEYS = [
   'mascote_ativo',
   'rickroll_video_filename',
   'rickroll_clicks',
+  'projetos_linhas_tecnologias',
 ] as const
 
 export const SITE_BILINGUAL_KEYS = [
@@ -38,3 +39,16 @@ export const SITE_BILINGUAL_KEYS = [
   ...SEO_PAGES.flatMap((page) => [`seo_${page}_title`, `seo_${page}_description`]),
   'seo_home_keywords',
 ]
+
+/** Número positivo de uma chave de configuração; vazio, inválido ou <= 0 cai no padrão. */
+export function numberFromContent(content: Record<string, string>, key: string, fallback: number): number {
+  const parsed = Number(content[key])
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+export const DEFAULT_PROJECT_TECH_ROWS = 3
+
+/** Quantas linhas de tecnologias o card de projeto mostra antes do chip "+N" (inteiro, mínimo 1). */
+export function projectTechRows(content: Record<string, string>): number {
+  return Math.max(1, Math.floor(numberFromContent(content, 'projetos_linhas_tecnologias', DEFAULT_PROJECT_TECH_ROWS)))
+}

@@ -16,6 +16,7 @@ export function ProjectsTeaser({
   withLabel,
   atLabel,
   locale,
+  maxTechRows,
 }: {
   projects: Project[]
   eyebrow: string
@@ -24,6 +25,7 @@ export function ProjectsTeaser({
   withLabel: string
   atLabel: string
   locale: Locale
+  maxTechRows?: number
 }) {
   const { enabled: reduceMotion } = useReduceMotion()
 
@@ -41,7 +43,7 @@ export function ProjectsTeaser({
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: reduceMotion ? 0 : 0.6, delay: reduceMotion ? 0 : i * 0.1, ease: [0.22, 1, 0.36, 1] }}
             >
-              <ProjectCard project={project} withLabel={withLabel} atLabel={atLabel} locale={locale} />
+              <ProjectCard project={project} withLabel={withLabel} atLabel={atLabel} locale={locale} maxTechRows={maxTechRows} />
             </motion.div>
           ))}
         </div>

@@ -1,7 +1,8 @@
 import { Suspense } from 'react'
 import { SplitTitle } from '@/components/split-title'
 import type { Metadata } from 'next'
-import { getVisibleProjects } from '@/lib/supabase/queries-cached'
+import { getSiteContent, getVisibleProjects } from '@/lib/supabase/queries-cached'
+import { projectTechRows } from '@/lib/site-keys'
 import { getDictionary, getLocale } from '@/lib/i18n'
 import { ProjectsExplorer } from '@/components/projects-explorer'
 import { pageMetadata } from '@/lib/seo'
@@ -16,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProjetosPage() {
-  const [projects, { dict, locale }] = await Promise.all([getVisibleProjects(), getDictionary()])
+  const [projects, content, { dict, locale }] = await Promise.all([getVisibleProjects(), getSiteContent(), getDictionary()])
   return (
     <main className="mx-auto max-w-4xl px-6 py-20">
       <FadeIn>
@@ -25,7 +26,7 @@ export default async function ProjetosPage() {
       </FadeIn>
       <div className="mt-10">
         <Suspense>
-          <ProjectsExplorer projects={projects} dict={dict.projetos} locale={locale} />
+          <ProjectsExplorer projects={projects} dict={dict.projetos} locale={locale} maxTechRows={projectTechRows(content)} />
         </Suspense>
       </div>
     </main>

@@ -9,10 +9,10 @@ import { AuthorNames } from '@/components/author-names'
 import type { Project } from '@/lib/supabase/queries'
 import type { Locale } from '@/lib/i18n'
 
-// As tecnologias ocupam no máximo MAX_TECH_ROWS linhas: o que passar vira um chip "+N" no fim da última linha.
-// É por linha e não por quantidade porque nome comprido ocupa mais espaço. O projeto continua vinculado a todas
-// (filtro e busca seguem achando ele); o chip só resume a exibição e abre o resto ao clicar
-const MAX_TECH_ROWS = 3
+// As tecnologias ocupam no máximo maxTechRows linhas (configurável: chave projetos_linhas_tecnologias, pela
+// Personalização ou pelo MCP): o que passar vira um chip "+N" no fim da última linha. É por linha e não por
+// quantidade porque nome comprido ocupa mais espaço. O projeto continua vinculado a todas (filtro e busca seguem
+// achando ele); o chip só resume a exibição e abre o resto ao clicar
 
 const PILL_CLASS_NAME =
   'tap-target flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel backface-hidden transition-[transform,border-color,color] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal hover:will-change-transform active:translate-y-0 motion-reduce:transition-none'
@@ -31,12 +31,14 @@ export function ProjectCard({
   atLabel = 'em',
   onTechClick,
   locale = 'pt',
+  maxTechRows = 3,
 }: {
   project: Project
   withLabel?: string
   atLabel?: string
   onTechClick?: (languageId: string) => void
   locale?: Locale
+  maxTechRows?: number
 }) {
   const isExternal = project.click_mode === 'link'
   const href = isExternal ? project.click_url ?? '#' : `/${locale}/projetos/${project.slug}`
@@ -45,10 +47,10 @@ export function ProjectCard({
   const techListRef = useRef<HTMLDivElement>(null)
   const [showAllTechs, setShowAllTechs] = useState(false)
   const [techListWidth, setTechListWidth] = useState(0)
-  // a medição vale só para a largura em que foi feita; largura nova = mede de novo a partir de todas.
+  // a medição vale só para a largura e o limite em que foi feita; mudou = mede de novo a partir de todas.
   // count null = mostrando todas (estado de medição); número = quantas cabem antes do chip "+N"
-  const [techFit, setTechFit] = useState<{ width: number; count: number | null }>({ width: 0, count: null })
-  const visibleTechCount = techFit.width === techListWidth ? techFit.count : null
+  const [techFit, setTechFit] = useState<{ width: number; rows: number; count: number | null }>({ width: 0, rows: 0, count: null })
+  const visibleTechCount = techFit.width === techListWidth && techFit.rows === maxTechRows ? techFit.count : null
 
   useEffect(() => {
     const el = techListRef.current
@@ -65,14 +67,14 @@ export function ProjectCard({
     if (!el || showAllTechs) return
     const items = Array.from(el.children) as HTMLElement[]
     const rowTops = [...new Set(items.map((item) => item.offsetTop))].sort((a, b) => a - b)
-    if (rowTops.length <= MAX_TECH_ROWS) return
+    if (rowTops.length <= maxTechRows) return
     if (visibleTechCount === null) {
-      const lastRowTop = rowTops[MAX_TECH_ROWS - 1]
-      setTechFit({ width: techListWidth, count: items.filter((item) => item.offsetTop <= lastRowTop).length - 1 })
+      const lastRowTop = rowTops[maxTechRows - 1]
+      setTechFit({ width: techListWidth, rows: maxTechRows, count: items.filter((item) => item.offsetTop <= lastRowTop).length - 1 })
     } else if (visibleTechCount > 0) {
-      setTechFit({ width: techListWidth, count: visibleTechCount - 1 })
+      setTechFit({ width: techListWidth, rows: maxTechRows, count: visibleTechCount - 1 })
     }
-  }, [showAllTechs, visibleTechCount, techListWidth])
+  }, [showAllTechs, visibleTechCount, techListWidth, maxTechRows])
 
   const collapsed = !showAllTechs && visibleTechCount !== null
   const visibleLanguages = collapsed ? project.languages.slice(0, visibleTechCount) : project.languages
@@ -179,6 +181,16 @@ export function ProjectCard({
               className={PILL_CLASS_NAME}
             >
               +{hiddenLanguages.length}
+            </button>
+          )}
+          {showAllTechs && (
+            <button
+              type="button"
+              onClick={() => setShowAllTechs(false)}
+              title={locale === 'en' ? 'Show less' : 'Mostrar menos'}
+              className={PILL_CLASS_NAME}
+            >
+              {locale === 'en' ? '− less' : '− menos'}
             </button>
           )}
         </div>
