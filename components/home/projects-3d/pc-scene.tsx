@@ -671,6 +671,21 @@ function SidePanel({ inner }: { inner: boolean }) {
           <meshStandardMaterial color="#120e10" roughness={0.8} />
         </mesh>
       ))}
+      {/* por fora, o endereço do site, no mesmo estilo do logo */}
+      {!inner && (
+        <group position={[0, -0.05, 0.008]}>
+          <Text font={MONO_BOLD} fontSize={0.14} position={[-0.045, 0, 0]} color="#f6eae3" anchorX="right" anchorY="middle">
+            zanoni
+          </Text>
+          <Text font={MONO_BOLD} fontSize={0.14} position={[-0.045, 0, 0]} color={SIGNAL} anchorX="left" anchorY="middle">
+            .dev.br
+          </Text>
+          <mesh position={[0, -0.13, 0]}>
+            <boxGeometry args={[1.1, 0.008, 0.002]} />
+            <Glow intensity={2.4} />
+          </mesh>
+        </group>
+      )}
       {inner && [-0.55, -0.75].map((y) => (
         <group key={y} position={[-0.3, y, 0.008]}>
           <RoundedBox args={[0.5, 0.14, 0.012]} radius={0.004}>
@@ -807,9 +822,16 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
     else it.still += dt
     it.last = p
     const spinning = it.still > 1.2 && d === 0
-    it.speed += ((spinning ? 0.4 : 0) - it.speed) * (1 - Math.exp(-dt * 1.5))
-    if (spinning || it.speed > 0.02) it.spin += it.speed * dt
-    else it.spin += (Math.round(it.spin / (Math.PI * 2)) * Math.PI * 2 - it.spin) * (1 - Math.exp(-dt * 3))
+    // bem devagar de frente; acelera aos poucos enquanto passa pelas costas (ninguém quer ver a traseira)
+    // e desacelera ao voltar para a frente: (1 - cos)/2 vai de 0 (frente) a 1 (costas) sem degrau
+    const back = Math.pow((1 - Math.cos(it.spin)) / 2, 2)
+    it.speed += ((spinning ? 0.1 * (1 + 5 * back) : 0) - it.speed) * (1 - Math.exp(-dt * 1.5))
+    if (spinning) it.spin += it.speed * dt
+    else {
+      // rolou: para de girar na hora e vira suavemente para a frente (a volta inteira mais próxima)
+      it.speed = 0
+      it.spin += (Math.round(it.spin / (Math.PI * 2)) * Math.PI * 2 - it.spin) * (1 - Math.exp(-dt * 2.5))
+    }
     if (root.current) {
       // gira para mostrar o lado de vidro e continua balançando devagar; no mergulho para de balançar
       root.current.rotation.y = -0.55 + e * 0.75 + it.spin + Math.sin(state.clock.elapsedTime * 0.25) * 0.06 * (1 - d)
