@@ -37,6 +37,8 @@ const MEANING: Record<string, { name: [string, string]; concept: [string, string
   cpu: { name: ['Processador', 'Processor'], concept: ['Código', 'Code'] },
   board: { name: ['Placa-mãe', 'Motherboard'], concept: ['Integração de sistemas', 'Systems integration'] },
   fan1: { name: ['Ventoinhas', 'Fans'], concept: ['Qualidade e testes', 'Quality & testing'] },
+  nvme: { name: ['SSD NVMe', 'NVMe SSD'], concept: ['Banco de dados', 'Databases'] },
+  hdd0: { name: ['HDs', 'Hard drives'], concept: ['Backups e recuperação', 'Backups & recovery'] },
 }
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
@@ -431,6 +433,105 @@ function Gpu({ brushed }: { brushed: THREE.Texture }) {
         <boxGeometry args={[0.6, 0.03, 0.012]} />
         <meshStandardMaterial color={GOLD} metalness={1} roughness={0.25} />
       </mesh>
+    </group>
+  )
+}
+
+// SSD M.2 deitado na placa-mãe: comprimento no x, espessura no z (de frente para o vidro), dissipador
+// escovado com a etiqueta e os contatos dourados na ponta que entra no slot
+function Nvme({ brushed }: { brushed: THREE.Texture }) {
+  return (
+    <group>
+      <mesh>
+        <boxGeometry args={[0.32, 0.085, 0.006]} />
+        <meshStandardMaterial color="#16241d" roughness={0.6} />
+      </mesh>
+      {Array.from({ length: 9 }, (_, i) => (
+        <mesh key={i} position={[-0.17, -0.034 + i * 0.0085, 0]}>
+          <boxGeometry args={[0.02, 0.005, 0.007]} />
+          <meshStandardMaterial color={GOLD} metalness={1} roughness={0.2} />
+        </mesh>
+      ))}
+      <RoundedBox args={[0.27, 0.08, 0.016]} radius={0.004} position={[0.015, 0, 0.011]}>
+        <meshStandardMaterial map={brushed} color="#6b6166" metalness={1} roughness={0.3} />
+      </RoundedBox>
+      {Array.from({ length: 6 }, (_, i) => (
+        <mesh key={i} position={[0.1 + i * 0.012, 0, 0.0195]}>
+          <boxGeometry args={[0.004, 0.07, 0.003]} />
+          <meshStandardMaterial color="#2f2530" metalness={0.8} roughness={0.4} />
+        </mesh>
+      ))}
+      <Text font={MONO_BOLD} fontSize={0.016} position={[-0.1, 0.012, 0.0195]} color="#2b2024" anchorX="left" anchorY="middle" letterSpacing={0.08}>
+        FZR NVMe · 2TB
+      </Text>
+      <Text font={MONO} fontSize={0.011} position={[-0.1, -0.014, 0.0195]} color="#3d3036" anchorX="left" anchorY="middle" letterSpacing={0.1}>
+        DATABASE · PCIe 5.0
+      </Text>
+      <mesh position={[0.015, -0.041, 0.011]}>
+        <boxGeometry args={[0.25, 0.003, 0.012]} />
+        <Glow intensity={2} />
+      </mesh>
+    </group>
+  )
+}
+
+// HD de 3,5" deitado no fundo do gabinete: tampa escovada com o eixo dos pratos e parafusos, etiqueta
+// creme com o uso (backup), placa controladora embaixo e os conectores SATA atrás
+function Hdd({ brushed, label }: { brushed: THREE.Texture; label: string }) {
+  const steel = { color: '#8d8489', metalness: 1, roughness: 0.3 } as const
+  return (
+    <group>
+      <RoundedBox args={[0.4, 0.07, 0.58]} radius={0.01}>
+        <meshStandardMaterial color="#2a2126" metalness={0.7} roughness={0.4} />
+      </RoundedBox>
+      <RoundedBox args={[0.38, 0.006, 0.56]} radius={0.003} position={[0, 0.036, 0]}>
+        <meshStandardMaterial map={brushed} color="#7a7075" metalness={1} roughness={0.28} />
+      </RoundedBox>
+      <mesh position={[0, 0.041, 0.12]}>
+        <cylinderGeometry args={[0.13, 0.13, 0.004, 48]} />
+        <meshStandardMaterial {...steel} />
+      </mesh>
+      <mesh position={[0, 0.045, 0.12]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.006, 24]} />
+        <meshStandardMaterial color="#5b4a52" metalness={1} roughness={0.25} />
+      </mesh>
+      {[-0.17, 0.17].flatMap((x) =>
+        [-0.26, 0.26].map((z) => (
+          <mesh key={`${x}${z}`} position={[x, 0.041, z]}>
+            <cylinderGeometry args={[0.009, 0.009, 0.004, 12]} />
+            <meshStandardMaterial {...steel} />
+          </mesh>
+        ))
+      )}
+      <group position={[0, 0.0405, -0.14]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh>
+          <planeGeometry args={[0.32, 0.2]} />
+          <meshStandardMaterial color="#f6eae3" roughness={0.7} />
+        </mesh>
+        <Text font={DISPLAY} fontSize={0.045} position={[-0.14, 0.05, 0.001]} color="#2b2024" anchorX="left" anchorY="middle" letterSpacing={-0.02}>
+          {label}
+        </Text>
+        <Text font={MONO_BOLD} fontSize={0.017} position={[-0.14, -0.005, 0.001]} color={SIGNAL} anchorX="left" anchorY="middle" letterSpacing={0.1}>
+          FZR · 8TB · 7200RPM
+        </Text>
+        <Text font={MONO} fontSize={0.012} position={[-0.14, -0.04, 0.001]} color="#5b4a52" anchorX="left" anchorY="middle" letterSpacing={0.08}>
+          SNAPSHOTS · RESTORE · 3-2-1
+        </Text>
+        <mesh position={[0, -0.075, 0.001]}>
+          <planeGeometry args={[0.28, 0.006]} />
+          <Glow intensity={1.6} />
+        </mesh>
+      </group>
+      <mesh position={[0, -0.037, 0.02]}>
+        <boxGeometry args={[0.3, 0.004, 0.4]} />
+        <meshStandardMaterial color="#16241d" roughness={0.6} />
+      </mesh>
+      {[-0.08, 0.06].map((x, i) => (
+        <mesh key={x} position={[x, -0.005, -0.292]}>
+          <boxGeometry args={[i ? 0.06 : 0.1, 0.02, 0.006]} />
+          <meshStandardMaterial color="#0f0b0d" roughness={0.7} />
+        </mesh>
+      ))}
     </group>
   )
 }
@@ -869,6 +970,17 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
       { key: 'gpu', assembled: [-0.05, -0.2, -0.12], offset: [0.15, -0.35, 1.45], spin: [-0.5, 0.15, 0], delay: 0.12, labelAt: [0, 0.3, 0.1], node: <Gpu brushed={brushed} /> },
       // a fonte sai para a frente e para a esquerda, sem descer (antes afundava na plataforma)
       { key: 'psu', assembled: [-0.47, -0.86, 0], offset: [-0.3, 0.02, 2.2], spin: [0, 0.35, 0], delay: 0.06, labelAt: [0, 0.34, 0.2], node: <Psu brushed={brushed} /> },
+      // SSD na placa-mãe, entre o processador e a placa de vídeo; HDs no fundo, na frente da fonte
+      { key: 'nvme', assembled: [-0.22, 0.12, -0.405], offset: [1.0, 0.3, 2.0], spin: [-0.15, 0.4, 0.1], delay: 0.18, labelAt: [0, 0.26, 0.05], node: <group scale={1.6}><Nvme brushed={brushed} /></group> },
+      ...[0, 1].map<Part>((i) => ({
+        key: `hdd${i}`,
+        assembled: [0.5, -0.92 + i * 0.09, 0.05],
+        offset: [1.0 - i * 0.15, 0.05 + i * 0.6, 1.9 + i * 0.4],
+        spin: [0, -0.4 - i * 0.2, 0],
+        delay: 0.1 + i * 0.04,
+        labelAt: [0, 0.22, 0],
+        node: <Hdd brushed={brushed} label={i ? 'RESTORE' : 'BACKUP'} />,
+      })),
       ...[0.55, 0, -0.55].map<Part>((y, i) => ({
         key: `fan${i}`,
         assembled: [0.92, y + 0.15, 0],
@@ -895,7 +1007,8 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
     if (Math.abs(p - it.last) > 1e-4) it.still = 0
     else it.still += dt
     it.last = p
-    const spinning = it.still > 1.2 && d === 0
+    // só gira com o PC fechado: aberto (desmontando, etiquetas ou mergulho) fica parado de frente
+    const spinning = it.still > 1.2 && raw === 0
     // bem devagar de frente; acelera aos poucos enquanto passa pelas costas (ninguém quer ver a traseira)
     // e desacelera ao voltar para a frente: (1 - cos)/2 vai de 0 (frente) a 1 (costas) sem degrau
     const back = Math.pow((1 - Math.cos(it.spin)) / 2, 2)
