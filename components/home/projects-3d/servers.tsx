@@ -493,6 +493,8 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
   }, [])
   const tip = useMemo(() => new THREE.Vector3(), [])
   const lastX = useRef(-1)
+  const lastTip = useRef(-1)
+  const prev = useRef({ x: -1, above: -1 })
   useFrame((state) => {
     const r = rocketRef.current ?? 0
     const a = easeInOut(segment(r, ASSEMBLE[0] + 0.1, ASSEMBLE[1]))
@@ -513,13 +515,22 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
       exhaust.current.scale.set(1 + ig, 1 + segment(r, LIFTOFF[0], LIFTOFF[1]), 1 + ig)
     }
     if (exhaustMat.current) exhaustMat.current.opacity = 0.75 * ig
-    // onde a ponta da chama cai na tela (em % da largura): o rastro da seção de contato continua dali
-    if (flame.current && ig > 0.5) {
+    // onde a ponta da chama cai na tela (x em % da largura; altura em px acima do pé da cena, onde começa o
+    // contato): o rastro do contato continua dali. Só publica com o foguete no fim e a câmera parada (dois quadros
+    // quase iguais); publicar durante o deslize da câmera fazia o rastro chacoalhar
+    if (flame.current && r > 0.995) {
       flame.current.localToWorld(tip.set(0, -1.8, 0)).project(state.camera)
       const x = ((tip.x + 1) / 2) * 100
-      if (Math.abs(x - lastX.current) > 0.05) {
+      // se a ponta passa do pé da tela da cena, a chama é cortada ali: o rastro começa nessa borda
+      const above = Math.max(0, ((tip.y + 1) / 2) * state.size.height)
+      const settled = Math.abs(x - prev.current.x) < 0.01 && Math.abs(above - prev.current.above) < 0.2
+      prev.current = { x, above }
+      if (settled && (Math.abs(x - lastX.current) > 0.1 || Math.abs(above - lastTip.current) > 1)) {
         lastX.current = x
+        lastTip.current = above
         document.documentElement.style.setProperty('--rocket-x', `${x.toFixed(2)}%`)
+        document.documentElement.style.setProperty('--rocket-tip', `${above.toFixed(1)}`)
+        window.dispatchEvent(new Event('rocket-tip'))
       }
     }
   })

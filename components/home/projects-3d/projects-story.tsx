@@ -197,8 +197,8 @@ function Story({
             </motion.div>
           )}
         </AnimatePresence>
-        {/* pé da cena funde no fundo da seção seguinte (a busca usa a mesma noite): sem a borda da vinheta */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-b from-transparent to-[#2b2024]" />
+        {/* pé da cena funde no fundo da seção seguinte (a mesma noite): faixa fina, para não apagar a ponta da chama */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-[#2b2024]" />
         {/* degradê para o texto ficar legível sobre a cena */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-transparent sm:bg-gradient-to-r sm:from-background/90 sm:via-background/20" />
         <div className="pointer-events-none relative mx-auto flex h-full max-w-6xl px-6 pt-24 sm:items-center sm:pt-0">

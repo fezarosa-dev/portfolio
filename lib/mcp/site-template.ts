@@ -44,6 +44,7 @@ Templates específicos: get_template_projeto (projetos) e get_template_curriculo
 ## Contato
 - upsert_link_contato { label, label_en?, url }; ordenar_links_contato { ordered_ids }; delete_link_contato.
 - Email, telefone, GitHub e LinkedIn: set_conteudo_site com as chaves contato_email, contato_telefone, link_github, link_linkedin.
+- De onde o foguete sai no globo do contato: set_local_lancamento { cep } (confere o CEP e salva as coordenadas; não use set_conteudo_site para launch_*).
 
 ## Mensagens
 - list_mensagens, marcar_mensagem_lida { id, read }, delete_mensagem.
