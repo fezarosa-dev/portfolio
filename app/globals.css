@@ -651,6 +651,26 @@ html.custom-scrollbar::-webkit-scrollbar {
   }
 }
 
+/* Alvos pequenos (chips, ícones redondos, links de rodapé): no toque a área clicável cresce
+   8px pra cada lado sem mudar o visual */
+@media (pointer: coarse) {
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+}
+
+/* Logos de tecnologia pretos/escuros (ROS, Flask, MySQL...) somem no fundo escuro: um contorno
+   claro de 1px deixa o desenho legível sem mexer nos logos coloridos */
+.dark img[src*='/devicons/'],
+.dark img[src*='cdn.simpleicons.org'] {
+  filter: drop-shadow(0 0 0.5px #fff) drop-shadow(0 0 0.5px #fff) drop-shadow(0 0 0.5px #fff);
+}
+
 /* Cards inclinando em 3D com brilho seguindo o mouse (components/hover-effects.tsx) */
 html:not(.reduce-motion) [data-tilt] {
   backface-visibility: hidden;

@@ -18,35 +18,35 @@ export async function Footer() {
   return (
     <footer className="mt-auto border-t border-hairline px-6 py-8">
       <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 font-mono text-xs text-steel sm:flex-row">
-        <p className="flex flex-wrap items-center justify-center gap-3">
+        <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
           <span>© {new Date().getFullYear()} Felipe Zanoni da Rosa</span>
           <a
             href={`/api?locale=${locale}`}
             target="_blank"
             rel="noopener noreferrer"
             title="JSON com projetos, currículo e contato — pra colar num modelo de IA"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
+            className="tap-target rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.exportAi}
           </a>
           <a
             href={`/${locale}/status`}
             title="Métricas técnicas reais deste site, ao vivo"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
+            className="tap-target rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.status}
           </a>
           <a
             href={`/${locale}/busca`}
             title="Busca em linguagem natural pelo conteúdo do site"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
+            className="tap-target rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.busca}
           </a>
           <a
             href={`/${locale}/como-funciona`}
             title="Mapa da arquitetura deste site"
-            className="rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
+            className="tap-target rounded-full border border-hairline px-2 py-0.5 transition-[border-color,color,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal active:translate-y-0 motion-reduce:transition-none"
           >
             {dict.footer.comoFunciona}
           </a>
@@ -58,7 +58,7 @@ export async function Footer() {
               href={link.href}
               target={link.href.startsWith('http') ? '_blank' : undefined}
               rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-              className="transition-colors hover:text-signal"
+              className="tap-target transition-colors hover:text-signal"
             >
               {link.label}
             </a>
@@ -66,9 +66,9 @@ export async function Footer() {
         </div>
       </div>
       <div className="mx-auto mt-4 flex max-w-4xl flex-col items-center justify-between gap-2 font-mono text-[11px] text-steel/70 sm:flex-row">
-        <div className="flex gap-4">
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-3">
           {legalLinks.map((link) => (
-            <a key={link.href} href={link.href} className="link-underline transition-colors hover:text-signal">
+            <a key={link.href} href={link.href} className="tap-target link-underline whitespace-nowrap transition-colors hover:text-signal">
               {link.label}
             </a>
           ))}

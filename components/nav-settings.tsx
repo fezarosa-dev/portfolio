@@ -55,7 +55,7 @@ export function NavSettings({
           hovered.current = false
           setHover(false)
         }}
-        className="group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
+        className="tap-target group flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-colors hover:border-signal hover:text-signal aria-expanded:border-signal aria-expanded:text-signal"
       >
         <GearIcon angle={angle} meshed={hover || open} />
       </Popover.Trigger>

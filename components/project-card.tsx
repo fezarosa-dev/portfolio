@@ -61,7 +61,7 @@ export function ProjectCard({
               href={project.company.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-signal hover:underline"
+              className="tap-target hover:text-signal hover:underline"
             >
               {resolveText(project.company.name, project.company.name_en, locale)}
             </a>
@@ -85,7 +85,7 @@ export function ProjectCard({
         <div className="mt-4 flex flex-wrap gap-2 border-t border-hairline pt-4">
           {project.languages.map((lang) => {
             const pillClassName =
-              'flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel backface-hidden transition-[transform,border-color,color] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal hover:will-change-transform active:translate-y-0 motion-reduce:transition-none'
+              'tap-target flex items-center gap-1 rounded-full border border-hairline px-2 py-1 font-mono text-[11px] text-steel backface-hidden transition-[transform,border-color,color] duration-150 ease-out hover:-translate-y-0.5 hover:border-signal hover:text-signal hover:will-change-transform active:translate-y-0 motion-reduce:transition-none'
             const pillContent = (
               <>
                 {lang.devicon_slug && (

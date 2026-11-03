@@ -29,7 +29,7 @@ export function SearchTrigger({ label }: { label: string }) {
       whileHover={animated ? { scale: 1.25 } : undefined}
       whileTap={animated ? { scale: 0.7, rotate: -20 } : undefined}
       transition={{ type: 'spring', stiffness: 500, damping: 12 }}
-      className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-[border-color,color,background-color,box-shadow] duration-200 hover:border-signal hover:bg-signal/10 hover:text-signal hover:shadow-[0_0_14px_var(--signal)] focus-visible:border-signal focus-visible:text-signal"
+      className="tap-target relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-hairline text-steel transition-[border-color,color,background-color,box-shadow] duration-200 hover:border-signal hover:bg-signal/10 hover:text-signal hover:shadow-[0_0_14px_var(--signal)] focus-visible:border-signal focus-visible:text-signal"
     >
       {animated && hovered && (
         <>

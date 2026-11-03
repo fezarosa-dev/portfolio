@@ -50,7 +50,7 @@ export function MobileNav({
           </li>
         )
       })}
-      <li className="flex justify-end gap-2 py-3">
+      <li className="flex justify-end gap-5 py-3">
         <span onClick={() => setOpen(false)}>
           <SearchTrigger label={searchLabel} />
         </span>
@@ -71,7 +71,7 @@ export function MobileNav({
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? closeLabel : openLabel}
         aria-expanded={open}
-        className={`flex h-8 w-8 flex-col items-center justify-center gap-2 ${reduceMotion ? '' : 'transition-transform duration-300'} ${open ? 'rotate-90' : ''}`}
+        className={`tap-target flex h-8 w-8 flex-col items-center justify-center gap-2 ${reduceMotion ? '' : 'transition-transform duration-300'} ${open ? 'rotate-90' : ''}`}
       >
         <span
           className={`h-0.5 w-5 origin-left bg-foreground ${reduceMotion ? '' : 'transition-transform duration-300'} ${open ? 'z-10 translate-y-5 rotate-[-60deg]' : ''}`}
