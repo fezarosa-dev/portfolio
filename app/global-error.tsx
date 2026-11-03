@@ -1,6 +1,7 @@
 'use client'
 
 import './globals.css'
+import { HOUSTON } from '@/lib/houston'
 
 // Último recurso: erro no próprio layout raiz (substitui <html>). Sem fontes nem componentes do site,
 // só o CSS global e o tema escuro padrão.
@@ -9,6 +10,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
     <html lang="pt-BR" className="dark h-full antialiased">
       <body className="site-warm flex min-h-full flex-col items-center justify-center gap-4 bg-background px-6 text-center text-foreground">
         <p className="text-8xl font-bold text-signal">500</p>
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-signal">“{HOUSTON}”</p>
         <h1 className="text-2xl font-medium">Algo quebrou por aqui</h1>
         <p className="max-w-md text-steel">O site teve um problema sério. Tenta de novo em instantes.</p>
         {error.digest && <p className="font-mono text-xs text-steel">ref: {error.digest}</p>}

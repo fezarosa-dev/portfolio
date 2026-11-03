@@ -3,9 +3,9 @@
 import { useMemo } from 'react'
 import { useChanges } from '@/components/admin/changes-provider'
 import { ProjectForm } from '@/components/admin/project-form'
-import { overlayAuthors, overlayCompanies, overlayLanguages, overlayProjects } from '@/lib/changes/overlay'
+import { overlayAuthors, overlayClients, overlayCompanies, overlayLanguages, overlayProjects } from '@/lib/changes/overlay'
 import type { ProjectData } from '@/lib/changes/types'
-import type { Author, Company, Language, Project } from '@/lib/supabase/queries'
+import type { Author, Company, CompanyClient, Language, Project } from '@/lib/supabase/queries'
 
 /** Cria (id = null) ou edita um projeto pela fila; a edição enxerga o que já está na fila. */
 export function ProjectEditor({
@@ -14,12 +14,14 @@ export function ProjectEditor({
   availableLanguages,
   availableAuthors,
   availableCompanies,
+  availableClients,
 }: {
   id: string | null
   projects: Project[]
   availableLanguages: Language[]
   availableAuthors: Author[]
   availableCompanies: Company[]
+  availableClients: CompanyClient[]
 }) {
   const { changes, enqueue, loaded } = useChanges()
   const ctx = useMemo(
@@ -30,6 +32,7 @@ export function ProjectEditor({
     }),
     [availableLanguages, availableAuthors, availableCompanies, changes]
   )
+  const clients = useMemo(() => overlayClients(availableClients, changes), [availableClients, changes])
   const project = useMemo(() => (id ? overlayProjects(projects, changes, ctx).find((p) => p.id === id) ?? null : null), [id, projects, changes, ctx])
   // id gerado uma vez por formulário novo: a criação já nasce com o id que as edições seguintes vão usar
   const newId = useMemo(() => crypto.randomUUID(), [])
@@ -53,7 +56,8 @@ export function ProjectEditor({
       project={project}
       availableLanguages={availableLanguages}
       availableAuthors={availableAuthors}
-      availableCompanies={availableCompanies}
+      availableCompanies={ctx.companies}
+      availableClients={clients}
       onSubmit={handleSubmit}
     />
   )

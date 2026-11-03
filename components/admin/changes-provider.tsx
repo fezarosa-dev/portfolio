@@ -13,6 +13,7 @@ import {
   type SendResult,
 } from '@/lib/changes/queue'
 import type { Change, ChangeOp } from '@/lib/changes/types'
+import { toastError } from '@/lib/toast-error'
 
 const STORAGE_KEY = 'admin-changes-v1'
 
@@ -124,7 +125,7 @@ export function ChangesProvider({ children }: { children: ReactNode }) {
           toast.success(okCount === 1 ? '1 mudança enviada' : `${okCount} mudanças enviadas`)
         }
         if (failed > 0) {
-          toast.error(failed === 1 ? '1 mudança falhou — veja na lista' : `${failed} mudanças falharam — veja na lista`)
+          toastError(failed === 1 ? '1 mudança falhou — veja na lista' : `${failed} mudanças falharam — veja na lista`)
         }
       } finally {
         sendingRef.current = false

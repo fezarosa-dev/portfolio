@@ -1,14 +1,15 @@
 import { getAllProjects } from '@/lib/supabase/admin-queries'
-import { getLanguages, getAuthors, getCompanies } from '@/lib/supabase/queries'
+import { getLanguages, getAuthors, getCompanies, getCompanyClients } from '@/lib/supabase/queries'
 import { ProjectEditor } from '@/components/admin/project-editor'
 
 export default async function EditarProjetoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [projects, availableLanguages, availableAuthors, availableCompanies] = await Promise.all([
+  const [projects, availableLanguages, availableAuthors, availableCompanies, availableClients] = await Promise.all([
     getAllProjects(),
     getLanguages(),
     getAuthors(),
     getCompanies(),
+    getCompanyClients(),
   ])
 
   return (
@@ -20,6 +21,7 @@ export default async function EditarProjetoPage({ params }: { params: Promise<{ 
         availableLanguages={availableLanguages}
         availableAuthors={availableAuthors}
         availableCompanies={availableCompanies}
+        availableClients={availableClients}
       />
     </div>
   )

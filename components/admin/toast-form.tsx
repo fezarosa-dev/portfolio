@@ -2,6 +2,7 @@
 
 import { toast } from 'sonner'
 import type { ReactNode } from 'react'
+import { toastError } from '@/lib/toast-error'
 
 export function ToastForm({
   action,
@@ -21,7 +22,7 @@ export function ToastForm({
       await action(formData)
       toast.success(successMessage)
     } catch (err) {
-      toast.error(errorMessage)
+      toastError(errorMessage)
       throw err
     }
   }

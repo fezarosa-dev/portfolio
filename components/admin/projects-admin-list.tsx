@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { homeWarning } from '@/lib/home-servers'
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { useChanges } from '@/components/admin/changes-provider'
@@ -29,6 +30,8 @@ export function ProjectsAdminList({
     [projects, changes, languages, authors, companies]
   )
   const touched = useMemo(() => touchedIds(changes, 'project'), [changes])
+  // a home mostra HOME_SERVERS projetos, um por servidor: avisa (já contando a fila), mas não impede salvar
+  const homeAlert = homeWarning(list)
 
   return (
     <div>
@@ -38,6 +41,12 @@ export function ProjectsAdminList({
         </h1>
         <Button render={<Link href="/admin/projetos/novo" />}>Novo projeto</Button>
       </div>
+
+      {homeAlert && (
+        <p role="status" className="mb-4 rounded-md border border-orange-500/60 bg-orange-500/10 px-3 py-2 text-sm">
+          ⚠ {homeAlert} Marque &quot;Aparecer na tela inicial&quot; nos projetos que devem ir para os servidores da home.
+        </p>
+      )}
 
       {list.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhum projeto ainda.</p>

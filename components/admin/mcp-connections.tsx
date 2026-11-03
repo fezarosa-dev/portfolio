@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { MCP_RESOURCES, MCP_RESOURCE_LABELS, type McpPermissions, type McpResource } from '@/lib/mcp/resources'
 import type { McpConnection } from '@/lib/mcp/connections'
+import { toastError } from '@/lib/toast-error'
 
 type Actions = {
   create: (nickname: string, permissions: McpPermissions) => Promise<{ connection: McpConnection; token: string }>
@@ -84,7 +85,7 @@ function CreateConnectionDialog({ create }: { create: Actions['create'] }) {
         setNickname('')
         setPermissions({})
       } catch {
-        toast.error('Não deu pra criar a conexão. Tenta de novo.')
+        toastError('Não deu pra criar a conexão. Tenta de novo.')
       }
     })
   }
@@ -169,7 +170,7 @@ function ConnectionCard({ connection, actions }: { connection: McpConnection; ac
         await actions.setPermissions(connection.id, next)
       } catch {
         setPermissions(permissions)
-        toast.error('Não deu pra salvar a permissão. Tenta de novo.')
+        toastError('Não deu pra salvar a permissão. Tenta de novo.')
       }
     })
   }
@@ -182,7 +183,7 @@ function ConnectionCard({ connection, actions }: { connection: McpConnection; ac
         toast.success('Apelido atualizado')
       } catch {
         setNickname(connection.nickname)
-        toast.error('Não deu pra renomear. Tenta de novo.')
+        toastError('Não deu pra renomear. Tenta de novo.')
       }
     })
   }
@@ -194,7 +195,7 @@ function ConnectionCard({ connection, actions }: { connection: McpConnection; ac
         await actions.setStatus(connection.id, next)
         toast.success(next === 'active' ? 'Conexão reativada' : 'Conexão revogada')
       } catch {
-        toast.error('Não deu pra alterar o status. Tenta de novo.')
+        toastError('Não deu pra alterar o status. Tenta de novo.')
       }
     })
   }
@@ -206,7 +207,7 @@ function ConnectionCard({ connection, actions }: { connection: McpConnection; ac
         await actions.remove(connection.id)
         toast.success('Conexão removida')
       } catch {
-        toast.error('Não deu pra remover. Tenta de novo.')
+        toastError('Não deu pra remover. Tenta de novo.')
       }
     })
   }

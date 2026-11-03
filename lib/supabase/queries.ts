@@ -33,6 +33,13 @@ export type Company = {
   url: string | null
 }
 
+/** Grupo de cliente dentro de uma empresa (ex.: um cliente de Freelancer). Só interno: painel e MCP. */
+export type CompanyClient = {
+  id: string
+  company_id: string
+  name: string
+}
+
 export type ResumeLink = {
   id: string
   label: string | null
@@ -62,6 +69,8 @@ export type Article = {
   created_at: string
 }
 
+export type ProjectStatus = 'producao' | 'prototipo' | 'encerrado'
+
 export type Project = {
   id: string
   slug: string
@@ -88,6 +97,12 @@ export type Project = {
   resume_with_en: string | null
   resume_solves: string | null
   resume_solves_en: string | null
+  // grupo de cliente dentro da empresa (interno: o nome não aparece no site; serve para contar clientes)
+  client_id: string | null
+  // ficha do servidor na home: estado do projeto e um número de destaque (opcionais)
+  status: ProjectStatus | null
+  highlight: string | null
+  highlight_en: string | null
   languages: Language[]
   authors: Author[]
   company: Company | null
@@ -145,6 +160,14 @@ export async function getAuthors(client?: SupabaseClient): Promise<Author[]> {
 
   if (error) throw error
   return data as Author[]
+}
+
+/** Grupos de clientes (só para quem está logado: sem leitura pública). */
+export async function getCompanyClients(client?: SupabaseClient): Promise<CompanyClient[]> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase.from('company_clients').select('id, company_id, name').order('created_at', { ascending: true })
+  if (error) throw error
+  return data as CompanyClient[]
 }
 
 export async function getCompanies(client?: SupabaseClient): Promise<Company[]> {
