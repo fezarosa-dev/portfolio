@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, Html, Lightformer, RoundedBox, Text } from '@react-three/drei'
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Environment, Html, Instance, Instances, Lightformer, PerformanceMonitor, Text } from '@react-three/drei'
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import type { MotionValue } from 'framer-motion'
 import { liftHeight, Servers, type ServerProject } from './servers'
-import { CARAMEL, clamp01, DISPLAY, easeInOut, Glow, GOLD, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL, type Vec3 } from './scene-kit'
+import { CARAMEL, clamp01, DISPLAY, RBox, easeInOut, Glow, GOLD, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL, type Vec3 } from './scene-kit'
 
 // Cena 3D da home: um PC que se desmonta conforme a rolagem (vista explodida) e a câmera mergulha no processador.
 // Cada peça representa uma parte do jeito de trabalhar (a fonte é a arquitetura da solução, a base de tudo).
@@ -29,8 +29,6 @@ export const STORY = {
   rocketEnd: 0.97,
 }
 
-const FLOOR_CLIP = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.125)]
-const NO_CLIP: THREE.Plane[] = []
 
 export type SceneStats = { projects: number; technologies: number; companies: number }
 
@@ -177,9 +175,9 @@ function Board({ pcb }: { pcb: THREE.Texture }) {
   }, [])
   return (
     <group>
-      <RoundedBox args={[1.55, 1.75, 0.04]} radius={0.01}>
+      <RBox args={[1.55, 1.75, 0.04]} radius={0.01}>
         <meshStandardMaterial map={pcb} roughness={0.65} metalness={0.25} />
-      </RoundedBox>
+      </RBox>
       {/* soquete do processador */}
       <mesh position={[0.12, 0.37, 0.03]}>
         <boxGeometry args={[0.52, 0.52, 0.02]} />
@@ -215,9 +213,9 @@ function Board({ pcb }: { pcb: THREE.Texture }) {
         { at: [0.12, 0.72, 0.06] as Vec3, size: [0.46, 0.12, 0.08] as Vec3, finsAlong: 'x' },
       ].map((h, k) => (
         <group key={k} position={h.at}>
-          <RoundedBox args={h.size} radius={0.01}>
+          <RBox args={h.size} radius={0.01}>
             <meshStandardMaterial color="#2a2128" metalness={0.9} roughness={0.3} />
-          </RoundedBox>
+          </RBox>
           {Array.from({ length: 7 }, (_, i) => (
             <mesh
               key={i}
@@ -235,9 +233,9 @@ function Board({ pcb }: { pcb: THREE.Texture }) {
       ))}
       {/* chipset */}
       <group position={[0.38, -0.75, 0.04]}>
-        <RoundedBox args={[0.3, 0.22, 0.04]} radius={0.01}>
+        <RBox args={[0.3, 0.22, 0.04]} radius={0.01}>
           <meshStandardMaterial color="#2a2128" metalness={0.9} roughness={0.3} />
-        </RoundedBox>
+        </RBox>
         <Text font={MONO_BOLD} fontSize={0.035} position={[0, 0, 0.022]} color={SIGNAL} anchorX="center" anchorY="middle">
           FZR
         </Text>
@@ -281,9 +279,9 @@ function Cpu({ brushed, stats, en }: { brushed: THREE.Texture; stats: SceneStats
   }, [])
   return (
     <group>
-      <RoundedBox args={[0.46, 0.46, 0.03]} radius={0.006}>
+      <RBox args={[0.46, 0.46, 0.03]} radius={0.006}>
         <meshStandardMaterial color="#1e5641" roughness={0.45} metalness={0.2} />
-      </RoundedBox>
+      </RBox>
       {pads.map(([x, y], i) => (
         <mesh key={i} position={[x, y, 0.016]}>
           <boxGeometry args={[0.008, 0.008, 0.002]} />
@@ -298,9 +296,9 @@ function Cpu({ brushed, stats, en }: { brushed: THREE.Texture; stats: SceneStats
           </mesh>
         ))
       )}
-      <RoundedBox args={[0.37, 0.37, 0.035]} radius={0.012} smoothness={6} position={[0, 0, 0.033]}>
+      <RBox args={[0.37, 0.37, 0.035]} radius={0.012} smoothness={6} position={[0, 0, 0.033]}>
         <meshPhysicalMaterial map={brushed} metalness={0.9} roughness={0.32} clearcoat={0.25} clearcoatRoughness={0.4} />
-      </RoundedBox>
+      </RBox>
       <group position={[0, 0, 0.0515]}>
         <Text font={MONO_BOLD} fontSize={0.016} position={[-0.034, 0.142, 0]} color="#2b2024" anchorX="center" anchorY="middle" sdfGlyphSize={128}>
           zanoni
@@ -339,19 +337,21 @@ function Ram({ accent, brushed }: { accent: string; brushed: THREE.Texture }) {
         <meshStandardMaterial color="#16241d" roughness={0.6} />
       </mesh>
       {/* contatos dourados na borda de baixo, com o chanfro de encaixe fora do centro */}
-      {Array.from({ length: 34 }, (_, i) => -0.28 + i * 0.017)
-        .filter((y) => Math.abs(y + 0.06) > 0.012)
-        .map((y) => (
-          <mesh key={y} position={[0, y, -0.048]}>
-            <boxGeometry args={[0.008, 0.011, 0.012]} />
-            <meshStandardMaterial color={GOLD} metalness={1} roughness={0.2} />
-          </mesh>
-        ))}
+      {/* peças repetidas viram uma instância só: uma chamada de desenho para todos os contatos */}
+      <Instances limit={34}>
+        <boxGeometry args={[0.008, 0.011, 0.012]} />
+        <meshStandardMaterial color={GOLD} metalness={1} roughness={0.2} />
+        {Array.from({ length: 34 }, (_, i) => -0.28 + i * 0.017)
+          .filter((y) => Math.abs(y + 0.06) > 0.012)
+          .map((y) => (
+            <Instance key={y} position={[0, y, -0.048]} />
+          ))}
+      </Instances>
       {[-1, 1].map((side) => (
         <group key={side} position={[side * 0.007, 0, 0.006]}>
-          <RoundedBox args={[0.006, 0.6, 0.086]} radius={0.002}>
+          <RBox args={[0.006, 0.6, 0.086]} radius={0.002}>
             <meshStandardMaterial map={brushed} color="#9a9095" metalness={1} roughness={0.32} />
-          </RoundedBox>
+          </RBox>
           {/* recortes em degrau no alto do dissipador */}
           {[-0.21, -0.07, 0.07, 0.21].map((y) => (
             <mesh key={y} position={[side * 0.0035, y, 0.03]} rotation={[0.5, 0, 0]}>
@@ -378,9 +378,9 @@ function Ram({ accent, brushed }: { accent: string; brushed: THREE.Texture }) {
         <boxGeometry args={[0.022, 0.6, 0.008]} />
         <meshStandardMaterial color="#1b1519" metalness={0.7} roughness={0.4} />
       </mesh>
-      <RoundedBox args={[0.016, 0.57, 0.014]} radius={0.004} position={[0, 0, 0.064]}>
+      <RBox args={[0.016, 0.57, 0.014]} radius={0.004} position={[0, 0, 0.064]}>
         <Glow color={accent} intensity={2.2} />
-      </RoundedBox>
+      </RBox>
     </group>
   )
 }
@@ -388,23 +388,24 @@ function Ram({ accent, brushed }: { accent: string; brushed: THREE.Texture }) {
 function Gpu({ brushed }: { brushed: THREE.Texture }) {
   return (
     <group>
-      <RoundedBox args={[1.25, 0.12, 0.5]} radius={0.03}>
+      <RBox args={[1.25, 0.12, 0.5]} radius={0.03}>
         <meshStandardMaterial color="#231b21" metalness={0.75} roughness={0.3} />
-      </RoundedBox>
+      </RBox>
       {/* backplate escovado em cima, com a marca */}
-      <RoundedBox args={[1.2, 0.012, 0.46]} radius={0.004} position={[0, 0.066, 0]}>
+      <RBox args={[1.2, 0.012, 0.46]} radius={0.004} position={[0, 0.066, 0]}>
         <meshStandardMaterial map={brushed} color="#6b6166" metalness={1} roughness={0.3} />
-      </RoundedBox>
+      </RBox>
       <Text font={MONO_BOLD} fontSize={0.05} position={[-0.25, 0.074, 0]} rotation={[-Math.PI / 2, 0, 0]} color={SIGNAL} anchorX="center" anchorY="middle">
         FZR · AI
       </Text>
       {/* aletas do dissipador entre a carcaça e as ventoinhas */}
-      {Array.from({ length: 26 }, (_, i) => (
-        <mesh key={i} position={[-0.58 + i * 0.046, -0.085, 0]}>
-          <boxGeometry args={[0.006, 0.05, 0.46]} />
-          <meshStandardMaterial color="#8d8489" metalness={1} roughness={0.3} />
-        </mesh>
-      ))}
+      <Instances limit={26}>
+        <boxGeometry args={[0.006, 0.05, 0.46]} />
+        <meshStandardMaterial color="#8d8489" metalness={1} roughness={0.3} />
+        {Array.from({ length: 26 }, (_, i) => (
+          <Instance key={i} position={[-0.58 + i * 0.046, -0.085, 0]} />
+        ))}
+      </Instances>
       {[-0.32, 0.32].map((x) => (
         <group key={x} position={[x, -0.13, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <Fan size={0.4} />
@@ -442,9 +443,9 @@ function Nvme({ brushed }: { brushed: THREE.Texture }) {
           <meshStandardMaterial color={GOLD} metalness={1} roughness={0.2} />
         </mesh>
       ))}
-      <RoundedBox args={[0.27, 0.08, 0.016]} radius={0.004} position={[0.015, 0, 0.011]}>
+      <RBox args={[0.27, 0.08, 0.016]} radius={0.004} position={[0.015, 0, 0.011]}>
         <meshStandardMaterial map={brushed} color="#6b6166" metalness={1} roughness={0.3} />
-      </RoundedBox>
+      </RBox>
       {Array.from({ length: 6 }, (_, i) => (
         <mesh key={i} position={[0.1 + i * 0.012, 0, 0.0195]}>
           <boxGeometry args={[0.004, 0.07, 0.003]} />
@@ -471,12 +472,12 @@ function Hdd({ brushed, label }: { brushed: THREE.Texture; label: string }) {
   const steel = { color: '#8d8489', metalness: 1, roughness: 0.3 } as const
   return (
     <group>
-      <RoundedBox args={[0.4, 0.07, 0.58]} radius={0.01}>
+      <RBox args={[0.4, 0.07, 0.58]} radius={0.01}>
         <meshStandardMaterial color="#2a2126" metalness={0.7} roughness={0.4} />
-      </RoundedBox>
-      <RoundedBox args={[0.38, 0.006, 0.56]} radius={0.003} position={[0, 0.036, 0]}>
+      </RBox>
+      <RBox args={[0.38, 0.006, 0.56]} radius={0.003} position={[0, 0.036, 0]}>
         <meshStandardMaterial map={brushed} color="#7a7075" metalness={1} roughness={0.28} />
-      </RoundedBox>
+      </RBox>
       <mesh position={[0, 0.041, 0.12]}>
         <cylinderGeometry args={[0.13, 0.13, 0.004, 48]} />
         <meshStandardMaterial {...steel} />
@@ -545,14 +546,13 @@ function Honeycomb({ radius, cell, z }: { radius: number; cell: number; z: numbe
     return out
   }, [radius, cell])
   return (
-    <group position={[0, 0, z]}>
+    <Instances limit={holes.length} position={[0, 0, z]}>
+      <cylinderGeometry args={[cell, cell, 0.003, 6]} />
+      <meshStandardMaterial color="#3a2f37" metalness={0.8} roughness={0.4} />
       {holes.map(([x, y]) => (
-        <mesh key={`${x}-${y}`} position={[x, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[cell, cell, 0.003, 6]} />
-          <meshStandardMaterial color="#3a2f37" metalness={0.8} roughness={0.4} />
-        </mesh>
+        <Instance key={`${x}-${y}`} position={[x, y, 0]} rotation={[Math.PI / 2, 0, 0]} />
       ))}
-    </group>
+    </Instances>
   )
 }
 
@@ -568,9 +568,9 @@ function Psu({ brushed }: { brushed: THREE.Texture }) {
   const grille = { color: '#6b6166', metalness: 1, roughness: 0.3 } as const
   return (
     <group>
-      <RoundedBox args={[1.0, 0.32, 0.75]} radius={0.035} smoothness={4}>
+      <RBox args={[1.0, 0.32, 0.75]} radius={0.035} smoothness={4}>
         <meshStandardMaterial color="#1b1519" metalness={0.5} roughness={0.55} />
-      </RoundedBox>
+      </RBox>
       {/* ventoinha: fundo escuro, pás girando e grade de anéis por cima */}
       <group position={[-0.08, 0.161, 0]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
@@ -614,9 +614,9 @@ function Psu({ brushed }: { brushed: THREE.Texture }) {
       </group>
       {/* lateral virada para a câmera: placa escovada com a marca (é a base de tudo) */}
       <group position={[0, 0, 0.378]}>
-        <RoundedBox args={[0.88, 0.24, 0.008]} radius={0.003}>
+        <RBox args={[0.88, 0.24, 0.008]} radius={0.003}>
           <meshStandardMaterial map={brushed} color="#6b6166" metalness={1} roughness={0.3} />
-        </RoundedBox>
+        </RBox>
         <Text font={DISPLAY} fontSize={0.085} position={[-0.38, 0.035, 0.005]} color="#2b2024" anchorX="left" anchorY="middle" letterSpacing={-0.03}>
           FZR
         </Text>
@@ -730,19 +730,18 @@ function RearPanel({ inner = false }: { inner?: boolean }) {
           <ringGeometry args={[0.2, 0.22, 64]} />
           <meshStandardMaterial {...steel} side={THREE.DoubleSide} />
         </mesh>
-        {Array.from({ length: 7 }, (_, row) =>
-          Array.from({ length: 7 }, (_, col) => {
-            const x = -0.15 + col * 0.05 + (row % 2) * 0.025
-            const y = -0.15 + row * 0.05
-            if (Math.hypot(x, y) > 0.18) return null
-            return (
-              <mesh key={`${row}-${col}`} position={[x, y, 0.002]} rotation={[Math.PI / 2, 0, 0]}>
-                <cylinderGeometry args={[0.021, 0.021, 0.004, 6]} />
-                <meshStandardMaterial {...dark} />
-              </mesh>
-            )
-          })
-        )}
+        <Instances limit={49}>
+          <cylinderGeometry args={[0.021, 0.021, 0.004, 6]} />
+          <meshStandardMaterial {...dark} />
+          {Array.from({ length: 7 }, (_, row) =>
+            Array.from({ length: 7 }, (_, col) => {
+              const x = -0.15 + col * 0.05 + (row % 2) * 0.025
+              const y = -0.15 + row * 0.05
+              if (Math.hypot(x, y) > 0.18) return null
+              return <Instance key={`${row}-${col}`} position={[x, y, 0.002]} rotation={[Math.PI / 2, 0, 0]} />
+            })
+          )}
+        </Instances>
         {[-1, 1].flatMap((sx) =>
           [-1, 1].map((sy) => (
             <mesh key={`${sx}${sy}`} position={[sx * 0.2, sy * 0.2, 0.004]} rotation={[Math.PI / 2, 0, 0]}>
@@ -759,14 +758,15 @@ function RearPanel({ inner = false }: { inner?: boolean }) {
             <boxGeometry args={[0.42, 0.055, 0.004]} />
             <meshStandardMaterial color={i < 2 ? '#4a4046' : '#2f2530'} metalness={0.9} roughness={0.35} />
           </mesh>
-          {Array.from({ length: 6 }, (_, j) => (
-            <mesh key={j} position={[-0.12 + j * 0.05, 0, 0.003]}>
-              <boxGeometry args={[0.03, 0.012, 0.002]} />
-              <meshStandardMaterial {...dark} />
-            </mesh>
-          ))}
         </group>
       ))}
+      <Instances limit={42}>
+        <boxGeometry args={[0.03, 0.012, 0.002]} />
+        <meshStandardMaterial {...dark} />
+        {Array.from({ length: 42 }, (_, n) => (
+          <Instance key={n} position={[-0.24 + (n % 6) * 0.05, 0.2 - Math.floor(n / 6) * 0.075, 0.006]} />
+        ))}
+      </Instances>
       <mesh position={[0.22, -0.1, 0.003]}>
         <boxGeometry args={[0.012, 0.6, 0.004]} />
         <Glow color={CARAMEL} intensity={1.2} />
@@ -825,16 +825,17 @@ function SidePanel({ inner }: { inner: boolean }) {
         </mesh>
       ))}
       {inner && [0.55, 0.1, -0.35].map((y) => (
-        <RoundedBox key={y} args={[0.07, 0.22, 0.01]} radius={0.02} position={[0.72, y, 0]}>
+        <RBox key={y} args={[0.07, 0.22, 0.01]} radius={0.02} position={[0.72, y, 0]}>
           <meshStandardMaterial color="#0f0b0d" roughness={0.9} />
-        </RoundedBox>
+        </RBox>
       ))}
-      {Array.from({ length: 12 }, (_, i) => (
-        <mesh key={i} position={[-0.6 + i * 0.1, 0.88, 0]}>
-          <boxGeometry args={[0.05, 0.12, 0.006]} />
-          <meshStandardMaterial color="#120e10" roughness={0.8} />
-        </mesh>
-      ))}
+      <Instances limit={12}>
+        <boxGeometry args={[0.05, 0.12, 0.006]} />
+        <meshStandardMaterial color="#120e10" roughness={0.8} />
+        {Array.from({ length: 12 }, (_, i) => (
+          <Instance key={i} position={[-0.6 + i * 0.1, 0.88, 0]} />
+        ))}
+      </Instances>
       {/* por fora, o endereço do site, no mesmo estilo do logo */}
       {!inner && (
         <group position={[0, -0.05, 0.008]}>
@@ -852,9 +853,9 @@ function SidePanel({ inner }: { inner: boolean }) {
       )}
       {inner && [-0.55, -0.75].map((y) => (
         <group key={y} position={[-0.3, y, 0.008]}>
-          <RoundedBox args={[0.5, 0.14, 0.012]} radius={0.004}>
+          <RBox args={[0.5, 0.14, 0.012]} radius={0.004}>
             <meshStandardMaterial color="#1b1519" metalness={0.6} roughness={0.45} />
-          </RoundedBox>
+          </RBox>
           <Text font={MONO_BOLD} fontSize={0.03} position={[-0.21, 0, 0.007]} color="#f6eae3" anchorX="left" anchorY="middle" letterSpacing={0.1}>
             NVMe · 2TB
           </Text>
@@ -886,9 +887,9 @@ function TopIo() {
           <meshStandardMaterial color="#2b4a8c" roughness={0.6} />
         </mesh>
       ))}
-      <RoundedBox args={[0.02, 0.006, 0.045]} radius={0.002} position={[0, 0.003, -0.03]}>
+      <RBox args={[0.02, 0.006, 0.045]} radius={0.002} position={[0, 0.003, -0.03]}>
         <meshStandardMaterial color="#0f0b0d" roughness={0.6} />
-      </RoundedBox>
+      </RBox>
       <mesh position={[0, 0.003, -0.1]}>
         <cylinderGeometry args={[0.011, 0.011, 0.006, 16]} />
         <meshStandardMaterial color="#0f0b0d" roughness={0.6} />
@@ -1078,8 +1079,6 @@ function Pc({
     const rk = easeInOut(rocketRef.current)
     // segue o foguete inteiro (com o fogo): ele fica no quadro e é a plataforma que vai ficando para trás
     const climb = liftHeight(rocketRef.current)
-    // com os servidores, tudo abaixo do chão é cortado: eles sobem "de dentro" da plataforma
-    state.gl.clippingPlanes = cut ? FLOOR_CLIP : NO_CLIP
     if (cut) {
       const narrow = state.size.width < 640
       if (narrow) {
@@ -1103,9 +1102,9 @@ function Pc({
       {/* gabinete: cada placa sai para o seu lado na desmontagem (vista explodida); o vidro sai pela frente */}
       {SHELL.map((panel) => (
         <group key={panel.key} ref={(g) => { shellRefs.current[panel.key] = g }} position={panel.at}>
-          <RoundedBox args={panel.size} radius={0.02}>
+          <RBox args={panel.size} radius={0.02}>
             <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.32} />
-          </RoundedBox>
+          </RBox>
           {panel.key === 'bottom' && (
             <mesh position={[0, 0.03, 0.53]}>
               <boxGeometry args={[2.0, 0.015, 0.015]} />
@@ -1233,11 +1232,75 @@ function SmoothedProgress({ source, targetRef }: { source: MotionValue<number>; 
 // terminou de carregar, então o primeiro quadro aqui significa cena pronta e shaders compilados
 function Ready({ onReady }: { onReady: () => void }) {
   const done = useRef(false)
-  useFrame(() => {
+  useFrame((state) => {
+    // só no desenvolvimento: expõe o renderer para medir chamadas de desenho nos testes
+    if (process.env.NODE_ENV !== 'production') (window as unknown as { __gl?: THREE.WebGLRenderer }).__gl = state.gl
     if (done.current) return
     done.current = true
     onReady()
   })
+  return null
+}
+
+// última rolagem da página: o trabalho pesado da cena espera a pessoa parar de rolar (um tranco com a página
+// parada quase não se nota; no meio da rolagem, sim)
+let lastScroll = 0
+if (typeof window !== 'undefined') window.addEventListener('scroll', () => (lastScroll = performance.now()), { passive: true })
+
+const whenIdle = (fn: () => void) => {
+  let cancel = () => {}
+  const start = performance.now()
+  const attempt = () => {
+    // rolando sem parar: depois de 2,5 s prepara assim mesmo (senão a cena nunca ficaria pronta)
+    if (performance.now() - lastScroll < 300 && performance.now() - start < 2500) {
+      const t = setTimeout(attempt, 150)
+      cancel = () => clearTimeout(t)
+      return
+    }
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(fn, { timeout: 1500 })
+      cancel = () => cancelIdleCallback(id)
+    } else {
+      const t = setTimeout(fn, 50)
+      cancel = () => clearTimeout(t)
+    }
+  }
+  attempt()
+  return () => cancel()
+}
+
+/**
+ * Prepara a cena sem travar a página: monta as partes uma de cada vez, no tempo livre do navegador e como transição
+ * do React (fatiada em pedaços pequenos), e depois compila todos os shaders de uma vez em segundo plano
+ * (compileAsync), inclusive os das peças que só aparecem mais tarde (os servidores e o foguete). Enquanto isso o
+ * Canvas não desenha nada (frameloop "never") e o loader cobre a seção.
+ */
+function Warmup({ stage, setStage, onWarm }: { stage: number; setStage: (n: number) => void; onWarm: () => void }) {
+  const { gl, scene, camera } = useThree()
+  // compila uma vez só (o efeito pode rodar de novo quando o componente pai renderiza)
+  const compiled = useRef(false)
+  useEffect(() => {
+    if (stage < 3) return whenIdle(() => startTransition(() => setStage(stage + 1)))
+    if (compiled.current) return
+    const stop = whenIdle(() => {
+      compiled.current = true
+      // o three só compila o que está visível: liga tudo por um instante, pede a compilação e volta como estava
+      const hidden: THREE.Object3D[] = []
+      scene.traverse((o) => {
+        if (!o.visible) {
+          hidden.push(o)
+          o.visible = true
+        }
+      })
+      const done = gl.compileAsync(scene, camera)
+      hidden.forEach((o) => (o.visible = false))
+      // o primeiro quadro (que ainda compila o pós-processamento) também espera a rolagem parar
+      done.catch(() => {}).finally(() => whenIdle(onWarm))
+    })
+    return () => {
+      if (!compiled.current) stop()
+    }
+  }, [stage, setStage, onWarm, gl, scene, camera])
   return null
 }
 
@@ -1261,16 +1324,40 @@ export default function PcScene({
   const smoothed = useRef(progress.get())
   const serversProgress = useRef(0)
   const rocketProgress = useRef(0)
+  // 0: luz e chão; 1: o PC; 2: os servidores e o foguete; 3: tudo montado (falta compilar)
+  const [stage, setStage] = useState(0)
+  const [warm, setWarm] = useState(false)
+  // até 2x no desktop (texto 3D nítido), 1,5x no celular; se o FPS cair, baixa a resolução e depois tira o brilho
+  const maxDpr = typeof window !== 'undefined' && window.innerWidth < 640 ? 1.5 : 2
+  const [dpr, setDpr] = useState(maxDpr)
+  const [lowFx, setLowFx] = useState(false)
   return (
     <Canvas
-      // longe da seção desenha só sob demanda: o primeiro quadro sai (deixa tudo pronto) e depois fica parada
-      frameloop={active ? 'always' : 'demand'}
-      // até 2x no desktop (texto 3D nítido); no celular segura em 1,5x pelo desempenho
-      dpr={[1, typeof window !== 'undefined' && window.innerWidth < 640 ? 1.5 : 2]}
+      // nada é desenhado até a cena estar montada e compilada; longe da seção, só sob demanda
+      frameloop={!warm ? 'never' : active ? 'always' : 'demand'}
+      dpr={dpr}
       camera={{ position: [3.1, 1.0, 5.3], fov: 38 }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
+      // o recorte do chão (servidores e foguete subindo de dentro da plataforma) vai só nos materiais deles:
+      // ligar e desligar o recorte da cena inteira obrigaria a recompilar todos os shaders
+      onCreated={({ gl }) => {
+        gl.localClippingEnabled = true
+        // em produção não confere erro de shader: a conferência obriga a esperar cada compilação terminar e
+        // anula a compilação em paralelo (era o maior bloqueio na abertura)
+        if (process.env.NODE_ENV === 'production') gl.debug.checkShaderErrors = false
+      }}
       aria-hidden
     >
+      <Warmup stage={stage} setStage={setStage} onWarm={() => setWarm(true)} />
+      <PerformanceMonitor
+        onDecline={() => setDpr(1)}
+        onIncline={() => setDpr(maxDpr)}
+        flipflops={3}
+        onFallback={() => {
+          setDpr(1)
+          setLowFx(true)
+        }}
+      />
       <color attach="background" args={['#2b2024']} />
       <fog attach="fog" args={['#2b2024', 9, 26]} />
       <hemisphereLight args={['#f6eae3', '#2b2024', 0.5]} />
@@ -1282,14 +1369,14 @@ export default function PcScene({
         <Lightformer form="ring" intensity={1.2} color={CARAMEL} position={[4, 0, 2]} scale={2} />
       </Environment>
       <SmoothedProgress source={progress} targetRef={smoothed} />
-      <Pc progressRef={smoothed} serversRef={serversProgress} rocketRef={rocketProgress} stats={stats} en={en} />
-      <Servers servers={servers} progressRef={serversProgress} rocketRef={rocketProgress} onOpen={onOpen} en={en} />
+      {stage >= 1 && <Pc progressRef={smoothed} serversRef={serversProgress} rocketRef={rocketProgress} stats={stats} en={en} />}
+      {stage >= 2 && <Servers servers={servers} progressRef={serversProgress} rocketRef={rocketProgress} onOpen={onOpen} en={en} />}
       <Platform />
       <Dust />
       <Ready onReady={onReady} />
-      {/* brilho real nas luzes (só o que passa de 1 brilha) e vinheta nas bordas */}
-      <EffectComposer multisampling={4}>
-        <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.2} intensity={0.9} />
+      {/* brilho real nas luzes (só o que passa de 1 brilha) e vinheta nas bordas; em aparelho fraco, só a vinheta */}
+      <EffectComposer multisampling={lowFx ? 0 : 4}>
+        {lowFx ? <></> : <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.2} intensity={0.9} />}
         <Vignette offset={0.25} darkness={0.6} />
       </EffectComposer>
     </Canvas>

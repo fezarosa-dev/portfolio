@@ -2,9 +2,9 @@
 
 import { useMemo, useRef, useState } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { Html, RoundedBox, Text } from '@react-three/drei'
+import { Html, Text } from '@react-three/drei'
 import * as THREE from 'three'
-import { CARAMEL, clamp01, DISPLAY, easeInOut, Glow, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL } from './scene-kit'
+import { CARAMEL, clamp01, RBox, DISPLAY, easeInOut, Glow, METAL, MONO, MONO_BOLD, seeded, segment, SIGNAL } from './scene-kit'
 
 /** Uma gaveta do servidor: uma categoria de tecnologia do projeto e as tecnologias dela. */
 export type Drawer = { label: string; techs: string[] }
@@ -20,6 +20,9 @@ export type ServerProject = {
   summary: string | null
   drawers: Drawer[]
 } | null
+
+// tudo dos servidores e do foguete é cortado abaixo do chão: eles sobem "de dentro" da plataforma
+const FLOOR_CLIP = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.125)]
 
 // medidas do rack (o chão da plataforma fica em y = -1,12)
 const W = 0.7
@@ -144,18 +147,18 @@ function DrawerUnit({
       {/* corpo da gaveta (aparece quando ela está para fora) e a frente */}
       <mesh>
         <boxGeometry args={[W - 0.1, UNIT_H - 0.01, 0.72]} />
-        <meshStandardMaterial color="#1c161a" metalness={0.6} roughness={0.45} />
+        <meshStandardMaterial clippingPlanes={FLOOR_CLIP} color="#1c161a" metalness={0.6} roughness={0.45} />
       </mesh>
       <mesh position={[0, 0, 0.362]}>
         <planeGeometry args={[W - 0.08, UNIT_H]} />
-        <meshStandardMaterial map={drawer ? faces.full : faces.blank} metalness={0.5} roughness={0.5} />
+        <meshStandardMaterial clippingPlanes={FLOOR_CLIP} map={drawer ? faces.full : faces.blank} metalness={0.5} roughness={0.5} />
       </mesh>
       {drawer && (
         <group position={[-W / 2 + 0.07, 0, 0.364]}>
           {[0, 1].map((j) => (
             <mesh key={j} position={[0, j ? -0.035 : 0.035, 0]}>
               <boxGeometry args={[0.014, j ? 0.008 : 0.014, 0.006]} />
-              <meshStandardMaterial ref={(m) => ledRef(index * 2 + j, m)} color="#1a1418" emissive={j ? CARAMEL : SIGNAL} emissiveIntensity={0} toneMapped={false} />
+              <meshStandardMaterial clippingPlanes={FLOOR_CLIP} ref={(m) => ledRef(index * 2 + j, m)} color="#1a1418" emissive={j ? CARAMEL : SIGNAL} emissiveIntensity={0} toneMapped={false} />
             </mesh>
           ))}
           {/* só o nome da categoria, grande o bastante para ler de longe; as tecnologias aparecem no cartão do mouse.
@@ -316,7 +319,7 @@ function Rack({
       {/* recorte aceso no chão por onde a carcaça sobe */}
       <mesh position={[row.x, FLOOR + 0.006, row.z]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[W + 0.08, D + 0.08]} />
-        <meshBasicMaterial ref={slot} color={SIGNAL} transparent opacity={0} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial clippingPlanes={FLOOR_CLIP} ref={slot} color={SIGNAL} transparent opacity={0} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
       <group ref={group} visible={false} {...pointer}>
         {/* carcaça aberta na frente: fundo, laterais, teto e base (as gavetas entram nela) */}
@@ -327,15 +330,15 @@ function Rack({
           [0, H / 2 - 0.02, 0, W, 0.04, D],
           [0, -H / 2 + 0.02, 0, W, 0.04, D],
         ].map(([x, y, z, w, h, d], i) => (
-          <RoundedBox key={i} args={[w, h, d]} radius={0.012} position={[x, y, z]}>
-            <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.35} />
-          </RoundedBox>
+          <RBox key={i} args={[w, h, d]} radius={0.012} position={[x, y, z]}>
+            <meshStandardMaterial clippingPlanes={FLOOR_CLIP} color={METAL} metalness={0.85} roughness={0.35} />
+          </RBox>
         ))}
         {/* trilhos dos slots */}
         {Array.from({ length: UNITS + 1 }, (_, i) => (
           <mesh key={i} position={[0, unitY(i) - 0.086, D / 2 - 0.03]}>
             <boxGeometry args={[W - 0.06, 0.004, 0.02]} />
-            <meshStandardMaterial color="#4a3f45" metalness={1} roughness={0.3} />
+            <meshStandardMaterial clippingPlanes={FLOOR_CLIP} color="#4a3f45" metalness={1} roughness={0.3} />
           </mesh>
         ))}
         {units.map((drawer, i) => (
@@ -360,7 +363,7 @@ function Rack({
         <group position={[0, H / 2 - 0.2, D / 2 - 0.02]}>
           <mesh>
             <planeGeometry args={[W - 0.08, 0.28]} />
-            <meshStandardMaterial ref={screen} color="#120e10" emissive="#2b2024" emissiveIntensity={0} toneMapped={false} />
+            <meshStandardMaterial clippingPlanes={FLOOR_CLIP} ref={screen} color="#120e10" emissive="#2b2024" emissiveIntensity={0} toneMapped={false} />
           </mesh>
           <Text
             sdfGlyphSize={128}
@@ -410,18 +413,18 @@ function Rack({
         </group>
         <mesh position={[0, H / 2 + 0.004, D / 2 - 0.05]}>
           <boxGeometry args={[W - 0.06, 0.008, 0.02]} />
-          <meshStandardMaterial ref={bar} color="#3a2f35" emissive={SIGNAL} emissiveIntensity={0} toneMapped={false} />
+          <meshStandardMaterial clippingPlanes={FLOOR_CLIP} ref={bar} color="#3a2f35" emissive={SIGNAL} emissiveIntensity={0} toneMapped={false} />
         </mesh>
         {/* bocal de propulsor embaixo (só aparece quando vira foguete: antes fica dentro do chão) e a chama */}
         <mesh position={[0, -H / 2 - 0.12, 0]}>
           <cylinderGeometry args={[0.2, 0.3, 0.24, 24, 1, true]} />
-          <meshStandardMaterial ref={nozzle} color="#3a2f35" emissive={SIGNAL} emissiveIntensity={0} metalness={0.9} roughness={0.3} side={THREE.DoubleSide} toneMapped={false} />
+          <meshStandardMaterial clippingPlanes={FLOOR_CLIP} ref={nozzle} color="#3a2f35" emissive={SIGNAL} emissiveIntensity={0} metalness={0.9} roughness={0.3} side={THREE.DoubleSide} toneMapped={false} />
         </mesh>
         {/* a chama cresce para baixo a partir do bocal: o grupo escala e o cone fica pendurado pela base */}
         <group ref={flame} position={[0, -H / 2 - 0.24, 0]} visible={false}>
           <mesh position={[0, -0.7, 0]} rotation={[Math.PI, 0, 0]}>
             <coneGeometry args={[0.24, 1.4, 24, 1, true]} />
-            <meshBasicMaterial color={SIGNAL} transparent opacity={0.85} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
+            <meshBasicMaterial clippingPlanes={FLOOR_CLIP} color={SIGNAL} transparent opacity={0.85} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
           </mesh>
         </group>
         {/* resumo do projeto em cima do rack (presa pela base, cresce para cima) */}
@@ -515,7 +518,7 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
       {/* corpo: cilindro metálico com faixas e janelas (o "núcleo" que junta os projetos) */}
       <mesh position={[0, 1.2, 0]}>
         <cylinderGeometry args={[0.42, 0.46, 2.8, 48]} />
-        <meshStandardMaterial color="#3a2f37" metalness={0.85} roughness={0.32} />
+        <meshStandardMaterial clippingPlanes={FLOOR_CLIP} color="#3a2f37" metalness={0.85} roughness={0.32} />
       </mesh>
       {[0.2, 1.4, 2.4].map((y) => (
         <mesh key={y} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
@@ -535,7 +538,7 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
       {/* ponta */}
       <mesh position={[0, 3.05, 0]}>
         <coneGeometry args={[0.42, 0.9, 48]} />
-        <meshStandardMaterial color="#2f2530" metalness={0.85} roughness={0.3} />
+        <meshStandardMaterial clippingPlanes={FLOOR_CLIP} color="#2f2530" metalness={0.85} roughness={0.3} />
       </mesh>
       <mesh position={[0, 3.52, 0]}>
         <sphereGeometry args={[0.05, 16, 16]} />
@@ -544,16 +547,16 @@ function RocketCore({ rocketRef }: { rocketRef: React.RefObject<number> }) {
       {/* bocal principal, a chama (pendurada pela base) e as faíscas */}
       <mesh position={[0, -0.32, 0]}>
         <cylinderGeometry args={[0.3, 0.42, 0.28, 32, 1, true]} />
-        <meshStandardMaterial color="#2a2126" emissive={SIGNAL} emissiveIntensity={1.2} metalness={0.9} roughness={0.3} side={THREE.DoubleSide} toneMapped={false} />
+        <meshStandardMaterial clippingPlanes={FLOOR_CLIP} color="#2a2126" emissive={SIGNAL} emissiveIntensity={1.2} metalness={0.9} roughness={0.3} side={THREE.DoubleSide} toneMapped={false} />
       </mesh>
       <group ref={flame} position={[0, -0.46, 0]} visible={false}>
         <mesh position={[0, -0.9, 0]} rotation={[Math.PI, 0, 0]}>
           <coneGeometry args={[0.34, 1.8, 32, 1, true]} />
-          <meshBasicMaterial color="#ffb070" transparent opacity={0.8} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
+          <meshBasicMaterial clippingPlanes={FLOOR_CLIP} color="#ffb070" transparent opacity={0.8} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
         </mesh>
       </group>
       <points ref={exhaust} geometry={geometry} visible={false}>
-        <pointsMaterial ref={exhaustMat} color={CARAMEL} size={0.06} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
+        <pointsMaterial clippingPlanes={FLOOR_CLIP} ref={exhaustMat} color={CARAMEL} size={0.06} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
       </points>
     </group>
   )
