@@ -38,7 +38,7 @@ const MEANING: Record<string, { name: [string, string]; concept: [string, string
   board: { name: ['Placa-mãe', 'Motherboard'], concept: ['Integração de sistemas', 'Systems integration'] },
   fan1: { name: ['Ventoinhas', 'Fans'], concept: ['Qualidade e testes', 'Quality & testing'] },
   nvme: { name: ['SSD NVMe', 'NVMe SSD'], concept: ['Banco de dados', 'Databases'] },
-  hdd0: { name: ['HDs', 'Hard drives'], concept: ['Backups e recuperação', 'Backups & recovery'] },
+  hdd0: { name: ['HDs', 'Hard drives'], concept: ['Nenhum dado se perde', 'No data ever lost'] },
 }
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
@@ -360,7 +360,7 @@ function Ram({ accent, brushed }: { accent: string; brushed: THREE.Texture }) {
       {[-1, 1].map((side) => (
         <group key={side} position={[side * 0.007, 0, 0.006]}>
           <RoundedBox args={[0.006, 0.6, 0.086]} radius={0.002}>
-            <meshStandardMaterial map={brushed} color="#5a5056" metalness={1} roughness={0.32} />
+            <meshStandardMaterial map={brushed} color="#9a9095" metalness={1} roughness={0.32} />
           </RoundedBox>
           {/* recortes em degrau no alto do dissipador */}
           {[-0.21, -0.07, 0.07, 0.21].map((y) => (
@@ -962,7 +962,8 @@ function Pc({ progressRef, stats, en }: { progressRef: React.RefObject<number>; 
         key: `ram${i}`,
         assembled: [0.5 + i * 0.075, 0.42, -0.33],
         offset: [0.35 + i * 0.28, 1.15, 0.9],
-        spin: [0, 0, (i - 1.5) * 0.12],
+        // vira a face larga (o dissipador com a marca) para a câmera; de perfil só apareciam quatro riscos
+        spin: [0, -1.15, (i - 1.5) * 0.12],
         delay: 0.26 + i * 0.03,
         labelAt: [0, 0.42, 0.1],
         node: <Ram accent={i % 2 ? CARAMEL : SIGNAL} brushed={brushed} />,
