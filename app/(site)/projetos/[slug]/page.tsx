@@ -3,6 +3,7 @@ import { SplitTitle } from '@/components/split-title'
 import { HandoffLink } from '@/components/handoff-link'
 import Link from 'next/link'
 import { FolderGit2 } from 'lucide-react'
+import { ShareButton } from '@/components/share-button'
 import type { Metadata } from 'next'
 import { getProjectById, getSiteContent } from '@/lib/supabase/queries-cached'
 import { UUID_RE } from '@/lib/supabase/queries'
@@ -107,8 +108,7 @@ export default async function ProjetoDetailPage({
             )}
           </p>
         )}
-        {(project.repo_url || project.site_url) && (
-          <div className="mt-5 flex flex-wrap items-center gap-3 font-mono text-xs">
+        <div className="mt-5 flex flex-wrap items-center gap-3 font-mono text-xs">
             {project.repo_url && (
               <a
                 href={project.repo_url}
@@ -125,13 +125,18 @@ export default async function ProjetoDetailPage({
                 href={project.site_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-hairline px-3 py-1 text-steel hover:border-signal hover:text-signal"
+                className="tap-target inline-flex items-center rounded-full border border-hairline px-4 py-2.5 text-sm text-steel hover:border-signal hover:text-signal"
               >
                 {dict.projetos.site}
               </a>
             )}
+            <ShareButton
+              slug={project.slug}
+              title={title}
+              label={dict.projetos.share}
+              copiedLabel={dict.projetos.shareCopied}
+            />
           </div>
-        )}
         {project.languages.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {project.languages.map((lang) => (
