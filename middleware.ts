@@ -70,7 +70,10 @@ export async function middleware(request: NextRequest) {
 
   const locale = detectLocale(request)
   const url = request.nextUrl.clone()
-  url.pathname = `/${locale}${pathname === '/' ? '' : pathname}`
+  // link curto pra compartilhar de boca: /p/<slug> → /<locale>/projetos/<slug>
+  url.pathname = first === 'p' && rest.length > 0
+    ? `/${locale}/projetos/${rest.join('/').toLowerCase()}`
+    : `/${locale}${pathname === '/' ? '' : pathname}`
   return NextResponse.redirect(url, 302)
 }
 
