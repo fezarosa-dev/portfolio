@@ -70,6 +70,8 @@ export type Dictionary = {
     at: string
     repo: string
     site: string
+    share: string
+    shareCopied: string
   }
   contato: {
     eyebrow: string
@@ -220,6 +222,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       at: 'em',
       repo: 'repositório ↗',
       site: 'site ↗',
+      share: 'compartilhar',
+      shareCopied: 'link copiado',
     },
     contato: {
       eyebrow: 'contato',
@@ -377,6 +381,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       at: 'at',
       repo: 'repository ↗',
       site: 'website ↗',
+      share: 'share',
+      shareCopied: 'link copied',
     },
     contato: {
       eyebrow: 'contact',
