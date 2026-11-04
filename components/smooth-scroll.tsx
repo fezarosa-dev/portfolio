@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Lenis from 'lenis'
+import { cancelFrame, frame } from 'framer-motion'
 import 'lenis/dist/lenis.css'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 
@@ -14,8 +15,11 @@ export function SmoothScroll() {
 
   useEffect(() => {
     if (reduce) return
+    // o Lenis anda no mesmo relógio do framer-motion, na fase "setup" (antes de o framer ler a rolagem): assim os
+    // valores do useScroll usam a posição deste quadro e não a do anterior (sem um quadro de atraso entre a página
+    // e os textos/cena presos à rolagem, e sem um segundo laço de requestAnimationFrame)
     const lenis = new Lenis({
-      autoRaf: true,
+      autoRaf: false,
       anchors: true,
       allowNestedScroll: true,
       duration: 1.15,
@@ -24,7 +28,12 @@ export function SmoothScroll() {
       touchMultiplier: 1.4,
       syncTouch: true,
     })
-    return () => lenis.destroy()
+    const update = ({ timestamp }: { timestamp: number }) => lenis.raf(timestamp)
+    frame.setup(update, true)
+    return () => {
+      cancelFrame(update)
+      lenis.destroy()
+    }
   }, [reduce])
 
   return null
