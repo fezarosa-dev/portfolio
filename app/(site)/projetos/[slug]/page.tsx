@@ -2,6 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { SplitTitle } from '@/components/split-title'
 import { HandoffLink } from '@/components/handoff-link'
 import Link from 'next/link'
+import { FolderGit2 } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getProjectById, getSiteContent } from '@/lib/supabase/queries-cached'
 import { UUID_RE } from '@/lib/supabase/queries'
@@ -107,14 +108,15 @@ export default async function ProjetoDetailPage({
           </p>
         )}
         {(project.repo_url || project.site_url) && (
-          <div className="mt-4 flex flex-wrap gap-3 font-mono text-xs">
+          <div className="mt-5 flex flex-wrap items-center gap-3 font-mono text-xs">
             {project.repo_url && (
               <a
                 href={project.repo_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-hairline px-3 py-1 text-steel hover:border-signal hover:text-signal"
+                className="tap-target inline-flex items-center gap-2 rounded-full border border-signal bg-signal px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-signal/30 transition-[filter,box-shadow] hover:shadow-lg hover:shadow-signal/40 hover:brightness-110"
               >
+                <FolderGit2 aria-hidden className="h-4 w-4" />
                 {dict.projetos.repo}
               </a>
             )}
