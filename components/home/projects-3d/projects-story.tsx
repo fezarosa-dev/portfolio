@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion, transform, useInView, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { MOBILE_QUERY } from '@/lib/mobile-query'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
 import type { Locale } from '@/lib/i18n'
@@ -225,9 +226,58 @@ function Story({
   )
 }
 
+function subscribeMobile(cb: () => void) {
+  const mq = window.matchMedia(MOBILE_QUERY)
+  mq.addEventListener('change', cb)
+  return () => mq.removeEventListener('change', cb)
+}
+
+// no celular a cena 3D sai: os capítulos viram texto corrido, seguido dos cards dos projetos
+function MobileStory({ eyebrow, locale, stats, teaser }: { eyebrow: string; locale: Locale; stats: Stats; teaser: TeaserProps }) {
+  const en = locale === 'en'
+  return (
+    <>
+      <section className="border-t border-hairline px-6 pt-24">
+        <div className="mx-auto max-w-4xl">
+          <p className="font-mono text-xs tracking-wide text-signal">{'// '}{eyebrow}</p>
+          <div className="mt-6 space-y-8">
+            {CHAPTERS.map((c, i) => {
+              const [title, text] = c[en ? 'en' : 'pt']
+              return (
+                <div key={i}>
+                  <h2 className="font-display text-2xl font-medium tracking-tight">{title}</h2>
+                  <p className="mt-2 text-steel">{text}</p>
+                  {i === 2 && (
+                    <div className="mt-4 flex gap-8">
+                      {[
+                        [stats.projects, en ? 'projects' : 'projetos'],
+                        [stats.technologies, en ? 'technologies' : 'tecnologias'],
+                        [stats.companies, en ? 'companies' : 'empresas'],
+                      ].map(([n, label]) => (
+                        <div key={label}>
+                          <p className="font-display text-3xl font-medium tabular-nums text-signal">{n}</p>
+                          <p className="font-mono text-[11px] uppercase tracking-wide text-steel">{label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+      <ProjectsTeaser {...teaser} />
+    </>
+  )
+}
+
 export function ProjectsStory({ stats, categories, ...teaser }: TeaserProps & { stats: Stats; categories: LanguageCategory[] }) {
   const { enabled: reduce } = useReduceMotion()
   const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => false)
+  // no servidor assume celular (renderiza o leve); o desktop troca para a cena depois de hidratar
+  const mobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE_QUERY).matches, () => true)
+  if (mobile) return <MobileStory eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} teaser={teaser} />
   return (
     <>
       {/* com a cena 3D os projetos viram os servidores; sem ela (reduzir movimento, sem WebGL) ficam os cards */}
