@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion, transform, useInView, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
-import { MOBILE_QUERY } from '@/lib/mobile-query'
 import { useReduceMotion } from '@/components/reduce-motion-provider'
 import { ProjectsTeaser } from '@/components/home/projects-teaser'
 import type { Locale } from '@/lib/i18n'
@@ -151,7 +150,6 @@ function Story({
   const [chapter, setChapter] = useState(0)
   // baixa o pacote do 3D assim que o navegador fica livre, sem esperar a rolagem chegar perto
   useEffect(() => {
-    if (window.matchMedia(MOBILE_QUERY).matches) return
     if (!('requestIdleCallback' in window)) {
       const t = setTimeout(loadScene, 2000)
       return () => clearTimeout(t)
@@ -227,64 +225,17 @@ function Story({
   )
 }
 
-// no celular a cena 3D sai: os capítulos viram texto corrido, seguido dos cards dos projetos
-function MobileStory({ eyebrow, locale, stats, teaser }: { eyebrow: string; locale: Locale; stats: Stats; teaser: TeaserProps }) {
-  const en = locale === 'en'
-  return (
-    <>
-      <section className="border-t border-hairline px-6 pt-24">
-        <div className="mx-auto max-w-4xl">
-          <p className="font-mono text-xs tracking-wide text-signal">{'// '}{eyebrow}</p>
-          <div className="mt-6 space-y-8">
-            {CHAPTERS.map((c, i) => {
-              const [title, text] = c[en ? 'en' : 'pt']
-              return (
-                <div key={i}>
-                  <h2 className="font-display text-2xl font-medium tracking-tight">{title}</h2>
-                  <p className="mt-2 text-steel">{text}</p>
-                  {i === 2 && (
-                    <div className="mt-4 flex gap-8">
-                      {[
-                        [stats.projects, en ? 'projects' : 'projetos'],
-                        [stats.technologies, en ? 'technologies' : 'tecnologias'],
-                        [stats.companies, en ? 'companies' : 'empresas'],
-                      ].map(([n, label]) => (
-                        <div key={label}>
-                          <p className="font-display text-3xl font-medium tabular-nums text-signal">{n}</p>
-                          <p className="font-mono text-[11px] uppercase tracking-wide text-steel">{label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-      <ProjectsTeaser {...teaser} />
-    </>
-  )
-}
-
 export function ProjectsStory({ stats, categories, ...teaser }: TeaserProps & { stats: Stats; categories: LanguageCategory[] }) {
   const { enabled: reduce } = useReduceMotion()
-  const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => true)
-  // as duas versões vão no HTML e o CSS esconde a que não serve (media query de lib/mobile-query.ts), então
-  // não há troca depois de hidratar. No celular o bloco do desktop fica display:none: a cena nunca monta
+  const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => false)
   return (
     <>
-      <div className="story-mobile">
-        <MobileStory eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} teaser={teaser} />
-      </div>
-      <div className="story-desktop">
       {/* com a cena 3D os projetos viram os servidores; sem ela (reduzir movimento, sem WebGL) ficam os cards */}
       {!reduce && webgl ? (
         <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} projects={teaser.projects} categories={categories} />
       ) : (
         <ProjectsTeaser {...teaser} />
       )}
-      </div>
     </>
   )
 }
