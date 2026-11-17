@@ -151,6 +151,7 @@ function Story({
   const [chapter, setChapter] = useState(0)
   // baixa o pacote do 3D assim que o navegador fica livre, sem esperar a rolagem chegar perto
   useEffect(() => {
+    if (window.matchMedia(MOBILE_QUERY).matches) return
     if (!('requestIdleCallback' in window)) {
       const t = setTimeout(loadScene, 2000)
       return () => clearTimeout(t)
@@ -226,12 +227,6 @@ function Story({
   )
 }
 
-function subscribeMobile(cb: () => void) {
-  const mq = window.matchMedia(MOBILE_QUERY)
-  mq.addEventListener('change', cb)
-  return () => mq.removeEventListener('change', cb)
-}
-
 // no celular a cena 3D sai: os capítulos viram texto corrido, seguido dos cards dos projetos
 function MobileStory({ eyebrow, locale, stats, teaser }: { eyebrow: string; locale: Locale; stats: Stats; teaser: TeaserProps }) {
   const en = locale === 'en'
@@ -274,18 +269,22 @@ function MobileStory({ eyebrow, locale, stats, teaser }: { eyebrow: string; loca
 
 export function ProjectsStory({ stats, categories, ...teaser }: TeaserProps & { stats: Stats; categories: LanguageCategory[] }) {
   const { enabled: reduce } = useReduceMotion()
-  const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => false)
-  // no servidor assume celular (renderiza o leve); o desktop troca para a cena depois de hidratar
-  const mobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE_QUERY).matches, () => true)
-  if (mobile) return <MobileStory eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} teaser={teaser} />
+  const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => true)
+  // as duas versões vão no HTML e o CSS esconde a que não serve (media query de lib/mobile-query.ts), então
+  // não há troca depois de hidratar. No celular o bloco do desktop fica display:none: a cena nunca monta
   return (
     <>
+      <div className="story-mobile">
+        <MobileStory eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} teaser={teaser} />
+      </div>
+      <div className="story-desktop">
       {/* com a cena 3D os projetos viram os servidores; sem ela (reduzir movimento, sem WebGL) ficam os cards */}
       {!reduce && webgl ? (
         <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} projects={teaser.projects} categories={categories} />
       ) : (
         <ProjectsTeaser {...teaser} />
       )}
+      </div>
     </>
   )
 }

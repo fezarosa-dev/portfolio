@@ -978,3 +978,19 @@ html:not(.reduce-motion) [data-tilt] {
     radial-gradient(1.5px 1.5px at 93% 82%, rgba(176, 119, 90, 0.5), transparent 60%);
   background-size: 360px 360px;
 }
+
+/* home: no celular/toque entra o texto e sai a cena 3D (mesma regra de lib/mobile-query.ts) */
+.story-mobile {
+  display: none;
+}
+.story-desktop {
+  display: contents;
+}
+@media (max-width: 767px), (hover: none) and (pointer: coarse) {
+  .story-mobile {
+    display: contents;
+  }
+  .story-desktop {
+    display: none;
+  }
+}
