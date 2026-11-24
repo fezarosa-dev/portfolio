@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { OG_TITLE_MAX } from '@/lib/og-limits'
 import { projectDataFromForm } from '@/lib/changes/forms'
 import type { ProjectData } from '@/lib/changes/types'
 import { iconUrl } from '@/lib/icons'
@@ -58,6 +59,7 @@ export function ProjectForm({
         language={language}
         defaultValuePt={project?.title}
         defaultValueEn={project?.title_en}
+        shareCardMax={OG_TITLE_MAX.withImage}
       />
 
       <BilingualField

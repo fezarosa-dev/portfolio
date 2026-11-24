@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { OG_TITLE_MAX } from '@/lib/og-limits'
 import { articleDataFromForm } from '@/lib/changes/forms'
 import type { ArticleData } from '@/lib/changes/types'
 import type { Article } from '@/lib/supabase/queries'
@@ -41,6 +42,7 @@ export function ArticleForm({
         language={language}
         defaultValuePt={article?.title}
         defaultValueEn={article?.title_en}
+        shareCardMax={OG_TITLE_MAX.withImage}
       />
 
       <BilingualField
