@@ -8,3 +8,8 @@
 // Mudou fonte, tamanho de letra ou margens do card em lib/og-image.tsx? Meça de novo.
 export const OG_TITLE_MAX = { plain: 80, withImage: 55 } as const
 export const OG_SUBTITLE_MAX = { plain: 120, withImage: 110 } as const
+
+// as mesmas regras em texto, pras ferramentas e templates do MCP (lib/mcp)
+export const OG_TITLE_HINT = `Vai no card de compartilhamento (WhatsApp/LinkedIn): até ${OG_TITLE_MAX.withImage} caracteres se o conteúdo tiver imagem, ${OG_TITLE_MAX.plain} se não tiver; acima disso o card corta na última palavra com "…".`
+export const OG_SUMMARY_HINT = `Também é a descrição do card de compartilhamento: até ${OG_SUBTITLE_MAX.withImage} caracteres se o conteúdo tiver imagem, ${OG_SUBTITLE_MAX.plain} se não tiver; acima disso corta com "…".`
+export const OG_PAGE_TITLE_HINT = `hero_title e seo_<página>_title (+ _en) vão no card de compartilhamento da página: até ${OG_TITLE_MAX.plain} caracteres; acima disso o card corta com "…".`

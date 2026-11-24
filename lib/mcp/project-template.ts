@@ -1,11 +1,13 @@
+import { OG_SUMMARY_HINT, OG_TITLE_HINT } from '@/lib/og-limits'
+
 /** Template pra IAs cadastrarem projetos via MCP (upsert_projeto) — campos públicos + os ocultos do currículo. */
 export const PROJECT_TEMPLATE = `# Template de projeto (use com upsert_projeto)
 
 Antes de criar, rode list_projetos / list_tecnologias / list_empresas / list_autores pra reaproveitar ids existentes (não duplique tecnologia, empresa ou autor). Se faltar algo, crie primeiro (upsert_tecnologia etc.).
 
 ## Campos PÚBLICOS (aparecem no site)
-- title / title_en: "Nome curto — descrição do que é" (ex.: "IXSonar — Análise de Visibilidade BGP entre Pontos de Troca de Tráfego"). O trecho antes do " — " vira a URL (slug) automaticamente.
-- summary / summary_en: 1–2 frases pro card do projeto.
+- title / title_en: "Nome curto — descrição do que é" (ex.: "IXSonar — Análise de Visibilidade BGP entre Pontos de Troca de Tráfego"). O trecho antes do " — " vira a URL (slug) automaticamente. ${OG_TITLE_HINT}
+- summary / summary_en: 1–2 frases pro card do projeto. ${OG_SUMMARY_HINT}
 - content_md / content_md_en: página do projeto em Markdown (contexto, o que foi feito, resultado). Imagens só por nome de arquivo da pasta do Drive.
 - repo_url, site_url: links (omita se não houver). click_mode: "detail" (padrão, abre a página do projeto) ou "link" (+ click_url).
 - company_id (empresa/contexto), language_ids (tecnologias usadas), author_ids.

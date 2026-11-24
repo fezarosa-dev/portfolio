@@ -39,7 +39,6 @@ export type Dictionary = {
     tagline: string
     deliveredEyebrow: string
     deliveredTitle: string
-    deliveredClientsNote: string
   }
   sobre: { eyebrow: string; title: string }
   servicos: {
@@ -193,7 +192,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
       tagline: 'Eu resolvo problemas. O código é só a ferramenta.',
       deliveredEyebrow: 'entregas',
       deliveredTitle: 'O que já foi entregue',
-      deliveredClientsNote: 'clientes atendidos como freelancer contam um a um',
     },
     sobre: { eyebrow: 'sobre-mim', title: 'Sobre mim' },
     servicos: {
@@ -355,7 +353,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
       tagline: 'I solve problems. Code is just the tool.',
       deliveredEyebrow: 'delivered',
       deliveredTitle: "What's been delivered",
-      deliveredClientsNote: 'freelance clients are counted one by one',
     },
     sobre: { eyebrow: 'about-me', title: 'About me' },
     servicos: {

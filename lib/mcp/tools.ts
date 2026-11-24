@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { OG_PAGE_TITLE_HINT, OG_SUMMARY_HINT, OG_TITLE_HINT } from '@/lib/og-limits'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getLanguages, getLanguageCategories, getAuthors, getCompanies, getCompanyClients, getContactLinks, getSiteContent } from '@/lib/supabase/queries'
@@ -142,10 +143,10 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
         description: 'Cria um projeto novo (sem "id") ou edita um existente (com "id"). Campos omitidos não são alterados numa edição.',
         inputSchema: {
           id: z.string().uuid().optional().describe('Omitir para criar um projeto novo'),
-          title: z.string().optional(),
-          title_en: z.string().optional(),
-          summary: z.string().optional(),
-          summary_en: z.string().optional(),
+          title: z.string().optional().describe(OG_TITLE_HINT),
+          title_en: z.string().optional().describe(OG_TITLE_HINT),
+          summary: z.string().optional().describe(OG_SUMMARY_HINT),
+          summary_en: z.string().optional().describe(OG_SUMMARY_HINT),
           content_md: z.string().optional().describe('Corpo do projeto em Markdown, português'),
           content_md_en: z.string().optional().describe('Corpo do projeto em Markdown, inglês'),
           repo_url: z.string().optional(),
@@ -293,10 +294,10 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
         description: 'Cria um artigo novo (sem "id") ou edita um existente (com "id"). Campos omitidos não são alterados numa edição.',
         inputSchema: {
           id: z.string().uuid().optional(),
-          title: z.string().optional(),
-          title_en: z.string().optional(),
-          summary: z.string().optional(),
-          summary_en: z.string().optional(),
+          title: z.string().optional().describe(OG_TITLE_HINT),
+          title_en: z.string().optional().describe(OG_TITLE_HINT),
+          summary: z.string().optional().describe(OG_SUMMARY_HINT),
+          summary_en: z.string().optional().describe(OG_SUMMARY_HINT),
           content_md: z.string().optional(),
           content_md_en: z.string().optional(),
           visible: z.boolean().optional(),
@@ -469,7 +470,8 @@ export function registerMcpTools(server: McpServer, permissions: McpPermissions,
       {
         title: 'Definir texto/config do site',
         description:
-          'Define o valor de uma chave de conteúdo do site (ex.: "seo_home_title", "sobre_texto_pt", "search_rate_limit_max"; "tecnologias_ativo" = "true"/"false" liga/desliga a página /tecnologias). Use read_conteudo_site pra ver as chaves existentes antes de editar.',
+          'Define o valor de uma chave de conteúdo do site (ex.: "seo_home_title", "sobre_texto_pt", "search_rate_limit_max"; "tecnologias_ativo" = "true"/"false" liga/desliga a página /tecnologias). Use read_conteudo_site pra ver as chaves existentes antes de editar. ' +
+          OG_PAGE_TITLE_HINT,
         inputSchema: { key: z.string(), value: z.string() },
       },
       async ({ key, value }) => {

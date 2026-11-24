@@ -1,5 +1,6 @@
 import { PAGE_TEXTS } from '@/lib/page-texts'
 import { SEO_PAGE_KEYS } from '@/lib/seo'
+import { OG_PAGE_TITLE_HINT, OG_SUMMARY_HINT, OG_TITLE_HINT } from '@/lib/og-limits'
 
 /** Páginas que aparecem no menu (valores de nav_hidden_links). */
 export const NAV_PAGES = ['/', '/sobre', '/servicos', '/projetos', '/tecnologias', '/artigos', '/contato', '/curriculo'] as const
@@ -31,6 +32,8 @@ Templates específicos: get_template_projeto (projetos) e get_template_curriculo
 
 ## Artigos — upsert_artigo
 { "title": "Título", "summary": "Resumo de 1–2 frases", "content_md": "# Markdown…", "visible": true } (+ title_en, summary_en, content_md_en). Imagens só por nome de arquivo da pasta do Drive.
+- title: ${OG_TITLE_HINT}
+- summary: ${OG_SUMMARY_HINT}
 
 ## Tecnologias
 - upsert_tecnologia { name (PT), name_en? (EN; vazio cai pro PT), icon_url?, category_id?, show_on_home? } — o currículo e o site mostram o nome no idioma da página, sempre ligado à tecnologia por id.
@@ -54,6 +57,7 @@ Templates específicos: get_template_projeto (projetos) e get_template_curriculo
 - Textos editáveis por página:
 ${pageTexts}
 - SEO: seo_<página>_title, seo_<página>_description (+ _en) para as páginas: ${seoPages}; seo_home_keywords (+ _en)
+- Card de compartilhamento: ${OG_PAGE_TITLE_HINT} (o card da home usa o hero_title, não o seo_home_title)
 - Identidade: site_icon, sobre_foto (nome de arquivo do Drive), drive_folder_url, status_color
 - Busca: search_rate_limit_max, search_rate_limit_window_minutes, search_max_query_length, search_semantic_timeout_ms, search_results_limit
 - Cards de projeto: projetos_linhas_tecnologias (número inteiro >= 1, padrão 3) = quantas linhas de tecnologias o card mostra antes de o resto virar um chip "+N"
