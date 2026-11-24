@@ -29,6 +29,12 @@ export default async function HomePage() {
     getDictionary(),
   ])
 
+  // as mesmas contas na cena 3D e no topo do celular: mudou no painel, muda nos dois
+  const stats = {
+    projects: projects.length,
+    technologies: languages.length,
+    companies: countClients(projects),
+  }
   const heroSubtitle = resolveText(content.hero_subtitle ?? '', content.hero_subtitle_en, locale)
   const personJsonLd = {
     '@context': 'https://schema.org',
@@ -51,6 +57,7 @@ export default async function HomePage() {
         subtitle={heroSubtitle}
         tagline={pageText(content, locale, 'hero_tagline')}
         languages={languages.filter((lang) => lang.show_on_home)}
+        stats={stats}
         whoamiLabel={dict.home.whoami}
         locale={locale}
       />
@@ -59,11 +66,7 @@ export default async function HomePage() {
         eyebrow={dict.home.aboutEyebrow}
       />
       <ProjectsStory
-        stats={{
-          projects: projects.length,
-          technologies: languages.length,
-          companies: countClients(projects),
-        }}
+        stats={stats}
         categories={categories}
         projects={projects.filter((p) => p.show_on_home)}
         eyebrow={dict.home.projectsEyebrow}
