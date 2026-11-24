@@ -12,6 +12,7 @@ import { DriveImagePicker } from '@/components/drive-image-picker'
 import { IconUpload } from '@/components/admin/icon-upload'
 import { LanguageToggle } from '@/components/admin/language-toggle'
 import { BilingualField } from '@/components/admin/bilingual-field'
+import { OG_TITLE_MAX } from '@/lib/og-limits'
 import { PAGE_TEXTS, defaultPageText } from '@/lib/page-texts'
 
 const NAV_ITEMS: { href: string; label: string }[] = [
@@ -155,6 +156,7 @@ export function SiteContentForm({
               language={language}
               defaultValuePt={lookup('hero_title')}
               defaultValueEn={lookup('hero_title_en')}
+              shareCardMax={OG_TITLE_MAX.plain}
             />
             <BilingualField
               name="hero_subtitle"
@@ -376,6 +378,7 @@ export function SiteContentForm({
                   language={language}
                   defaultValuePt={lookup(`seo_${page.key}_title`)}
                   defaultValueEn={lookup(`seo_${page.key}_title_en`)}
+                  shareCardMax={page.key === 'home' ? undefined : OG_TITLE_MAX.plain}
                 />
                 <BilingualField
                   name={`seo_${page.key}_description`}

@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { fetchDriveImage, listDriveImages } from '@/lib/drive'
+import { OG_SUBTITLE_MAX, OG_TITLE_MAX } from '@/lib/og-limits'
 
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 }
 export const OG_IMAGE_CONTENT_TYPE = 'image/png'
@@ -48,6 +49,12 @@ export function renderOgImage({
   subtitle?: string | null
   imageSrc?: string | null
 }) {
+  const layout = imageSrc ? 'withImage' : 'plain'
+  const titleText = truncate(title, OG_TITLE_MAX[layout])
+  const subtitleText = subtitle ? truncate(subtitle, OG_SUBTITLE_MAX[layout]) : null
+
+  // Alturas fixas (letra + lineHeight + lineClamp) garantem que título e descrição nunca passam
+  // da área do card nem encostam um no outro; os limites de lib/og-limits.ts foram medidos com elas.
   return new ImageResponse(
     (
       <div
@@ -65,7 +72,7 @@ export function renderOgImage({
             flexDirection: 'column',
             justifyContent: 'center',
             flex: 1,
-            padding: imageSrc ? '80px 56px' : '96px',
+            padding: imageSrc ? '64px 56px' : '72px 96px',
             minWidth: 0,
           }}
         >
@@ -73,6 +80,7 @@ export function renderOgImage({
             style={{
               display: 'flex',
               fontSize: 28,
+              lineHeight: 1.2,
               color: '#f2661d',
               fontFamily: 'monospace',
               marginBottom: 24,
@@ -82,26 +90,37 @@ export function renderOgImage({
           </div>
           <div
             style={{
-              display: 'flex',
+              display: 'block',
               fontSize: imageSrc ? 52 : 64,
               fontWeight: 600,
               lineHeight: 1.15,
+              lineClamp: 3,
             }}
           >
-            {title}
+            {titleText}
           </div>
-          {subtitle && (
-            <div style={{ display: 'flex', fontSize: 28, color: '#4b5563', marginTop: 20 }}>
-              {subtitle}
+          {subtitleText && (
+            <div
+              style={{
+                display: 'block',
+                fontSize: 28,
+                lineHeight: 1.35,
+                color: '#4b5563',
+                marginTop: 20,
+                lineClamp: imageSrc ? 3 : 2,
+              }}
+            >
+              {subtitleText}
             </div>
           )}
           <div
             style={{
               display: 'flex',
               fontSize: 24,
+              lineHeight: 1.2,
               color: '#f2661d',
               fontFamily: 'monospace',
-              marginTop: 56,
+              marginTop: 40,
             }}
           >
             zanoni.dev.br
@@ -113,6 +132,10 @@ export function renderOgImage({
         )}
       </div>
     ),
-    OG_IMAGE_SIZE
+    {
+      ...OG_IMAGE_SIZE,
+      // CDN guarda 10 min e serve a cópia antiga enquanto refaz; sem isso o next/og manda "immutable" por 1 ano
+      headers: { 'cache-control': 'public, max-age=0, s-maxage=600, stale-while-revalidate=86400' },
+    }
   )
 }

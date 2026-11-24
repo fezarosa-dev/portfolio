@@ -24,6 +24,11 @@ export function localizedAlternates(locale: Locale, path: string) {
   }
 }
 
+/** Card de compartilhamento gerado por app/api/og, com o idioma na URL (cada idioma tem a sua imagem). */
+export function ogImage(locale: Locale, path: string, alt: string) {
+  return { url: `/api/og/${locale}${path}`, width: 1200, height: 630, alt }
+}
+
 export function pageMetadata(
   locale: Locale,
   path: string,
@@ -33,6 +38,7 @@ export function pageMetadata(
 ): Metadata {
   const url = `${SITE_URL}/${locale}${path}`
   const fullTitle = `${title} — Zanoni`
+  const images = [ogImage(locale, path, title)]
   return {
     title,
     description,
@@ -44,11 +50,13 @@ export function pageMetadata(
       siteName: SITE_NAME,
       title: fullTitle,
       description,
+      images,
     },
     twitter: {
       card: 'summary_large_image',
       title: fullTitle,
       description,
+      images,
     },
   }
 }

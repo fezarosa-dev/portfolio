@@ -54,7 +54,7 @@ export default async function ArtigoDetailPage({
     '@type': 'Article',
     headline: title,
     description: resolveText(article.summary, article.summary_en, locale) || undefined,
-    image: `${pageUrl}/opengraph-image`,
+    image: `${SITE_URL}/api/og/${locale}/artigos/${article.id}`,
     datePublished: article.created_at,
     dateModified: article.created_at,
     author: { '@type': 'Person', name: 'Felipe Zanoni da Rosa' },

@@ -13,6 +13,7 @@ import { getSiteContent, getVisibleProjects, getResume } from '@/lib/supabase/qu
 import { ImagePreloader } from '@/components/image-preloader'
 import { extractDriveImageUrls } from '@/lib/markdown/preload-images'
 import { resolveText } from '@/lib/bilingual'
+import { ogImage } from '@/lib/seo'
 import { findDriveFile, listDriveMedia, parseDriveFolderId, resolveDriveImageUrl } from '@/lib/drive'
 import { getDictionary, getLocale } from '@/lib/i18n'
 
@@ -79,11 +80,13 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: SITE_NAME,
       title: seo.ogTitle,
       description,
+      images: [ogImage(locale, '', seo.ogTitle)],
     },
     twitter: {
       card: 'summary_large_image',
       title: seo.ogTitle,
       description,
+      images: [ogImage(locale, '', seo.ogTitle)],
     },
   }
 }
