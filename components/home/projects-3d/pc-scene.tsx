@@ -1329,8 +1329,10 @@ export default function PcScene({
   // 0: luz e chão; 1: o PC; 2: os servidores e o foguete; 3: tudo montado (falta compilar)
   const [stage, setStage] = useState(0)
   const [warm, setWarm] = useState(false)
-  // até 2x no desktop (texto 3D nítido), 1,5x no celular; se o FPS cair, baixa a resolução e depois tira o brilho
-  const maxDpr = typeof window !== 'undefined' && window.innerWidth < 640 ? 1.5 : 2
+  // a densidade da própria tela, até 2x no desktop e 1,5x no celular; se o FPS cair, baixa a resolução e depois
+  // tira o brilho. Nunca acima da tela: numa tela 1x, desenhar em 2x quadruplica os pixels (e o MSAA e o bloom
+  // por cima deles) sem ganho visível, já que o MSAA cuida das bordas e o texto 3D é SDF
+  const maxDpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, window.innerWidth < 640 ? 1.5 : 2)
   const [dpr, setDpr] = useState(maxDpr)
   const [lowFx, setLowFx] = useState(false)
   return (

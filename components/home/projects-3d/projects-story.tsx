@@ -11,6 +11,7 @@ import { SceneLoader } from './scene-loader'
 import type { ServerProject } from './servers'
 import { HOME_SERVERS } from '@/lib/home-servers'
 import { firstSentences } from '@/lib/short-text'
+import { useIsMobile } from '@/lib/use-mobile'
 import type { LanguageCategory, Project } from '@/lib/supabase/queries'
 
 // o 3D (three + react-three-fiber) vira um pacote à parte, fora do carregamento inicial da página
@@ -228,10 +229,11 @@ function Story({
 export function ProjectsStory({ stats, categories, ...teaser }: TeaserProps & { stats: Stats; categories: LanguageCategory[] }) {
   const { enabled: reduce } = useReduceMotion()
   const webgl = useSyncExternalStore(noopSubscribe, supportsWebGL, () => false)
+  const mobile = useIsMobile()
   return (
     <>
-      {/* com a cena 3D os projetos viram os servidores; sem ela (reduzir movimento, sem WebGL) ficam os cards */}
-      {!reduce && webgl ? (
+      {/* com a cena 3D os projetos viram os servidores; sem ela (celular, reduzir movimento, sem WebGL) ficam os cards */}
+      {!reduce && webgl && !mobile ? (
         <Story eyebrow={teaser.eyebrow} locale={teaser.locale} stats={stats} projects={teaser.projects} categories={categories} />
       ) : (
         <ProjectsTeaser {...teaser} />
