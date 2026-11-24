@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { shouldRedirectToLogin } from '@/lib/auth-guard'
 import { detectLocaleFromAcceptLanguage } from '@/lib/i18n/detect-locale'
+import { resolveShortLink } from '@/lib/short-link'
 import type { Locale } from '@/lib/i18n/dictionaries'
 
 const PASSTHROUGH_PREFIXES = ['/admin', '/api']
@@ -58,6 +59,15 @@ export async function middleware(request: NextRequest) {
     return pathname.startsWith('/admin') ? handleAdmin(request) : NextResponse.next()
   }
 
+  const locale = detectLocale(request)
+  // link curto pra compartilhar: /<idioma>/p/<slug> (ou o antigo /p/<slug>) → /<idioma>/projetos/<slug>
+  const shortTarget = resolveShortLink(pathname, locale)
+  if (shortTarget) {
+    const url = request.nextUrl.clone()
+    url.pathname = shortTarget
+    return NextResponse.redirect(url, 302)
+  }
+
   const [, first, ...rest] = pathname.split('/')
 
   if (first === 'pt' || first === 'en') {
@@ -68,12 +78,8 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  const locale = detectLocale(request)
   const url = request.nextUrl.clone()
-  // link curto pra compartilhar de boca: /p/<slug> → /<locale>/projetos/<slug>
-  url.pathname = first === 'p' && rest.length > 0
-    ? `/${locale}/projetos/${rest.join('/').toLowerCase()}`
-    : `/${locale}${pathname === '/' ? '' : pathname}`
+  url.pathname = `/${locale}${pathname === '/' ? '' : pathname}`
   return NextResponse.redirect(url, 302)
 }
 
