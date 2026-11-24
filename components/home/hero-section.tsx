@@ -10,14 +10,12 @@ import { useReduceMotion } from '@/components/reduce-motion-provider'
 import type { Language } from '@/lib/supabase/queries'
 import type { Locale } from '@/lib/i18n'
 import { langName } from '@/lib/bilingual'
-import { HomeStatsCountUp, type HomeStats } from '@/components/home/home-stats'
 
 export function HeroSection({
   title,
   subtitle,
   tagline,
   languages,
-  stats,
   whoamiLabel,
   locale,
 }: {
@@ -25,7 +23,6 @@ export function HeroSection({
   subtitle: string
   tagline: string
   languages: Language[]
-  stats: HomeStats
   whoamiLabel: string
   locale: Locale
 }) {
@@ -87,7 +84,7 @@ export function HeroSection({
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={noAnim ?? { duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mt-8 hidden flex-wrap justify-center gap-3 md:flex"
+          className="relative mt-8 flex flex-wrap justify-center gap-3"
         >
           {languages.map((lang, i) => (
             <motion.li
@@ -117,16 +114,6 @@ export function HeroSection({
           ))}
         </motion.ul>
       )}
-      {/* no celular a nuvem de tecnologias ocupa a tela toda: no lugar dela, os números da cena 3D.
-          Troca por CSS (md = 768px, o mesmo corte do useIsMobile) pra já vir certa no HTML, sem piscar */}
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={noAnim ?? { duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="relative mt-8 md:hidden"
-      >
-        <HomeStatsCountUp stats={stats} locale={locale} className="flex justify-center gap-8" />
-      </motion.div>
       <motion.div
         aria-hidden
         className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2"

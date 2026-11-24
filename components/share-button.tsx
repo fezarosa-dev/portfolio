@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import { Check, Share2 } from 'lucide-react'
+import { shortLinkPath } from '@/lib/short-link'
+import type { Locale } from '@/lib/i18n'
 
-// compartilha o link curto (/p/<slug>): share sheet nativo no celular, copia no desktop
-export function ShareButton({ slug, title, label, copiedLabel }: {
+// compartilha o link curto (/<idioma>/p/<slug>): share sheet nativo no celular, copia no desktop
+export function ShareButton({ slug, locale, title, label, copiedLabel }: {
   slug: string
+  locale: Locale
   title: string
   label: string
   copiedLabel: string
@@ -13,7 +16,7 @@ export function ShareButton({ slug, title, label, copiedLabel }: {
   const [copied, setCopied] = useState(false)
 
   async function share() {
-    const url = `${location.protocol}//${location.host.replace(/^www\./, '')}/p/${slug}`
+    const url = `${location.protocol}//${location.host.replace(/^www\./, '')}${shortLinkPath(locale, slug)}`
     if (navigator.share) {
       try {
         await navigator.share({ title, url })

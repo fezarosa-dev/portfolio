@@ -132,6 +132,7 @@ export default async function ProjetoDetailPage({
             )}
             <ShareButton
               slug={project.slug}
+              locale={locale}
               title={title}
               label={dict.projetos.share}
               copiedLabel={dict.projetos.shareCopied}
