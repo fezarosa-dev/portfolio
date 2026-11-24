@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { statItems, STAT_LABEL_CLASS, STAT_VALUE_CLASS, type HomeStats } from '@/components/home/home-stats'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion, transform, useInView, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
@@ -18,7 +19,7 @@ import type { LanguageCategory, Project } from '@/lib/supabase/queries'
 const loadScene = () => import('./pc-scene')
 const PcScene = dynamic(loadScene, { ssr: false })
 
-type Stats = { projects: number; technologies: number; companies: number }
+type Stats = HomeStats
 
 type TeaserProps = React.ComponentProps<typeof ProjectsTeaser>
 
@@ -48,8 +49,8 @@ function Counter({ progress, value, label }: { progress: MotionValue<number>; va
   const shown = useTransform(progress, (v) => Math.round(transform(v, [0.36, 0.44], [0, value])))
   return (
     <div>
-      <motion.p className="font-display text-4xl font-medium tabular-nums text-signal sm:text-5xl">{shown}</motion.p>
-      <p className="font-mono text-[11px] uppercase tracking-wide text-steel">{label}</p>
+      <motion.p className={STAT_VALUE_CLASS}>{shown}</motion.p>
+      <p className={STAT_LABEL_CLASS}>{label}</p>
     </div>
   )
 }
@@ -85,9 +86,9 @@ function ChapterText({
       <p className="mt-3 max-w-sm text-steel">{text}</p>
       {index === 2 && (
         <div className="mt-6 flex gap-8">
-          <Counter progress={progress} value={stats.projects} label={locale === 'en' ? 'projects' : 'projetos'} />
-          <Counter progress={progress} value={stats.technologies} label={locale === 'en' ? 'technologies' : 'tecnologias'} />
-          <Counter progress={progress} value={stats.companies} label={locale === 'en' ? 'companies' : 'empresas'} />
+          {statItems(stats, locale).map((item) => (
+            <Counter key={item.key} progress={progress} value={item.value} label={item.label} />
+          ))}
         </div>
       )}
     </motion.div>
